@@ -89,6 +89,16 @@ export const products: Product[] = [
     description: 'Nutritious broccoli florets, rich in vitamins and minerals.',
     unit: 'head',
     featured: true
+  },
+  {
+    id: '9',
+    name: 'Pack Fruit ',
+    category: 'vegetable',
+    price: 22.29,
+    image: 'https://freshbox.ma/wp-content/uploads/2025/03/Pack-Famille-2.jpg',
+    description: 'Nutritious broccoli florets, rich in vitamins and minerals.',
+    unit: 'head',
+    featured: true
   }
 ];
 
