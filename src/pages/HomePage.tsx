@@ -34,11 +34,6 @@ const HomePage: React.FC = () => {
           <CategoryBanner category="vegetable" />
         </div>
         
-        <div className="mt-10 text-center">
-          <Button variant="outline" asChild>
-            <Link to="/admin">Panneau d'Administration</Link>
-          </Button>
-        </div>
       </div>
       
       <CallToAction />
