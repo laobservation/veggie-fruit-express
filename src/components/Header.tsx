@@ -24,9 +24,9 @@ const Header = () => {
         </Link>
         
         <nav className="hidden md:flex space-x-6">
-          <Link to="/" className="text-gray-700 hover:text-veggie-primary font-medium">Home</Link>
+          <Link to="/" className="text-gray-700 hover:text-veggie-primary font-medium">Accueil</Link>
           <Link to="/fruits" className="text-gray-700 hover:text-veggie-primary font-medium">Fruits</Link>
-          <Link to="/vegetables" className="text-gray-700 hover:text-veggie-primary font-medium">Vegetables</Link>
+          <Link to="/vegetables" className="text-gray-700 hover:text-veggie-primary font-medium">Légumes</Link>
         </nav>
         
         <div className="flex items-center gap-4">

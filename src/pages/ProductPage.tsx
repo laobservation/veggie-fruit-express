@@ -21,9 +21,9 @@ const ProductPage = () => {
       <div className="min-h-screen flex flex-col">
         <Header />
         <main className="flex-grow container mx-auto px-4 py-16 text-center">
-          <h1 className="text-3xl font-bold mb-4">Product Not Found</h1>
-          <p className="mb-8">Sorry, we couldn't find the product you're looking for.</p>
-          <Button onClick={() => navigate('/')}>Back to Home</Button>
+          <h1 className="text-3xl font-bold mb-4">Produit non trouvé</h1>
+          <p className="mb-8">Désolé, nous n'avons pas pu trouver le produit que vous cherchez.</p>
+          <Button onClick={() => navigate('/')}>Retour à l'Accueil</Button>
         </main>
         <Footer />
       </div>
@@ -34,6 +34,8 @@ const ProductPage = () => {
   const relatedProducts = getProductsByCategory(product.category)
     .filter(p => p.id !== product.id)
     .slice(0, 4);
+
+  const categoryText = product.category === 'fruit' ? 'Fruits' : 'Légumes';
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -46,7 +48,7 @@ const ProductPage = () => {
             onClick={() => navigate(-1)}
           >
             <ArrowLeft className="h-4 w-4" />
-            Back
+            Retour
           </Button>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
@@ -63,11 +65,11 @@ const ProductPage = () => {
             <div className="flex flex-col">
               <div className="mb-4">
                 <span className="inline-flex items-center rounded-full bg-veggie-light px-2 py-1 text-xs font-medium text-veggie-dark mb-2">
-                  {product.category}
+                  {product.category === 'fruit' ? 'Fruit' : 'Légume'}
                 </span>
                 <h1 className="text-3xl font-bold text-gray-900 mb-2">{product.name}</h1>
                 <p className="text-2xl font-semibold text-veggie-dark mb-2">
-                  ${product.price.toFixed(2)} <span className="text-sm text-gray-500">/ {product.unit}</span>
+                  {product.price.toFixed(2)}€ <span className="text-sm text-gray-500">/ {product.unit}</span>
                 </p>
               </div>
               
@@ -83,7 +85,7 @@ const ProductPage = () => {
                   size="lg"
                 >
                   <ShoppingCart className="mr-2 h-5 w-5" />
-                  Add to Cart
+                  Ajouter au Panier
                 </Button>
               </div>
             </div>
@@ -93,7 +95,7 @@ const ProductPage = () => {
           {relatedProducts.length > 0 && (
             <ProductGrid 
               products={relatedProducts} 
-              title={`More ${product.category === 'fruit' ? 'Fruits' : 'Vegetables'} You Might Like`}
+              title={`Plus de ${categoryText} que vous pourriez aimer`}
             />
           )}
         </div>

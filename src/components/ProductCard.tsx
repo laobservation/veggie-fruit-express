@@ -27,7 +27,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
           <div className="flex justify-between items-start mb-2">
             <h3 className="text-lg font-medium text-gray-900 line-clamp-1">{product.name}</h3>
             <span className="inline-flex items-center rounded-full bg-veggie-light px-2 py-1 text-xs font-medium text-veggie-dark">
-              {product.category}
+              {product.category === 'fruit' ? 'Fruit' : 'Légume'}
             </span>
           </div>
           
@@ -39,7 +39,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div className="flex justify-between items-center">
           <div>
             <p className="text-xl font-semibold text-veggie-dark">
-              ${product.price.toFixed(2)}
+              {product.price.toFixed(2)}€
               <span className="text-sm text-gray-500 ml-1">/ {product.unit}</span>
             </p>
           </div>
@@ -53,7 +53,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             className="bg-veggie-primary hover:bg-veggie-dark text-white rounded-md"
           >
             <ShoppingCart className="h-4 w-4 mr-2" />
-            Add
+            Ajouter
           </Button>
         </div>
       </div>

@@ -14,7 +14,7 @@ const HomePage: React.FC = () => {
       <Hero />
       
       <div className="container mx-auto px-4 py-8">
-        <ProductGrid products={featuredProducts} title="Featured Products" />
+        <ProductGrid products={featuredProducts} title="Produits Vedettes" />
         
         <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
           <CategoryBanner category="fruit" />

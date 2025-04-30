@@ -8,9 +8,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { useCart } from "@/hooks/use-cart";
-import { Minus, Plus, Trash2 } from "lucide-react";
+import { Minus, Plus, Truck, Trash2 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import { useState } from "react";
+import DeliveryForm from "./DeliveryForm";
 
 interface CartProps {
   isOpen: boolean;
@@ -18,27 +20,41 @@ interface CartProps {
 }
 
 const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
-  const { items, updateQuantity, removeItem, clearCart, getTotalPrice } = useCart();
+  const { items, updateQuantity, removeItem, getTotalPrice } = useCart();
+  const [showDeliveryForm, setShowDeliveryForm] = useState(false);
 
-  const handleCheckout = () => {
-    toast.success("Order placed successfully! Your items will be delivered soon.");
-    clearCart();
-    onClose();
+  const handleShowDeliveryForm = () => {
+    if (items.length > 0) {
+      setShowDeliveryForm(true);
+    } else {
+      toast.error("Votre panier est vide");
+    }
   };
 
   return (
     <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="flex flex-col h-full w-full sm:max-w-md">
         <SheetHeader>
-          <SheetTitle>Your Cart</SheetTitle>
+          <SheetTitle>{showDeliveryForm ? "Informations de livraison" : "Votre Panier"}</SheetTitle>
         </SheetHeader>
         
-        {items.length === 0 ? (
+        {showDeliveryForm ? (
+          <div className="flex-1 overflow-auto py-4">
+            <DeliveryForm onClose={onClose} />
+            <Button 
+              variant="ghost" 
+              className="mt-4 w-full"
+              onClick={() => setShowDeliveryForm(false)}
+            >
+              Retour au panier
+            </Button>
+          </div>
+        ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center flex-1">
-            <h3 className="font-medium text-lg">Your cart is empty</h3>
-            <p className="text-gray-500 mb-4">Add some fresh products to get started</p>
+            <h3 className="font-medium text-lg">Votre panier est vide</h3>
+            <p className="text-gray-500 mb-4">Ajoutez des produits frais pour commencer</p>
             <Button onClick={onClose} asChild>
-              <Link to="/">Continue Shopping</Link>
+              <Link to="/">Continuer vos achats</Link>
             </Button>
           </div>
         ) : (
@@ -65,7 +81,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                       </button>
                     </div>
                     
-                    <p className="text-gray-500 text-sm">${item.product.price.toFixed(2)} / {item.product.unit}</p>
+                    <p className="text-gray-500 text-sm">{item.product.price.toFixed(2)}€ / {item.product.unit}</p>
                     
                     <div className="flex items-center mt-2">
                       <Button 
@@ -86,7 +102,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                         <Plus className="h-3 w-3" />
                       </Button>
                       <div className="ml-auto font-medium">
-                        ${(item.product.price * item.quantity).toFixed(2)}
+                        {(item.product.price * item.quantity).toFixed(2)}€
                       </div>
                     </div>
                   </div>
@@ -96,31 +112,32 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
             
             <div className="border-t pt-4">
               <div className="flex justify-between mb-2">
-                <span className="font-medium">Subtotal</span>
-                <span>${getTotalPrice().toFixed(2)}</span>
+                <span className="font-medium">Sous-total</span>
+                <span>{getTotalPrice().toFixed(2)}€</span>
               </div>
               <div className="flex justify-between mb-2">
-                <span className="font-medium">Delivery</span>
-                <span>Free</span>
+                <span className="font-medium">Livraison</span>
+                <span>Gratuit</span>
               </div>
               <Separator className="my-4" />
               <div className="flex justify-between mb-4">
                 <span className="text-lg font-semibold">Total</span>
-                <span className="text-lg font-semibold">${getTotalPrice().toFixed(2)}</span>
+                <span className="text-lg font-semibold">{getTotalPrice().toFixed(2)}€</span>
               </div>
               
               <Button 
                 className="w-full bg-veggie-primary hover:bg-veggie-dark text-white mb-2"
-                onClick={handleCheckout}
+                onClick={handleShowDeliveryForm}
               >
-                Order with Cash on Delivery
+                <Truck className="mr-2 h-5 w-5" />
+                Procéder à la livraison
               </Button>
               <Button 
                 variant="outline" 
                 className="w-full"
                 onClick={onClose}
               >
-                Continue Shopping
+                Continuer vos achats
               </Button>
             </div>
           </>
