@@ -4,6 +4,7 @@ import { useCart } from '@/hooks/use-cart';
 import { ShoppingCart } from 'lucide-react';
 import { Product } from '@/data/products';
 import { Link } from 'react-router-dom';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 interface ProductCardProps {
   product: Product;
@@ -15,12 +16,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
       <Link to={`/product/${product.id}`}>
-        <div className="h-48 overflow-hidden">
-          <img 
-            src={product.image} 
-            alt={product.name} 
-            className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-          />
+        <div className="overflow-hidden">
+          <AspectRatio ratio={1/1} className="bg-muted">
+            <img 
+              src={product.image} 
+              alt={product.name} 
+              className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
+              loading="lazy"
+            />
+          </AspectRatio>
         </div>
         
         <div className="p-4">
