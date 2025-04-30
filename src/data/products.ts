@@ -8,6 +8,7 @@ export interface Product {
   description: string;
   unit: string;
   featured?: boolean;
+  videoUrl?: string; // New field for YouTube video
 }
 
 export const products: Product[] = [
