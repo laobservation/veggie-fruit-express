@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,7 +18,7 @@ import {
   CarouselPrevious,
 } from '@/components/ui/carousel';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { edit, plus, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Edit, Plus, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Slider } from '@/components/ui/slider';
 
 type SlidePosition = 'left' | 'right' | 'center';
@@ -229,7 +228,7 @@ const SliderEditor: React.FC = () => {
                       className="bg-white"
                       onClick={() => handleEditSlide(slide)}
                     >
-                      <edit className="h-4 w-4 mr-2" />
+                      <Edit className="h-4 w-4 mr-2" />
                       Modifier
                     </Button>
                     <Button 
@@ -258,7 +257,7 @@ const SliderEditor: React.FC = () => {
           onClick={handleAddNewSlide}
           className="bg-veggie-primary hover:bg-veggie-dark"
         >
-          <plus className="h-4 w-4 mr-2" />
+          <Plus className="h-4 w-4 mr-2" />
           Ajouter une Diapositive
         </Button>
       </div>

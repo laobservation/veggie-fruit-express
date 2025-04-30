@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -15,7 +14,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/components/ui/use-toast';
 import { Product, products } from '@/data/products';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
-import { edit, plus } from 'lucide-react';
+import { Edit, Plus } from 'lucide-react';
 
 const ProductManager: React.FC = () => {
   const { toast } = useToast();
@@ -111,7 +110,7 @@ const ProductManager: React.FC = () => {
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-semibold">Gestion des Produits</h2>
         <Button onClick={handleAddNewProduct} className="bg-veggie-primary hover:bg-veggie-dark">
-          <plus className="h-4 w-4 mr-2" />
+          <Plus className="h-4 w-4 mr-2" />
           Ajouter un Produit
         </Button>
       </div>
@@ -126,7 +125,7 @@ const ProductManager: React.FC = () => {
                 size="sm" 
                 onClick={() => handleEditProduct(product)}
               >
-                <edit className="h-4 w-4" />
+                <Edit className="h-4 w-4" />
               </Button>
             </div>
             <div className="aspect-square overflow-hidden rounded mb-2 bg-gray-100">
