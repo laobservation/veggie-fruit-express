@@ -35,7 +35,8 @@ const ProductManager: React.FC = () => {
     description: '',
     unit: 'kg',
     featured: false,
-    videoUrl: ''
+    videoUrl: '',
+    categoryLink: false
   };
   
   const [formData, setFormData] = useState<Product>(emptyProduct);
@@ -387,6 +388,17 @@ const ProductManager: React.FC = () => {
                 } 
               />
               <Label htmlFor="featured">Produit Vedette</Label>
+            </div>
+            
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="categoryLink" 
+                checked={formData.categoryLink} 
+                onCheckedChange={(checked) => 
+                  handleCheckboxChange(Boolean(checked), 'categoryLink')
+                } 
+              />
+              <Label htmlFor="categoryLink">Lier à la Page de Catégorie</Label>
             </div>
           </div>
           

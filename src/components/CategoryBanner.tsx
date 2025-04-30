@@ -1,11 +1,14 @@
 
 import { Link } from 'react-router-dom';
+import { getCategoryLinkedProducts } from '@/data/products';
 
 interface CategoryBannerProps {
   category: 'fruit' | 'vegetable';
 }
 
 const CategoryBanner: React.FC<CategoryBannerProps> = ({ category }) => {
+  const linkedProducts = getCategoryLinkedProducts(category);
+  
   return (
     <div 
       className={`relative h-40 md:h-60 w-full rounded-lg overflow-hidden mb-8 bg-cover bg-center`}
@@ -27,6 +30,20 @@ const CategoryBanner: React.FC<CategoryBannerProps> = ({ category }) => {
         >
           Browse All {category === 'fruit' ? 'Fruits' : 'Vegetables'}
         </Link>
+        
+        {linkedProducts.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2 justify-center">
+            {linkedProducts.map((product) => (
+              <Link 
+                key={product.id} 
+                to={`/product/${product.id}`}
+                className="bg-white/80 text-veggie-dark hover:bg-veggie-primary hover:text-white transition-colors px-3 py-1 rounded-md text-sm"
+              >
+                {product.name}
+              </Link>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

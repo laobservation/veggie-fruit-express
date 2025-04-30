@@ -1,4 +1,3 @@
-
 export interface Product {
   id: string;
   name: string;
@@ -8,7 +7,8 @@ export interface Product {
   description: string;
   unit: string;
   featured?: boolean;
-  videoUrl?: string; // New field for YouTube video
+  videoUrl?: string;
+  categoryLink?: boolean;
 }
 
 export const products: Product[] = [
@@ -20,7 +20,8 @@ export const products: Product[] = [
     image: '/images/apple.jpg',
     description: 'Sweet and crunchy apples freshly harvested from local farms.',
     unit: 'kg',
-    featured: true
+    featured: true,
+    categoryLink: true
   },
   {
     id: '2',
@@ -101,4 +102,8 @@ export const getProductsByCategory = (category: 'fruit' | 'vegetable'): Product[
 
 export const getProductById = (id: string): Product | undefined => {
   return products.find(product => product.id === id);
+};
+
+export const getCategoryLinkedProducts = (category: 'fruit' | 'vegetable'): Product[] => {
+  return products.filter(product => product.category === category && product.categoryLink);
 };

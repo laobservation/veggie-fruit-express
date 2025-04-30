@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProductManager from '@/components/admin/ProductManager';
 import ContentEditor from '@/components/admin/ContentEditor';
 import SliderEditor from '@/components/admin/SliderEditor';
+import PageManager from '@/components/admin/PageManager';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -21,10 +22,11 @@ const AdminPage: React.FC = () => {
       </div>
       
       <Tabs defaultValue="products" className="w-full">
-        <TabsList className="mb-4 grid grid-cols-3">
+        <TabsList className="mb-4 grid grid-cols-4">
           <TabsTrigger value="products">Produits</TabsTrigger>
           <TabsTrigger value="content">Contenu</TabsTrigger>
           <TabsTrigger value="slider">Slider</TabsTrigger>
+          <TabsTrigger value="pages">Pages</TabsTrigger>
         </TabsList>
         <TabsContent value="products" className="p-4 border rounded-md bg-white">
           <ProductManager />
@@ -34,6 +36,9 @@ const AdminPage: React.FC = () => {
         </TabsContent>
         <TabsContent value="slider" className="p-4 border rounded-md bg-white">
           <SliderEditor />
+        </TabsContent>
+        <TabsContent value="pages" className="p-4 border rounded-md bg-white">
+          <PageManager />
         </TabsContent>
       </Tabs>
     </div>
