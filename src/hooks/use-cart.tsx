@@ -1,10 +1,9 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Product } from '@/data/products';
 import { ReactNode, useState, useEffect } from 'react';
 import CartNotification from '@/components/CartNotification';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, Smartphone } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -154,9 +153,17 @@ export const CartNotificationProvider = ({ children }: { children: ReactNode }) 
       {showCartReminder && hasInitialized && !isCartOpen && (
         <div 
           className={cn(
-            "fixed bottom-4 right-4 z-40 animate-fade-in"
+            "fixed bottom-4 right-4 z-40 flex flex-col gap-2 animate-fade-in"
           )}
         >
+          <Button 
+            onClick={() => window.open("https://wa.me/+212600000000?text=Je souhaite commander des produits", "_blank")}
+            className="bg-green-500 hover:bg-green-600 text-white rounded-full p-3 shadow-lg"
+            size="icon"
+          >
+            <Smartphone className="h-5 w-5" />
+          </Button>
+          
           <Button 
             onClick={openCart}
             className="bg-veggie-primary hover:bg-veggie-dark text-white rounded-full p-3 shadow-lg"

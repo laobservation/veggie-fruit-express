@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { getProductById } from '@/data/products';
@@ -9,13 +9,17 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductGrid from '@/components/ProductGrid';
 import { getProductsByCategory } from '@/data/products';
-import Cart from '@/components/Cart';
 
 const ProductPage = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
   const { addItem } = useCart();
   const product = getProductById(productId || '');
+  
+  // Scroll to top on page load
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [productId]);
   
   if (!product) {
     return (
@@ -102,7 +106,6 @@ const ProductPage = () => {
         </div>
       </main>
       <Footer />
-      <Cart />
     </div>
   );
 };

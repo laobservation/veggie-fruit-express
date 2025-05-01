@@ -15,7 +15,12 @@ import { useState } from "react";
 import DeliveryForm from "./DeliveryForm";
 import { formatPrice } from "@/lib/formatPrice";
 
-const Cart: React.FC = () => {
+interface CartProps {
+  isOpen?: boolean;
+  onClose?: () => void;
+}
+
+const Cart: React.FC<CartProps> = ({ isOpen: propIsOpen, onClose: propOnClose }) => {
   const { 
     items, 
     updateQuantity, 
@@ -25,6 +30,7 @@ const Cart: React.FC = () => {
     closeCart,
     toggleCartReminder
   } = useCart();
+  
   const [showDeliveryForm, setShowDeliveryForm] = useState(false);
 
   const handleShowDeliveryForm = () => {
@@ -36,14 +42,22 @@ const Cart: React.FC = () => {
   };
   
   const handleClose = () => {
-    closeCart();
+    if (propOnClose) {
+      propOnClose();
+    } else {
+      closeCart();
+    }
+    
     if (items.length > 0) {
       toggleCartReminder(true);
     }
   };
+  
+  // Use prop isOpen if provided, otherwise use from store
+  const effectiveIsOpen = propIsOpen !== undefined ? propIsOpen : isCartOpen;
 
   return (
-    <Sheet open={isCartOpen} onOpenChange={handleClose}>
+    <Sheet open={effectiveIsOpen} onOpenChange={handleClose}>
       <SheetContent className="flex flex-col h-full w-full sm:max-w-md">
         <SheetHeader>
           <SheetTitle>{showDeliveryForm ? "Informations de livraison" : "Votre Panier"}</SheetTitle>
