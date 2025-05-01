@@ -2,7 +2,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Product } from '@/data/products';
-import { toast } from "sonner";
 import { ReactNode, useState } from 'react';
 import CartNotification from '@/components/CartNotification';
 
@@ -47,26 +46,19 @@ export const useCart = create<CartState>()(
               quantity: existingItem.quantity + quantity
             }
           });
-          toast.success(`Updated ${product.name} quantity in cart`);
         } else {
           set({ 
             items: [...currentItems, { product, quantity }],
             showNotification: true,
             notificationItem: { product, quantity }
           });
-          toast.success(`Added ${product.name} to cart`);
         }
       },
       removeItem: (productId: string) => {
         const currentItems = get().items;
-        const itemToRemove = currentItems.find(item => item.product.id === productId);
-        
-        if (itemToRemove) {
-          set({
-            items: currentItems.filter(item => item.product.id !== productId),
-          });
-          toast.info(`Removed ${itemToRemove.product.name} from cart`);
-        }
+        set({
+          items: currentItems.filter(item => item.product.id !== productId),
+        });
       },
       updateQuantity: (productId: string, quantity: number) => {
         const currentItems = get().items;

@@ -53,16 +53,16 @@ const CartNotification: React.FC<CartNotificationProps> = ({
   return (
     <div
       className={cn(
-        "fixed bottom-4 right-4 z-50 bg-white rounded-lg shadow-lg border border-gray-200 w-72 transition-all duration-300 transform",
+        "fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 transition-all duration-300 transform",
         isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
       )}
       role="alert"
     >
-      <div className="p-4">
+      <div className="container mx-auto p-4">
         <div className="flex justify-between items-start">
           <div className="flex items-center">
             <ShoppingCart className="h-5 w-5 text-veggie-primary mr-2" />
-            <h3 className="text-sm font-medium text-gray-900">Produit ajouté</h3>
+            <h3 className="text-sm font-medium text-gray-900">Produit ajouté au panier</h3>
           </div>
           <button
             onClick={handleClose}

@@ -4,7 +4,6 @@ import Hero from '@/components/Hero';
 import CategoryBanner from '@/components/CategoryBanner';
 import CallToAction from '@/components/CallToAction';
 import ProductGrid from '@/components/ProductGrid';
-import CategoryCircles from '@/components/CategoryCircles';
 import { Card, CardContent } from '@/components/ui/card';
 import { getFeaturedProducts } from '@/data/products';
 
@@ -25,8 +24,6 @@ const HomePage: React.FC = () => {
             </p>
           </CardContent>
         </Card>
-        
-        <CategoryCircles />
         
         <ProductGrid products={featuredProducts} title="Produits Vedettes" />
         
