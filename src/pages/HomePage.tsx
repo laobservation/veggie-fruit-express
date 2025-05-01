@@ -4,10 +4,9 @@ import Hero from '@/components/Hero';
 import CategoryBanner from '@/components/CategoryBanner';
 import CallToAction from '@/components/CallToAction';
 import ProductGrid from '@/components/ProductGrid';
+import CategoryCircles from '@/components/CategoryCircles';
 import { Card, CardContent } from '@/components/ui/card';
 import { getFeaturedProducts } from '@/data/products';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
 
 const HomePage: React.FC = () => {
   const featuredProducts = getFeaturedProducts();
@@ -27,13 +26,14 @@ const HomePage: React.FC = () => {
           </CardContent>
         </Card>
         
+        <CategoryCircles />
+        
         <ProductGrid products={featuredProducts} title="Produits Vedettes" />
         
         <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
           <CategoryBanner category="fruit" />
           <CategoryBanner category="vegetable" />
         </div>
-        
       </div>
       
       <CallToAction />

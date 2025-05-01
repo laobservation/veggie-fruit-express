@@ -13,6 +13,7 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useState } from "react";
 import DeliveryForm from "./DeliveryForm";
+import { formatPrice } from "@/lib/formatPrice";
 
 interface CartProps {
   isOpen: boolean;
@@ -81,7 +82,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                       </button>
                     </div>
                     
-                    <p className="text-gray-500 text-sm">{item.product.price.toFixed(2)}€ / {item.product.unit}</p>
+                    <p className="text-gray-500 text-sm">{formatPrice(item.product.price)} / {item.product.unit}</p>
                     
                     <div className="flex items-center mt-2">
                       <Button 
@@ -102,7 +103,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
                         <Plus className="h-3 w-3" />
                       </Button>
                       <div className="ml-auto font-medium">
-                        {(item.product.price * item.quantity).toFixed(2)}€
+                        {formatPrice(item.product.price * item.quantity)}
                       </div>
                     </div>
                   </div>
@@ -113,7 +114,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
             <div className="border-t pt-4">
               <div className="flex justify-between mb-2">
                 <span className="font-medium">Sous-total</span>
-                <span>{getTotalPrice().toFixed(2)}€</span>
+                <span>{formatPrice(getTotalPrice())}</span>
               </div>
               <div className="flex justify-between mb-2">
                 <span className="font-medium">Livraison</span>
@@ -122,7 +123,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
               <Separator className="my-4" />
               <div className="flex justify-between mb-4">
                 <span className="text-lg font-semibold">Total</span>
-                <span className="text-lg font-semibold">{getTotalPrice().toFixed(2)}€</span>
+                <span className="text-lg font-semibold">{formatPrice(getTotalPrice())}</span>
               </div>
               
               <Button 

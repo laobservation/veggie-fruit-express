@@ -3,6 +3,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Product } from '@/data/products';
 import { toast } from "sonner";
+import { ReactNode, useState } from 'react';
+import CartNotification from '@/components/CartNotification';
 
 export interface CartItem {
   product: Product;
@@ -11,18 +13,23 @@ export interface CartItem {
 
 interface CartState {
   items: CartItem[];
+  showNotification: boolean;
+  notificationItem: CartItem | null;
   addItem: (product: Product, quantity?: number) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
+  hideNotification: () => void;
 }
 
 export const useCart = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
+      showNotification: false,
+      notificationItem: null,
       addItem: (product: Product, quantity = 1) => {
         const currentItems = get().items;
         const existingItem = currentItems.find(item => item.product.id === product.id);
@@ -34,10 +41,19 @@ export const useCart = create<CartState>()(
                 ? { ...item, quantity: item.quantity + quantity }
                 : item
             ),
+            showNotification: true,
+            notificationItem: {
+              product,
+              quantity: existingItem.quantity + quantity
+            }
           });
           toast.success(`Updated ${product.name} quantity in cart`);
         } else {
-          set({ items: [...currentItems, { product, quantity }] });
+          set({ 
+            items: [...currentItems, { product, quantity }],
+            showNotification: true,
+            notificationItem: { product, quantity }
+          });
           toast.success(`Added ${product.name} to cart`);
         }
       },
@@ -78,9 +94,34 @@ export const useCart = create<CartState>()(
           0
         );
       },
+      hideNotification: () => set({ showNotification: false, notificationItem: null }),
     }),
     {
       name: 'cart-storage',
     }
   )
 );
+
+// CartNotificationProvider component to render notifications
+export const CartNotificationProvider = ({ children }: { children: ReactNode }) => {
+  const { showNotification, notificationItem, hideNotification } = useCart();
+  const [isCartOpen, setIsCartOpen] = useState(false);
+
+  return (
+    <>
+      {children}
+      
+      {showNotification && notificationItem && (
+        <CartNotification
+          product={notificationItem.product}
+          quantity={notificationItem.quantity}
+          onClose={hideNotification}
+          onViewCart={() => {
+            setIsCartOpen(true);
+            hideNotification();
+          }}
+        />
+      )}
+    </>
+  );
+};
