@@ -15,13 +15,16 @@ import { useState } from "react";
 import DeliveryForm from "./DeliveryForm";
 import { formatPrice } from "@/lib/formatPrice";
 
-interface CartProps {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
-  const { items, updateQuantity, removeItem, getTotalPrice } = useCart();
+const Cart: React.FC = () => {
+  const { 
+    items, 
+    updateQuantity, 
+    removeItem, 
+    getTotalPrice, 
+    isCartOpen, 
+    closeCart,
+    toggleCartReminder
+  } = useCart();
   const [showDeliveryForm, setShowDeliveryForm] = useState(false);
 
   const handleShowDeliveryForm = () => {
@@ -31,9 +34,16 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
       toast.error("Votre panier est vide");
     }
   };
+  
+  const handleClose = () => {
+    closeCart();
+    if (items.length > 0) {
+      toggleCartReminder(true);
+    }
+  };
 
   return (
-    <Sheet open={isOpen} onOpenChange={onClose}>
+    <Sheet open={isCartOpen} onOpenChange={handleClose}>
       <SheetContent className="flex flex-col h-full w-full sm:max-w-md">
         <SheetHeader>
           <SheetTitle>{showDeliveryForm ? "Informations de livraison" : "Votre Panier"}</SheetTitle>
@@ -41,7 +51,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
         
         {showDeliveryForm ? (
           <div className="flex-1 overflow-auto py-4">
-            <DeliveryForm onClose={onClose} />
+            <DeliveryForm onClose={handleClose} />
             <Button 
               variant="ghost" 
               className="mt-4 w-full"
@@ -54,7 +64,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
           <div className="flex flex-col items-center justify-center flex-1">
             <h3 className="font-medium text-lg">Votre panier est vide</h3>
             <p className="text-gray-500 mb-4">Ajoutez des produits frais pour commencer</p>
-            <Button onClick={onClose} asChild>
+            <Button onClick={handleClose} asChild>
               <Link to="/">Continuer vos achats</Link>
             </Button>
           </div>
@@ -136,7 +146,7 @@ const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
               <Button 
                 variant="outline" 
                 className="w-full"
-                onClick={onClose}
+                onClick={handleClose}
               >
                 Continuer vos achats
               </Button>

@@ -6,6 +6,7 @@ import CallToAction from '@/components/CallToAction';
 import ProductGrid from '@/components/ProductGrid';
 import { Card, CardContent } from '@/components/ui/card';
 import { getFeaturedProducts } from '@/data/products';
+import Cart from '@/components/Cart';
 
 const HomePage: React.FC = () => {
   const featuredProducts = getFeaturedProducts();
@@ -34,6 +35,7 @@ const HomePage: React.FC = () => {
       </div>
       
       <CallToAction />
+      <Cart />
     </div>
   );
 };

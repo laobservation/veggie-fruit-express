@@ -9,6 +9,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductGrid from '@/components/ProductGrid';
 import { getProductsByCategory } from '@/data/products';
+import Cart from '@/components/Cart';
 
 const ProductPage = () => {
   const { productId } = useParams();
@@ -101,6 +102,7 @@ const ProductPage = () => {
         </div>
       </main>
       <Footer />
+      <Cart />
     </div>
   );
 };
