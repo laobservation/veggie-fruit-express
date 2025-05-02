@@ -4,7 +4,7 @@ import ProductGrid from '@/components/ProductGrid';
 import { getFeaturedProducts } from '@/data/products';
 import Cart from '@/components/Cart';
 import { Link } from 'react-router-dom';
-import { Fruit, Vegetables, Coffee, Cookie, Home, Search, ShoppingCart, User } from 'lucide-react';
+import { Apple, Banana, Coffee, Cookie, Home, Search, ShoppingCart, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const HomePage: React.FC = () => {
@@ -40,13 +40,13 @@ const HomePage: React.FC = () => {
           <div className="grid grid-cols-4 gap-2">
             <Link to="/fruits" className="flex flex-col items-center">
               <div className="bg-white p-4 rounded-2xl shadow-md w-full aspect-square flex flex-col items-center justify-center">
-                <Fruit className="h-8 w-8 text-green-700 mb-2" />
+                <Apple className="h-8 w-8 text-green-700 mb-2" />
                 <span className="text-center text-sm font-medium">Fruits</span>
               </div>
             </Link>
             <Link to="/vegetables" className="flex flex-col items-center">
               <div className="bg-white p-4 rounded-2xl shadow-md w-full aspect-square flex flex-col items-center justify-center">
-                <Vegetables className="h-8 w-8 text-green-700 mb-2" />
+                <Banana className="h-8 w-8 text-green-700 mb-2" />
                 <span className="text-center text-sm font-medium">Vegetables</span>
               </div>
             </Link>
