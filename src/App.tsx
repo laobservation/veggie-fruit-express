@@ -11,6 +11,7 @@ import ProductPage from "./pages/ProductPage";
 import ThankYouPage from "./pages/ThankYouPage";
 import NotFound from "./pages/NotFound";
 import AdminPage from "./pages/AdminPage";
+import { CartNotificationProvider } from "@/hooks/use-cart";
 
 const queryClient = new QueryClient();
 
@@ -20,15 +21,17 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/fruits" element={<FruitsPage />} />
-          <Route path="/vegetables" element={<VegetablesPage />} />
-          <Route path="/product/:productId" element={<ProductPage />} />
-          <Route path="/thank-you" element={<ThankYouPage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <CartNotificationProvider>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/fruits" element={<FruitsPage />} />
+            <Route path="/vegetables" element={<VegetablesPage />} />
+            <Route path="/product/:productId" element={<ProductPage />} />
+            <Route path="/thank-you" element={<ThankYouPage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </CartNotificationProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

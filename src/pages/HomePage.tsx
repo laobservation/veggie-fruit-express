@@ -6,8 +6,7 @@ import CallToAction from '@/components/CallToAction';
 import ProductGrid from '@/components/ProductGrid';
 import { Card, CardContent } from '@/components/ui/card';
 import { getFeaturedProducts } from '@/data/products';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
+import Cart from '@/components/Cart';
 
 const HomePage: React.FC = () => {
   const featuredProducts = getFeaturedProducts();
@@ -33,15 +32,10 @@ const HomePage: React.FC = () => {
           <CategoryBanner category="fruit" />
           <CategoryBanner category="vegetable" />
         </div>
-        
-        <div className="mt-10 text-center">
-          <Button variant="outline" asChild>
-            <Link to="/admin">Panneau d'Administration</Link>
-          </Button>
-        </div>
       </div>
       
       <CallToAction />
+      <Cart />
     </div>
   );
 };

@@ -5,6 +5,7 @@ import { ShoppingCart } from 'lucide-react';
 import { Product } from '@/data/products';
 import { Link } from 'react-router-dom';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import { formatPrice } from '@/lib/formatPrice';
 
 interface ProductCardProps {
   product: Product;
@@ -43,7 +44,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         <div className="flex justify-between items-center">
           <div>
             <p className="text-xl font-semibold text-veggie-dark">
-              {product.price.toFixed(2)}€
+              {formatPrice(product.price)}
               <span className="text-sm text-gray-500 ml-1">/ {product.unit}</span>
             </p>
           </div>
