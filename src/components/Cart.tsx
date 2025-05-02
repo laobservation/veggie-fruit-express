@@ -13,24 +13,14 @@ import { Link } from "react-router-dom";
 import { toast } from "sonner";
 import { useState } from "react";
 import DeliveryForm from "./DeliveryForm";
-import { formatPrice } from "@/lib/formatPrice";
 
 interface CartProps {
-  isOpen?: boolean;
-  onClose?: () => void;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
-const Cart: React.FC<CartProps> = ({ isOpen: propIsOpen, onClose: propOnClose }) => {
-  const { 
-    items, 
-    updateQuantity, 
-    removeItem, 
-    getTotalPrice, 
-    isCartOpen, 
-    closeCart,
-    toggleCartReminder
-  } = useCart();
-  
+const Cart: React.FC<CartProps> = ({ isOpen, onClose }) => {
+  const { items, updateQuantity, removeItem, getTotalPrice } = useCart();
   const [showDeliveryForm, setShowDeliveryForm] = useState(false);
 
   const handleShowDeliveryForm = () => {
@@ -40,24 +30,9 @@ const Cart: React.FC<CartProps> = ({ isOpen: propIsOpen, onClose: propOnClose })
       toast.error("Votre panier est vide");
     }
   };
-  
-  const handleClose = () => {
-    if (propOnClose) {
-      propOnClose();
-    } else {
-      closeCart();
-    }
-    
-    if (items.length > 0) {
-      toggleCartReminder(true);
-    }
-  };
-  
-  // Use prop isOpen if provided, otherwise use from store
-  const effectiveIsOpen = propIsOpen !== undefined ? propIsOpen : isCartOpen;
 
   return (
-    <Sheet open={effectiveIsOpen} onOpenChange={handleClose}>
+    <Sheet open={isOpen} onOpenChange={onClose}>
       <SheetContent className="flex flex-col h-full w-full sm:max-w-md">
         <SheetHeader>
           <SheetTitle>{showDeliveryForm ? "Informations de livraison" : "Votre Panier"}</SheetTitle>
@@ -65,7 +40,7 @@ const Cart: React.FC<CartProps> = ({ isOpen: propIsOpen, onClose: propOnClose })
         
         {showDeliveryForm ? (
           <div className="flex-1 overflow-auto py-4">
-            <DeliveryForm onClose={handleClose} />
+            <DeliveryForm onClose={onClose} />
             <Button 
               variant="ghost" 
               className="mt-4 w-full"
@@ -78,7 +53,7 @@ const Cart: React.FC<CartProps> = ({ isOpen: propIsOpen, onClose: propOnClose })
           <div className="flex flex-col items-center justify-center flex-1">
             <h3 className="font-medium text-lg">Votre panier est vide</h3>
             <p className="text-gray-500 mb-4">Ajoutez des produits frais pour commencer</p>
-            <Button onClick={handleClose} asChild>
+            <Button onClick={onClose} asChild>
               <Link to="/">Continuer vos achats</Link>
             </Button>
           </div>
@@ -106,7 +81,7 @@ const Cart: React.FC<CartProps> = ({ isOpen: propIsOpen, onClose: propOnClose })
                       </button>
                     </div>
                     
-                    <p className="text-gray-500 text-sm">{formatPrice(item.product.price)} / {item.product.unit}</p>
+                    <p className="text-gray-500 text-sm">{item.product.price.toFixed(2)}€ / {item.product.unit}</p>
                     
                     <div className="flex items-center mt-2">
                       <Button 
@@ -127,7 +102,7 @@ const Cart: React.FC<CartProps> = ({ isOpen: propIsOpen, onClose: propOnClose })
                         <Plus className="h-3 w-3" />
                       </Button>
                       <div className="ml-auto font-medium">
-                        {formatPrice(item.product.price * item.quantity)}
+                        {(item.product.price * item.quantity).toFixed(2)}€
                       </div>
                     </div>
                   </div>
@@ -138,7 +113,7 @@ const Cart: React.FC<CartProps> = ({ isOpen: propIsOpen, onClose: propOnClose })
             <div className="border-t pt-4">
               <div className="flex justify-between mb-2">
                 <span className="font-medium">Sous-total</span>
-                <span>{formatPrice(getTotalPrice())}</span>
+                <span>{getTotalPrice().toFixed(2)}€</span>
               </div>
               <div className="flex justify-between mb-2">
                 <span className="font-medium">Livraison</span>
@@ -147,7 +122,7 @@ const Cart: React.FC<CartProps> = ({ isOpen: propIsOpen, onClose: propOnClose })
               <Separator className="my-4" />
               <div className="flex justify-between mb-4">
                 <span className="text-lg font-semibold">Total</span>
-                <span className="text-lg font-semibold">{formatPrice(getTotalPrice())}</span>
+                <span className="text-lg font-semibold">{getTotalPrice().toFixed(2)}€</span>
               </div>
               
               <Button 
@@ -160,7 +135,7 @@ const Cart: React.FC<CartProps> = ({ isOpen: propIsOpen, onClose: propOnClose })
               <Button 
                 variant="outline" 
                 className="w-full"
-                onClick={handleClose}
+                onClick={onClose}
               >
                 Continuer vos achats
               </Button>

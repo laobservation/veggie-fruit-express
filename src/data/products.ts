@@ -17,7 +17,7 @@ export const products: Product[] = [
     name: 'Fresh Apples',
     category: 'fruit',
     price: 2.99,
-    image: 'https://freshleafuae.com/wp-content/uploads/2024/08/red-apple-freshleaf-dubai-uae-img01.jpg',
+    image: '/images/apple.jpg',
     description: 'Sweet and crunchy apples freshly harvested from local farms.',
     unit: 'kg',
     featured: true,
@@ -28,7 +28,7 @@ export const products: Product[] = [
     name: 'Organic Bananas',
     category: 'fruit',
     price: 1.99,
-    image: 'https://images-cdn.ubuy.co.id/634e2c65a0e13a0eb35bdb1a-fresh-organic-bananas-bundle-3-lbs.jpg',
+    image: '/images/banana.jpg',
     description: 'Naturally ripened organic bananas, rich in potassium and fiber.',
     unit: 'bunch'
   },
@@ -37,7 +37,7 @@ export const products: Product[] = [
     name: 'Fresh Oranges',
     category: 'fruit',
     price: 3.49,
-    image: 'https://glycemic-index.net/images/rpaE64Cepa.webp',
+    image: '/images/orange.jpg',
     description: 'Juicy oranges packed with vitamin C, perfect for fresh juice.',
     unit: 'kg',
     featured: true
@@ -47,7 +47,7 @@ export const products: Product[] = [
     name: 'Ripe Strawberries',
     category: 'fruit',
     price: 4.99,
-    image: 'https://img.freepik.com/photos-gratuite/baie-fraise-levitation-fond-blanc_485709-57.jpg',
+    image: '/images/strawberry.jpg',
     description: 'Sweet and juicy strawberries, handpicked at peak ripeness.',
     unit: 'basket',
     featured: true
@@ -57,16 +57,16 @@ export const products: Product[] = [
     name: 'Fresh Spinach',
     category: 'vegetable',
     price: 2.49,
-    image: 'https://gabbarfarms.com/cdn/shop/products/Spinach.jpg',
+    image: '/images/spinach.jpg',
     description: 'Nutrient-rich spinach leaves, perfect for salads and cooking.',
     unit: 'bunch'
   },
   {
     id: '6',
-    name: 'Carotte – الجزر (1kg)',
+    name: 'Organic Carrots',
     category: 'vegetable',
     price: 1.79,
-    image: 'https://harvestmarkets.com.au/cdn/shop/products/ResizerImage2048X1535_1024x1024.jpg',
+    image: '/images/carrot.jpg',
     description: 'Crunchy organic carrots, high in beta-carotene and antioxidants.',
     unit: 'kg',
     featured: true
@@ -76,7 +76,7 @@ export const products: Product[] = [
     name: 'Fresh Tomatoes',
     category: 'vegetable',
     price: 2.99,
-    image: 'https://i5.walmartimages.com/asr/a1e8e44a-2b82-48ab-9c09-b68420f6954c.04f6e0e87807fc5457f57e3ec0770061.jpeg',
+    image: '/images/tomato.jpg',
     description: 'Plump and juicy tomatoes, perfect for salads and cooking.',
     unit: 'kg'
   },
@@ -85,17 +85,7 @@ export const products: Product[] = [
     name: 'Organic Broccoli',
     category: 'vegetable',
     price: 3.29,
-    image: 'https://organicmandya.com/cdn/shop/files/Broccoli.jpg',
-    description: 'Nutritious broccoli florets, rich in vitamins and minerals.',
-    unit: 'head',
-    featured: true
-  },
-  {
-    id: '9',
-    name: 'Pack Fruit ',
-    category: 'vegetable',
-    price: 22.29,
-    image: 'https://freshbox.ma/wp-content/uploads/2025/03/Pack-Famille-2.jpg',
+    image: '/images/broccoli.jpg',
     description: 'Nutritious broccoli florets, rich in vitamins and minerals.',
     unit: 'head',
     featured: true

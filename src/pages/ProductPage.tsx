@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { getProductById } from '@/data/products';
@@ -15,11 +15,6 @@ const ProductPage = () => {
   const navigate = useNavigate();
   const { addItem } = useCart();
   const product = getProductById(productId || '');
-  
-  // Scroll to top on page load
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [productId]);
   
   if (!product) {
     return (
