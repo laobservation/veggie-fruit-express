@@ -15,6 +15,8 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/hooks/use-cart';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface DeliveryFormProps {
   onClose: () => void;
@@ -44,18 +46,40 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
 
   const preferDeliveryTime = form.watch('preferDeliveryTime');
 
-  const onSubmit = (data: FormValues) => {
-    const orderDetails = {
-      name: data.name,
-      address: data.address,
-      phone: data.phone,
-      preferredTime: data.preferDeliveryTime ? data.deliveryTime : '',
-      totalAmount: getTotalPrice(),
-      items: items
-    };
+  const onSubmit = async (data: FormValues) => {
+    try {
+      // Store order in Supabase
+      const { error } = await supabase
+        .from('Orders')
+        .insert({
+          'Client Name': data.name,
+          'Adresse': data.address,
+          'Phone': parseInt(data.phone, 10) || null, // Convert to number or null if invalid
+        });
 
-    clearCart();
-    navigate('/thank-you', { state: { orderDetails } });
+      if (error) {
+        console.error('Error storing order:', error);
+        toast.error("Une erreur s'est produite lors de l'enregistrement de la commande.");
+        return;
+      }
+
+      // If successful, proceed as before
+      const orderDetails = {
+        name: data.name,
+        address: data.address,
+        phone: data.phone,
+        preferredTime: data.preferDeliveryTime ? data.deliveryTime : '',
+        totalAmount: getTotalPrice(),
+        items: items
+      };
+
+      clearCart();
+      toast.success("Commande enregistrée avec succès!");
+      navigate('/thank-you', { state: { orderDetails } });
+    } catch (err) {
+      console.error('Error processing order:', err);
+      toast.error("Une erreur s'est produite. Veuillez réessayer.");
+    }
   };
 
   return (
