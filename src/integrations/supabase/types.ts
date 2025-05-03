@@ -15,21 +15,36 @@ export type Database = {
           "Client Name": string | null
           created_at: string
           id: number
+          notified: boolean | null
+          order_items: Json | null
           Phone: number | null
+          preferred_time: string | null
+          status: string | null
+          total_amount: number | null
         }
         Insert: {
           Adresse?: string | null
           "Client Name"?: string | null
           created_at?: string
           id?: number
+          notified?: boolean | null
+          order_items?: Json | null
           Phone?: number | null
+          preferred_time?: string | null
+          status?: string | null
+          total_amount?: number | null
         }
         Update: {
           Adresse?: string | null
           "Client Name"?: string | null
           created_at?: string
           id?: number
+          notified?: boolean | null
+          order_items?: Json | null
           Phone?: number | null
+          preferred_time?: string | null
+          status?: string | null
+          total_amount?: number | null
         }
         Relationships: []
       }
