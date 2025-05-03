@@ -50,7 +50,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
     try {
       // Store order in Supabase using the correct case for table name "Orders"
       const { error } = await supabase
-        .from('"Orders"')
+        .from('Orders')
         .insert({
           'Client Name': data.name,
           'Adresse': data.address,

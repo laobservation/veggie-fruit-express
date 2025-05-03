@@ -23,7 +23,7 @@ const OrdersManager: React.FC = () => {
     setLoading(true);
     try {
       const { data, error } = await supabase
-        .from('"Orders"')
+        .from('Orders')
         .select('*')
         .order('created_at', { ascending: false });
 
@@ -37,7 +37,8 @@ const OrdersManager: React.FC = () => {
         return;
       }
 
-      setOrders(data || []);
+      // Ensure the data matches our Order interface
+      setOrders(data as Order[]);
     } catch (err) {
       console.error('Error in fetching orders:', err);
       toast({
@@ -57,7 +58,7 @@ const OrdersManager: React.FC = () => {
   const handleDeleteOrder = async (orderId: number) => {
     try {
       const { error } = await supabase
-        .from('"Orders"')
+        .from('Orders')
         .delete()
         .eq('id', orderId);
 
