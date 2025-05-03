@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { 
@@ -48,14 +47,29 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
 
   const onSubmit = async (data: FormValues) => {
     try {
-      // Store order in Supabase using the correct case for table name "Orders"
-      const { error } = await supabase
+      // Prepare order items data
+      const itemsData = items.map(item => ({
+        productId: item.product.id,
+        productName: item.product.name,
+        quantity: item.quantity,
+        price: item.product.price
+      }));
+      
+      // Store order in Supabase
+      const { data: orderData, error } = await supabase
         .from('Orders')
         .insert({
           'Client Name': data.name,
           'Adresse': data.address,
           'Phone': parseInt(data.phone, 10) || null, // Convert to number or null if invalid
-        });
+          'order_items': itemsData, // Store order items as JSON
+          'total_amount': getTotalPrice(),
+          'preferred_time': data.preferDeliveryTime ? data.deliveryTime : null,
+          'status': 'new',
+          'notified': false
+        })
+        .select('id')
+        .single();
 
       if (error) {
         console.error('Error storing order:', error);
@@ -63,14 +77,16 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
         return;
       }
 
-      // If successful, proceed as before
+      // If successful, proceed with order confirmation
       const orderDetails = {
+        orderId: orderData?.id,
         name: data.name,
         address: data.address,
         phone: data.phone,
         preferredTime: data.preferDeliveryTime ? data.deliveryTime : '',
         totalAmount: getTotalPrice(),
-        items: items
+        items: items,
+        date: new Date().toISOString()
       };
 
       clearCart();
