@@ -6,6 +6,7 @@ import ContentEditor from '@/components/admin/ContentEditor';
 import SliderEditor from '@/components/admin/SliderEditor';
 import PageManager from '@/components/admin/PageManager';
 import LogoManager from '@/components/admin/LogoManager';
+import OrdersManager from '@/components/admin/OrdersManager';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
@@ -23,8 +24,9 @@ const AdminPage: React.FC = () => {
       </div>
       
       <Tabs defaultValue="products" className="w-full">
-        <TabsList className="mb-4 grid grid-cols-5">
+        <TabsList className="mb-4 grid grid-cols-6">
           <TabsTrigger value="products">Produits</TabsTrigger>
+          <TabsTrigger value="orders">Commandes</TabsTrigger>
           <TabsTrigger value="content">Contenu</TabsTrigger>
           <TabsTrigger value="slider">Slider</TabsTrigger>
           <TabsTrigger value="pages">Pages</TabsTrigger>
@@ -32,6 +34,9 @@ const AdminPage: React.FC = () => {
         </TabsList>
         <TabsContent value="products" className="p-4 border rounded-md bg-white">
           <ProductManager />
+        </TabsContent>
+        <TabsContent value="orders" className="p-4 border rounded-md bg-white">
+          <OrdersManager />
         </TabsContent>
         <TabsContent value="content" className="p-4 border rounded-md bg-white">
           <ContentEditor />
