@@ -16,6 +16,7 @@ import {
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { Json } from '@/integrations/supabase/types';
+import { formatPrice } from '@/lib/formatPrice';
 
 interface OrderItem {
   productId: number;
@@ -109,38 +110,41 @@ const OrdersManager: React.FC = () => {
   }, []);
 
   const handleDeleteOrder = async (orderId: number) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) {
-      try {
-        const { error } = await supabase
-          .from('Orders')
-          .delete()
-          .eq('id', orderId);
+    try {
+      const { error } = await supabase
+        .from('Orders')
+        .delete()
+        .eq('id', orderId);
 
-        if (error) {
-          console.error('Error deleting order:', error);
-          toast({
-            title: "Erreur",
-            description: "Impossible de supprimer la commande.",
-            variant: "destructive",
-          });
-          return;
-        }
-
-        toast({
-          title: "Succès",
-          description: "La commande a été supprimée avec succès.",
-        });
-        
-        // Refresh the orders list
-        fetchOrders();
-      } catch (err) {
-        console.error('Error in deleting order:', err);
+      if (error) {
+        console.error('Error deleting order:', error);
         toast({
           title: "Erreur",
-          description: "Une erreur s'est produite lors de la suppression de la commande.",
+          description: "Impossible de supprimer la commande.",
           variant: "destructive",
         });
+        return;
       }
+
+      toast({
+        title: "Succès",
+        description: "La commande a été supprimée avec succès.",
+      });
+      
+      // Remove the deleted order from the local state
+      setOrders(orders.filter(order => order.id !== orderId));
+      
+      // Close the dialog if the deleted order was being viewed
+      if (selectedOrder && selectedOrder.id === orderId) {
+        setViewDialogOpen(false);
+      }
+    } catch (err) {
+      console.error('Error in deleting order:', err);
+      toast({
+        title: "Erreur",
+        description: "Une erreur s'est produite lors de la suppression de la commande.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -237,8 +241,8 @@ const OrdersManager: React.FC = () => {
         const itemData = [
           item.productName,
           item.quantity,
-          `€${item.price.toFixed(2)}`,
-          `€${(item.price * item.quantity).toFixed(2)}`
+          formatPrice(item.price),
+          formatPrice(item.price * item.quantity)
         ];
         tableRows.push(itemData);
       });
@@ -256,7 +260,7 @@ const OrdersManager: React.FC = () => {
     // Total
     const finalY = (doc as any).lastAutoTable.finalY || 120;
     doc.setFontSize(12);
-    doc.text(`Total: €${order.total_amount?.toFixed(2) || '0.00'}`, 150, finalY + 15);
+    doc.text(`Total: ${formatPrice(order.total_amount || 0)}`, 150, finalY + 15);
     
     // Footer
     doc.setFontSize(10);
@@ -335,34 +339,53 @@ const OrdersManager: React.FC = () => {
                   <TableCell className="truncate max-w-[200px]">{order['Adresse']}</TableCell>
                   <TableCell>{formatDate(order.created_at)}</TableCell>
                   <TableCell>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="sm" className="h-8 w-fit px-2">
-                          {getStatusBadge(order.status)}
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="start">
-                        {statusOptions.map(option => (
-                          <DropdownMenuItem 
-                            key={option.value}
-                            onClick={() => handleUpdateStatus(order.id, option.value)}
-                            className="flex items-center gap-2"
-                          >
-                            <span className={`w-3 h-3 rounded-full ${option.color}`}></span>
-                            {option.label}
-                            {order.status === option.value && <Check className="h-4 w-4 ml-1" />}
-                          </DropdownMenuItem>
-                        ))}
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <div className="flex items-center space-x-2">
+                      {getStatusBadge(order.status)}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="sm" className="h-6 w-6 p-0 ml-1">
+                            <span className="sr-only">Changer le statut</span>
+                            <svg
+                              width="15"
+                              height="15"
+                              viewBox="0 0 15 15"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-3 w-3"
+                            >
+                              <path
+                                d="M3.13523 6.15803C3.3241 5.95657 3.64052 5.94637 3.84197 6.13523L7.5 9.56464L11.158 6.13523C11.3595 5.94637 11.6759 5.95657 11.8648 6.15803C12.0536 6.35949 12.0434 6.67591 11.842 6.86477L7.84197 10.6148C7.64964 10.7951 7.35036 10.7951 7.15803 10.6148L3.15803 6.86477C2.95657 6.67591 2.94637 6.35949 3.13523 6.15803Z"
+                                fill="currentColor"
+                                fillRule="evenodd"
+                                clipRule="evenodd"
+                              ></path>
+                            </svg>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                          {statusOptions.map(option => (
+                            <DropdownMenuItem 
+                              key={option.value}
+                              onClick={() => handleUpdateStatus(order.id, option.value)}
+                              className="flex items-center gap-2"
+                            >
+                              <span className={`w-3 h-3 rounded-full ${option.color}`}></span>
+                              {option.label}
+                              {order.status === option.value && <Check className="h-4 w-4 ml-1" />}
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </TableCell>
-                  <TableCell>€{order.total_amount?.toFixed(2) || '0.00'}</TableCell>
+                  <TableCell>{formatPrice(order.total_amount || 0)}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex justify-end space-x-1">
                       <Button
                         variant="ghost"
                         size="sm"
                         onClick={() => handleViewOrder(order)}
+                        title="Voir les détails"
                       >
                         <Eye className="h-4 w-4" />
                       </Button>
@@ -370,6 +393,7 @@ const OrdersManager: React.FC = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => generateOrderPDF(order)}
+                        title="Télécharger PDF"
                       >
                         <Download className="h-4 w-4" />
                       </Button>
@@ -378,6 +402,7 @@ const OrdersManager: React.FC = () => {
                         size="sm"
                         onClick={() => handleDeleteOrder(order.id)}
                         className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                        title="Supprimer"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -415,7 +440,7 @@ const OrdersManager: React.FC = () => {
                   <p>
                     <span className="font-medium">Statut:</span> {getStatusBadge(selectedOrder.status)}
                   </p>
-                  <p><span className="font-medium">Total:</span> €{selectedOrder.total_amount?.toFixed(2) || '0.00'}</p>
+                  <p><span className="font-medium">Total:</span> {formatPrice(selectedOrder.total_amount || 0)}</p>
                 </div>
               </div>
               
@@ -437,8 +462,8 @@ const OrdersManager: React.FC = () => {
                           <TableRow key={idx}>
                             <TableCell>{item.productName}</TableCell>
                             <TableCell className="text-center">{item.quantity}</TableCell>
-                            <TableCell className="text-right">€{item.price.toFixed(2)}</TableCell>
-                            <TableCell className="text-right">€{(item.price * item.quantity).toFixed(2)}</TableCell>
+                            <TableCell className="text-right">{formatPrice(item.price)}</TableCell>
+                            <TableCell className="text-right">{formatPrice(item.price * item.quantity)}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -467,14 +492,24 @@ const OrdersManager: React.FC = () => {
               </div>
               
               <div className="flex justify-between pt-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => generateOrderPDF(selectedOrder)}
-                  className="flex items-center"
-                >
-                  <Download className="mr-2 h-4 w-4" />
-                  Télécharger PDF
-                </Button>
+                <div className="space-x-2">
+                  <Button 
+                    variant="outline" 
+                    onClick={() => generateOrderPDF(selectedOrder)}
+                    className="flex items-center"
+                  >
+                    <Download className="mr-2 h-4 w-4" />
+                    Télécharger PDF
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex items-center text-red-500 hover:text-red-700 hover:bg-red-50 border-red-200"
+                    onClick={() => handleDeleteOrder(selectedOrder.id)}
+                  >
+                    <Trash2 className="mr-2 h-4 w-4" />
+                    Supprimer
+                  </Button>
+                </div>
                 <Button 
                   variant="outline"
                   onClick={() => setViewDialogOpen(false)}

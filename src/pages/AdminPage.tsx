@@ -50,6 +50,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { formatPrice } from '@/lib/formatPrice';
 
 // Components for different sections
 import ProductManager from '@/components/admin/ProductManager';
@@ -61,54 +62,32 @@ import LogoManager from '@/components/admin/LogoManager';
 import CustomersList from '@/components/admin/CustomersList';
 import WebsiteSettings from '@/components/admin/WebsiteSettings';
 
+// Sample chart data
 const chartData = [
-  { name: 'Sun', income: 15000, cost: 10000 },
-  { name: 'Mon', income: 21000, cost: 14000 },
-  { name: 'Tue', income: 18000, cost: 12000 },
-  { name: 'Wed', income: 25000, cost: 15000 },
-  { name: 'Thu', income: 32000, cost: 18000 },
-  { name: 'Fri', income: 24000, cost: 16000 },
-  { name: 'Sat', income: 22000, cost: 14000 },
+  { name: 'Dim', income: 15000, cost: 10000 },
+  { name: 'Lun', income: 21000, cost: 14000 },
+  { name: 'Mar', income: 18000, cost: 12000 },
+  { name: 'Mer', income: 25000, cost: 15000 },
+  { name: 'Jeu', income: 32000, cost: 18000 },
+  { name: 'Ven', income: 24000, cost: 16000 },
+  { name: 'Sam', income: 22000, cost: 14000 },
 ];
 
-const topSellingProducts = [
-  { 
-    id: '1', 
-    name: 'Pommes Bio', 
-    orderId: '#1234', 
-    stock: 'In Stock', 
-    review: 4.9, 
-    sold: 123, 
-    price: '3.99€'
-  },
-  { 
-    id: '2', 
-    name: 'Tomates Cerises', 
-    orderId: '#1235', 
-    stock: 'Out of Stock', 
-    review: 4.8, 
-    sold: 98, 
-    price: '4.49€'
-  },
-  { 
-    id: '3', 
-    name: 'Carottes Bio', 
-    orderId: '#1236', 
-    stock: 'In Stock', 
-    review: 4.7, 
-    sold: 75, 
-    price: '2.99€'
-  },
-];
+interface TopSellingProduct {
+  id: string;
+  name: string;
+  orderId: string;
+  stock: string;
+  review: number;
+  sold: number;
+  price: string;
+}
 
-const countryData = [
-  { country: 'France', flag: '🇫🇷', amount: '9.16k' },
-  { country: 'Belgique', flag: '🇧🇪', amount: '7.12k' },
-  { country: 'Espagne', flag: '🇪🇸', amount: '6.13k' },
-  { country: 'Italie', flag: '🇮🇹', amount: '5.21k' },
-  { country: 'Allemagne', flag: '🇩🇪', amount: '4.18k' },
-  { country: 'Suisse', flag: '🇨🇭', amount: '3.17k' },
-];
+interface TopClient {
+  name: string;
+  orders: number;
+  amount: string;
+}
 
 const AdminPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
@@ -117,50 +96,145 @@ const AdminPage: React.FC = () => {
     revenue: 0,
     orders: 0
   });
+  const [topSellingProducts, setTopSellingProducts] = useState<TopSellingProduct[]>([]);
+  const [topClients, setTopClients] = useState<TopClient[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        // Fetch total orders
-        const { data: orders, error: ordersError } = await supabase
-          .from('Orders')
-          .select('id, total_amount');
-        
-        if (ordersError) throw ordersError;
-        
-        // Count distinct client names for customer count
-        const { count: customerCount, error: customerError } = await supabase
-          .from('Orders')
-          .select('Client Name', { count: 'exact', head: true })
-          .not('Client Name', 'is', null);
-        
-        if (customerError) throw customerError;
-        
-        // Calculate total revenue
-        const totalRevenue = orders?.reduce((sum, order) => {
-          return sum + (order.total_amount || 0);
-        }, 0);
-        
-        setStats({
-          customers: customerCount || 0,
-          revenue: totalRevenue || 0,
-          orders: orders?.length || 0
-        });
-        
-      } catch (error) {
-        console.error('Error fetching stats:', error);
-        toast({
-          title: "Erreur",
-          description: "Impossible de charger les statistiques",
-          variant: "destructive",
-        });
-      }
-    };
-
     fetchStats();
-  }, [toast]);
+    fetchTopSellingProducts();
+    fetchTopClients();
+  }, []);
+
+  const fetchStats = async () => {
+    try {
+      // Fetch total orders
+      const { data: orders, error: ordersError } = await supabase
+        .from('Orders')
+        .select('id, total_amount');
+      
+      if (ordersError) throw ordersError;
+      
+      // Count distinct client names for customer count
+      const { count: customerCount, error: customerError } = await supabase
+        .from('Orders')
+        .select('Client Name', { count: 'exact', head: true })
+        .not('Client Name', 'is', null);
+      
+      if (customerError) throw customerError;
+      
+      // Calculate total revenue
+      const totalRevenue = orders?.reduce((sum, order) => {
+        return sum + (order.total_amount || 0);
+      }, 0);
+      
+      setStats({
+        customers: customerCount || 0,
+        revenue: totalRevenue || 0,
+        orders: orders?.length || 0
+      });
+      
+    } catch (error) {
+      console.error('Error fetching stats:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les statistiques",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const fetchTopSellingProducts = async () => {
+    setIsLoading(true);
+    try {
+      // Fetch products with their stock 
+      const { data: productsData, error: productsError } = await supabase
+        .from('Products')
+        .select('*')
+        .order('id', { ascending: true })
+        .limit(5);
+
+      if (productsError) throw productsError;
+
+      // Format products for display
+      const formattedProducts = (productsData || []).map(product => ({
+        id: String(product.id),
+        name: product.name || 'Produit sans nom',
+        orderId: `#${1000 + parseInt(product.id)}`, 
+        stock: (product.stock && product.stock > 0) ? 'In Stock' : 'Out of Stock',
+        review: 4.0 + Math.random() * 0.9, // Mock review score between 4.0-4.9
+        sold: Math.floor(Math.random() * 100) + 50, // Mock sales number between 50-150
+        price: formatPrice(product.price || 0)
+      }));
+
+      setTopSellingProducts(formattedProducts);
+    } catch (error) {
+      console.error('Error fetching top selling products:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les produits les plus vendus",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const fetchTopClients = async () => {
+    try {
+      // Get orders grouped by client name
+      const { data, error } = await supabase
+        .from('Orders')
+        .select('*');
+
+      if (error) throw error;
+
+      // Process orders to get top clients by purchase amount
+      const clientMap = new Map();
+      data.forEach(order => {
+        const clientName = order['Client Name'] || 'Client Inconnu';
+        const amount = order.total_amount || 0;
+        
+        if (!clientMap.has(clientName)) {
+          clientMap.set(clientName, { 
+            totalAmount: amount, 
+            orderCount: 1 
+          });
+        } else {
+          const client = clientMap.get(clientName);
+          clientMap.set(clientName, {
+            totalAmount: client.totalAmount + amount,
+            orderCount: client.orderCount + 1
+          });
+        }
+      });
+
+      // Convert to array and sort by total amount
+      const topClientsList = Array.from(clientMap.entries())
+        .map(([name, data]) => ({
+          name,
+          orders: data.orderCount,
+          amount: formatPrice(data.totalAmount)
+        }))
+        .sort((a, b) => {
+          const amountA = parseFloat(a.amount.split(' ')[0]);
+          const amountB = parseFloat(b.amount.split(' ')[0]);
+          return amountB - amountA;
+        })
+        .slice(0, 6); // Get top 6 clients
+      
+      setTopClients(topClientsList);
+    } catch (error) {
+      console.error('Error fetching top clients:', error);
+      toast({
+        title: "Erreur",
+        description: "Impossible de charger les meilleurs clients",
+        variant: "destructive",
+      });
+    }
+  };
 
   // Render the appropriate content based on activeTab
   const renderContent = () => {
@@ -191,7 +265,7 @@ const AdminPage: React.FC = () => {
                 <CardContent className="pt-6">
                   <div className="space-y-2">
                     <p className="text-sm text-muted-foreground">Revenu total</p>
-                    <h2 className="text-3xl font-bold">{stats.revenue.toLocaleString()}€</h2>
+                    <h2 className="text-3xl font-bold">{formatPrice(stats.revenue)}</h2>
                     <div className="flex items-center text-xs text-red-600">
                       <svg className="w-3 h-3 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M17 7L7 17M7 17H16M7 17V8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -287,21 +361,32 @@ const AdminPage: React.FC = () => {
               <Card>
                 <CardContent className="pt-6">
                   <div className="flex justify-between items-center mb-6">
-                    <h3 className="text-xl font-semibold">Top Pays</h3>
+                    <h3 className="text-xl font-semibold">Top Clients</h3>
                     <Button variant="ghost" size="icon">
                       <MoreVertical className="h-4 w-4" />
                     </Button>
                   </div>
                   <div className="space-y-4">
-                    {countryData.map((item) => (
-                      <div key={item.country} className="flex justify-between items-center">
-                        <div className="flex items-center space-x-2">
-                          <div className="text-xl">{item.flag}</div>
-                          <span>{item.country}</span>
-                        </div>
-                        <span className="text-muted-foreground">{item.amount}</span>
+                    {isLoading ? (
+                      <div className="flex justify-center items-center h-32">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-veggie-primary"></div>
                       </div>
-                    ))}
+                    ) : (
+                      topClients.map((client, index) => (
+                        <div key={index} className="flex justify-between items-center">
+                          <div className="flex items-center space-x-2">
+                            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-veggie-light text-veggie-dark font-medium">
+                              {client.name.charAt(0)}
+                            </div>
+                            <span>{client.name}</span>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-muted-foreground">{client.amount}</div>
+                            <div className="text-xs text-muted-foreground">{client.orders} commande{client.orders > 1 ? 's' : ''}</div>
+                          </div>
+                        </div>
+                      ))
+                    )}
                   </div>
                 </CardContent>
               </Card>
@@ -331,43 +416,49 @@ const AdminPage: React.FC = () => {
                     </Select>
                   </div>
                 </div>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Nom du produit</TableHead>
-                      <TableHead>ID commande</TableHead>
-                      <TableHead>Stock</TableHead>
-                      <TableHead>Évaluation</TableHead>
-                      <TableHead>Vendu</TableHead>
-                      <TableHead className="text-right">Prix</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {topSellingProducts.map((product) => (
-                      <TableRow key={product.id}>
-                        <TableCell className="font-medium">{product.name}</TableCell>
-                        <TableCell>{product.orderId}</TableCell>
-                        <TableCell>
-                          <Badge variant={product.stock === 'In Stock' ? 'outline' : 'destructive'} className={cn(
-                            product.stock === 'In Stock' ? 'text-green-500 border-green-200 bg-green-50' : ''
-                          )}>
-                            {product.stock === 'In Stock' ? 'En stock' : 'Épuisé'}
-                          </Badge>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center">
-                            {product.review} 
-                            <svg className="w-4 h-4 text-yellow-400 ml-1" fill="currentColor" viewBox="0 0 20 20">
-                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                            </svg>
-                          </div>
-                        </TableCell>
-                        <TableCell>{product.sold}</TableCell>
-                        <TableCell className="text-right">{product.price}</TableCell>
+                {isLoading ? (
+                  <div className="flex justify-center items-center h-32">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-veggie-primary"></div>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nom du produit</TableHead>
+                        <TableHead>ID commande</TableHead>
+                        <TableHead>Stock</TableHead>
+                        <TableHead>Évaluation</TableHead>
+                        <TableHead>Vendu</TableHead>
+                        <TableHead className="text-right">Prix</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {topSellingProducts.map((product) => (
+                        <TableRow key={product.id}>
+                          <TableCell className="font-medium">{product.name}</TableCell>
+                          <TableCell>{product.orderId}</TableCell>
+                          <TableCell>
+                            <Badge variant={product.stock === 'In Stock' ? 'outline' : 'destructive'} className={cn(
+                              product.stock === 'In Stock' ? 'text-green-500 border-green-200 bg-green-50' : ''
+                            )}>
+                              {product.stock === 'In Stock' ? 'En stock' : 'Épuisé'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex items-center">
+                              {product.review.toFixed(1)} 
+                              <svg className="w-4 h-4 text-yellow-400 ml-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                              </svg>
+                            </div>
+                          </TableCell>
+                          <TableCell>{product.sold}</TableCell>
+                          <TableCell className="text-right">{product.price}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -614,8 +705,8 @@ const CustomTooltip = ({ active, payload }: any) => {
     return (
       <div className="bg-white p-3 border rounded-lg shadow-md">
         <p className="text-sm font-medium">{`${payload[0].payload.name}`}</p>
-        <p className="text-sm text-blue-600">{`Ventes: ${payload[1]?.value.toLocaleString()}€`}</p>
-        <p className="text-sm text-teal-600">{`Coûts: ${payload[0]?.value.toLocaleString()}€`}</p>
+        <p className="text-sm text-blue-600">{`Ventes: ${formatPrice(payload[1]?.value)}`}</p>
+        <p className="text-sm text-teal-600">{`Coûts: ${formatPrice(payload[0]?.value)}`}</p>
       </div>
     );
   }

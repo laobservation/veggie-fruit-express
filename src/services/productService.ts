@@ -14,10 +14,16 @@ export type SupabaseProduct = {
   link_to_category: boolean | null;
   media_type: string | null;  // Changed from 'image' | 'video' to string | null
   created_at: string | null;
+  stock: number | null;  // Added stock field
 };
 
+// Extended Product interface with optional stock
+export interface ExtendedProduct extends Product {
+  stock?: number;
+}
+
 // Transform local product data format to Supabase format
-export const transformProductForSupabase = (product: Product): Omit<SupabaseProduct, 'id' | 'created_at'> => {
+export const transformProductForSupabase = (product: ExtendedProduct): Omit<SupabaseProduct, 'id' | 'created_at'> => {
   return {
     name: product.name,
     category: product.category,
@@ -27,11 +33,12 @@ export const transformProductForSupabase = (product: Product): Omit<SupabaseProd
     unit: product.unit,
     link_to_category: product.categoryLink,
     media_type: product.videoUrl ? 'video' : 'image',
+    stock: product.stock || 0,  // Default to 0 if not provided
   };
 };
 
 // Transform Supabase product format to local format
-export const transformProductFromSupabase = (product: SupabaseProduct): Product => {
+export const transformProductFromSupabase = (product: SupabaseProduct): ExtendedProduct => {
   if (!product.name || !product.category || !product.price || !product.image_url || 
       !product.description || !product.unit) {
     throw new Error('Invalid product data from database');
@@ -47,12 +54,13 @@ export const transformProductFromSupabase = (product: SupabaseProduct): Product 
     unit: product.unit,
     categoryLink: product.link_to_category || false,
     videoUrl: product.media_type === 'video' ? product.image_url : undefined,
-    featured: false // Default value as it's not stored in Supabase
+    featured: false, // Default value as it's not stored in Supabase
+    stock: product.stock || 0,  // Added stock field
   };
 };
 
 // Fetch all products from Supabase
-export const fetchProducts = async (): Promise<Product[]> => {
+export const fetchProducts = async (): Promise<ExtendedProduct[]> => {
   const { data, error } = await supabase
     .from('Products')
     .select('*');
@@ -67,7 +75,7 @@ export const fetchProducts = async (): Promise<Product[]> => {
 };
 
 // Create a new product in Supabase
-export const createProduct = async (product: Product): Promise<Product> => {
+export const createProduct = async (product: ExtendedProduct): Promise<ExtendedProduct> => {
   const supabaseProduct = transformProductForSupabase(product);
   
   const { data, error } = await supabase
@@ -85,7 +93,7 @@ export const createProduct = async (product: Product): Promise<Product> => {
 };
 
 // Update an existing product in Supabase
-export const updateProduct = async (id: string, product: Product): Promise<Product> => {
+export const updateProduct = async (id: string, product: ExtendedProduct): Promise<ExtendedProduct> => {
   const supabaseProduct = transformProductForSupabase(product);
   
   const { data, error } = await supabase
