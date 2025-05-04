@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -40,7 +41,7 @@ const ProductManager: React.FC = () => {
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
-  const [mediaType, setMediaType<'image' | 'video'>>('image');
+  const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
   const [isLoading, setIsLoading] = useState(true);
   
   const emptyProduct: Product = {
