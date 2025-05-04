@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
@@ -106,23 +105,8 @@ const OrdersManager: React.FC = () => {
         (payload) => {
           console.log('Orders table changed:', payload);
           
-          // Direct state update based on the operation type
-          if (payload.eventType === 'DELETE') {
-            // Immediately remove the deleted order from local state
-            const deletedId = payload.old?.id;
-            if (deletedId) {
-              setOrders(prevOrders => prevOrders.filter(order => order.id !== deletedId));
-              
-              // Close dialog if deleted order was being viewed
-              if (selectedOrder?.id === deletedId) {
-                setViewDialogOpen(false);
-                setSelectedOrder(null);
-              }
-            }
-          } else {
-            // For other changes (INSERT, UPDATE), refresh the orders
-            fetchOrders();
-          }
+          // Force a refresh of orders on any database change to ensure UI syncs with DB
+          fetchOrders();
         }
       )
       .subscribe();
@@ -131,7 +115,7 @@ const OrdersManager: React.FC = () => {
       // Unsubscribe when component unmounts
       supabase.removeChannel(ordersChannel);
     };
-  }, [selectedOrder, page]); // Add page as dependency to refetch when page changes
+  }, [page]); // Only refresh when the page changes
 
   const handleDeleteOrder = async (orderId: number) => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) {
@@ -139,6 +123,8 @@ const OrdersManager: React.FC = () => {
     }
     
     try {
+      setLoading(true); // Set loading state to prevent user interaction during deletion
+      
       // First, update the local state to give immediate feedback
       setOrders(prevOrders => prevOrders.filter(order => order.id !== orderId));
       
@@ -148,64 +134,86 @@ const OrdersManager: React.FC = () => {
         setSelectedOrder(null);
       }
       
-      // Delete from the database - Must be awaited to ensure completion
-      const { error } = await supabase
-        .from('Orders')
-        .delete()
-        .eq('id', orderId);
-
-      if (error) {
-        console.error('Error deleting order:', error);
-        // If there was an error, revert the UI change by fetching orders again
-        fetchOrders();
-        toast({
-          title: "Erreur",
-          description: "Impossible de supprimer la commande.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Show success notification
-      toast({
-        title: "Succès",
-        description: "La commande a été supprimée avec succès.",
-      });
+      // Delete from the database - Use multiple attempts if needed
+      let deletionSuccess = false;
+      let attempts = 0;
+      const maxAttempts = 3;
       
-      // Force a complete refresh of the order list to ensure proper pagination and database sync
-      // This is critical to ensure the UI reflects the actual database state
-      fetchOrders();
-      
-      // Double check deletion by querying the specific order - ensure it's really gone
-      const { data: checkData } = await supabase
-        .from('Orders')
-        .select('*')
-        .eq('id', orderId)
-        .single();
-      
-      if (checkData) {
-        console.error('Order still exists after deletion attempt:', checkData);
-        // Try deletion one more time if the order still exists
-        const { error: secondError } = await supabase
+      while (!deletionSuccess && attempts < maxAttempts) {
+        attempts++;
+        
+        const { error } = await supabase
           .from('Orders')
           .delete()
           .eq('id', orderId);
         
-        if (!secondError) {
-          // If second attempt succeeded, refresh orders again
-          fetchOrders();
+        if (error) {
+          console.error(`Deletion attempt ${attempts} failed:`, error);
+          
+          // Short delay before retrying
+          if (attempts < maxAttempts) {
+            await new Promise(resolve => setTimeout(resolve, 500));
+          } else {
+            // If all attempts failed, show error and revert UI
+            toast({
+              title: "Erreur",
+              description: "Impossible de supprimer la commande après plusieurs tentatives.",
+              variant: "destructive",
+            });
+            
+            // Revert UI by fetching orders again
+            fetchOrders();
+            return;
+          }
+        } else {
+          // Success - no error
+          deletionSuccess = true;
+          
+          // Verify deletion by checking if the order still exists
+          const { data: checkData } = await supabase
+            .from('Orders')
+            .select('id')
+            .eq('id', orderId)
+            .maybeSingle();
+          
+          if (checkData) {
+            console.error('Order still exists after successful deletion request:', checkData);
+            deletionSuccess = false;
+            
+            // If last attempt and order still exists, show warning
+            if (attempts >= maxAttempts) {
+              toast({
+                title: "Avertissement",
+                description: "La commande semble toujours exister dans la base de données.",
+                variant: "destructive",
+              });
+            }
+          }
         }
       }
-
+      
+      if (deletionSuccess) {
+        // Show success notification
+        toast({
+          title: "Succès",
+          description: "La commande a été supprimée avec succès.",
+        });
+      }
+      
+      // Refresh the orders list to ensure UI is in sync with database
+      await fetchOrders();
+      
     } catch (err) {
       console.error('Error in deleting order:', err);
-      // If there was an error, revert the UI change by fetching orders again
-      fetchOrders();
       toast({
         title: "Erreur",
         description: "Une erreur s'est produite lors de la suppression de la commande.",
         variant: "destructive",
       });
+      // Refresh to ensure UI accuracy
+      fetchOrders();
+    } finally {
+      setLoading(false);
     }
   };
 
