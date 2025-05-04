@@ -6,7 +6,7 @@ export interface Product {
   image: string;
   description: string;
   unit: string;
-  featured: boolean; // Change from optional to required
+  featured: boolean; // Changed from optional to required
   videoUrl?: string;
   categoryLink?: boolean;
   stock?: number;
@@ -151,13 +151,8 @@ export const getProductByIdFromSupabase = async (id: string) => {
       throw error;
     }
     
-    // Ensure featured property exists before transforming
-    const productWithFeatured = {
-      ...data,
-      featured: typeof data.featured !== 'undefined' ? data.featured : false
-    };
-    
-    return transformProductFromSupabase(productWithFeatured);
+    // The transform function now handles missing featured property
+    return transformProductFromSupabase(data);
   } catch (error) {
     console.error('Error fetching product from Supabase:', error);
     // Fall back to local data

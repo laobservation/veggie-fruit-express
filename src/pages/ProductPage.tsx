@@ -14,6 +14,7 @@ import ProductDetail from '@/components/product/ProductDetail';
 import LoadingState from '@/components/product/LoadingState';
 import NotFoundState from '@/components/product/NotFoundState';
 import StickyAddToCart from '@/components/product/StickyAddToCart';
+import { Product } from '@/types/product';
 
 const ProductPage = () => {
   const { productId } = useParams();
@@ -33,7 +34,7 @@ const ProductPage = () => {
   const categoryText = product.category === 'fruit' ? 'Fruits' : 'Légumes';
 
   const handleAddToCart = () => {
-    addItem(product);
+    addItem(product as Product);
   };
 
   return (
@@ -64,7 +65,7 @@ const ProductPage = () => {
           {/* Related Products */}
           {relatedProducts.length > 0 && (
             <ProductGrid 
-              products={relatedProducts} 
+              products={relatedProducts as Product[]} 
               title={`Plus de ${categoryText} que vous pourriez aimer`}
             />
           )}

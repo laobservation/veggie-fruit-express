@@ -32,7 +32,7 @@ export const useProductDetails = (productId: string | undefined) => {
           if (localProduct) {
             const typedProduct: Product = {
               ...localProduct,
-              category: localProduct.category as 'fruit' | 'vegetable',
+              category: localProduct.category, // Already correctly typed in local data
               featured: localProduct.featured || false
             };
             
@@ -52,14 +52,8 @@ export const useProductDetails = (productId: string | undefined) => {
             console.error('Product not found');
           }
         } else {
-          // Add featured property if it doesn't exist
-          const productWithFeatured = {
-            ...supabaseProduct,
-            featured: typeof supabaseProduct.featured !== 'undefined' ? supabaseProduct.featured : false
-          };
-          
-          // Transform Supabase product data
-          const transformedProduct = transformProductFromSupabase(productWithFeatured);
+          // Transform Supabase product data - no need to manually add featured property
+          const transformedProduct = transformProductFromSupabase(supabaseProduct);
           setProduct(transformedProduct);
           
           // Fetch related products from the same category
@@ -71,13 +65,8 @@ export const useProductDetails = (productId: string | undefined) => {
             .limit(4);
             
           if (relatedData && relatedData.length > 0) {
-            // Ensure all related products have the featured property
-            const relatedWithFeatured = relatedData.map(p => ({
-              ...p,
-              featured: typeof p.featured !== 'undefined' ? p.featured : false
-            }));
-            
-            setRelatedProducts(relatedWithFeatured.map(p => transformProductFromSupabase(p)));
+            // Transform each related product using our helper
+            setRelatedProducts(relatedData.map(p => transformProductFromSupabase(p)));
           }
         }
       } catch (err) {

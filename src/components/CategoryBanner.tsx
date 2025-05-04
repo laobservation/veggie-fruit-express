@@ -1,4 +1,3 @@
-
 import { Link } from 'react-router-dom';
 import { getCategoryLinkedProducts } from '@/data/products';
 import { supabase } from '@/integrations/supabase/client';
@@ -26,14 +25,12 @@ const CategoryBanner: React.FC<CategoryBannerProps> = ({ category }) => {
         if (error) throw error;
         
         if (data && data.length > 0) {
-          // Ensure the data includes the featured property before transforming
-          const productsWithFeatured = data.map(product => ({
-            ...product,
-            featured: typeof product.featured !== 'undefined' ? product.featured : false
-          }));
-          
           // Transform Supabase products to our Product type
-          const products = productsWithFeatured.map(product => transformProductFromSupabase(product));
+          // The transform function now handles missing featured property
+          const products = data.map(product => transformProductFromSupabase({
+            ...product,
+            // featured is handled in transformProductFromSupabase
+          }));
           setLinkedProducts(products);
         }
       } catch (error) {

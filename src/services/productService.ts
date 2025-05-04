@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
 import { Json } from "@/integrations/supabase/types";
@@ -16,7 +15,7 @@ export type SupabaseProduct = {
   media_type: string | null;  
   created_at: string | null;
   stock: number | null;  
-  featured: boolean | null; // Make sure featured is included here
+  featured?: boolean | null; // Make featured optional to match actual database schema
 };
 
 // Extended Product interface with optional stock
@@ -56,7 +55,7 @@ export const transformProductFromSupabase = (product: SupabaseProduct): Extended
     unit: product.unit || 'kg',
     categoryLink: product.link_to_category || false,
     videoUrl: product.media_type === 'video' ? product.image_url : undefined,
-    featured: product.featured || false, // Default to false if not present
+    featured: !!product.featured, // Convert to boolean and default to false if missing
     stock: product.stock || 0,
   };
 };
