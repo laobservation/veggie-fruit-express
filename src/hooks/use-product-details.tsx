@@ -1,0 +1,95 @@
+
+import { useState, useEffect } from 'react';
+import { Product } from '@/types/product';
+import { supabase } from '@/integrations/supabase/client';
+import { transformProductFromSupabase } from '@/services/productService';
+import { getProductById, getProductsByCategory } from '@/data/products';
+
+export const useProductDetails = (productId: string | undefined) => {
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProduct = async () => {
+      setLoading(true);
+      
+      try {
+        if (!productId) {
+          throw new Error('No product ID provided');
+        }
+        
+        // First try to get from Supabase
+        const { data: supabaseProduct, error } = await supabase
+          .from('Products')
+          .select('*')
+          .eq('id', parseInt(productId, 10))
+          .single();
+        
+        if (error || !supabaseProduct) {
+          // If not found in Supabase, try local data
+          const localProduct = getProductById(productId);
+          if (localProduct) {
+            const typedProduct: Product = {
+              ...localProduct,
+              category: localProduct.category as 'fruit' | 'vegetable',
+              featured: localProduct.featured || false
+            };
+            
+            setProduct(typedProduct);
+            
+            // Get related products for this product
+            const related = getProductsByCategory(typedProduct.category)
+              .filter(p => p.id !== typedProduct.id)
+              .slice(0, 4);
+              
+            setRelatedProducts(related.map(p => ({
+              ...p,
+              featured: p.featured || false
+            })));
+          } else {
+            // Product not found anywhere
+            console.error('Product not found');
+          }
+        } else {
+          // Add featured property if it doesn't exist
+          const productWithFeatured = {
+            ...supabaseProduct,
+            featured: typeof supabaseProduct.featured !== 'undefined' ? supabaseProduct.featured : false
+          };
+          
+          // Transform Supabase product data
+          const transformedProduct = transformProductFromSupabase(productWithFeatured);
+          setProduct(transformedProduct);
+          
+          // Fetch related products from the same category
+          const { data: relatedData } = await supabase
+            .from('Products')
+            .select('*')
+            .eq('category', transformedProduct.category)
+            .neq('id', parseInt(productId, 10))
+            .limit(4);
+            
+          if (relatedData && relatedData.length > 0) {
+            // Ensure all related products have the featured property
+            const relatedWithFeatured = relatedData.map(p => ({
+              ...p,
+              featured: typeof p.featured !== 'undefined' ? p.featured : false
+            }));
+            
+            setRelatedProducts(relatedWithFeatured.map(p => transformProductFromSupabase(p)));
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching product:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProduct();
+    window.scrollTo(0, 0);
+  }, [productId]);
+
+  return { product, relatedProducts, loading };
+};

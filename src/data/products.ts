@@ -1,4 +1,3 @@
-
 export interface Product {
   id: string;
   name: string;
@@ -155,7 +154,7 @@ export const getProductByIdFromSupabase = async (id: string) => {
     // Ensure featured property exists before transforming
     const productWithFeatured = {
       ...data,
-      featured: data.featured !== null ? data.featured : false
+      featured: typeof data.featured !== 'undefined' ? data.featured : false
     };
     
     return transformProductFromSupabase(productWithFeatured);
