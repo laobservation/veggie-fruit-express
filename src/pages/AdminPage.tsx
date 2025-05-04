@@ -211,5 +211,5 @@ const AdminPage = () => {
   );
 };
 
-// Add the default export
+// Add the default export - this is needed for proper importing
 export default AdminPage;

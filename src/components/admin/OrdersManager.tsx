@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -107,6 +106,29 @@ const OrdersManager: React.FC = () => {
 
   useEffect(() => {
     fetchOrders();
+    
+    // Set up a subscription to listen for changes to orders
+    const ordersChannel = supabase
+      .channel('orders-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen for all events (INSERT, UPDATE, DELETE)
+          schema: 'public',
+          table: 'Orders'
+        },
+        (payload) => {
+          console.log('Orders table changed:', payload);
+          // Refresh the orders to ensure UI is in sync
+          fetchOrders();
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      // Unsubscribe when component unmounts
+      supabase.removeChannel(ordersChannel);
+    };
   }, []);
 
   const handleDeleteOrder = async (orderId: number) => {

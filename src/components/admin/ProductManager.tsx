@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,37 +13,38 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/components/ui/use-toast';
-import { Product, products } from '@/data/products';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Edit, Plus, Image, Youtube, ArrowLeft } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { supabase } from '@/integrations/supabase/client';
-import { 
-  transformProductForSupabase, 
-  transformProductFromSupabase,
-  fetchProducts,
-  createProduct,
-  updateProduct,
-  deleteProduct
-} from '@/services/productService';
 import { Link } from 'react-router-dom';
 import { formatPrice } from '@/lib/formatPrice';
 
-// Extended Product type with stock field
-interface ExtendedProduct extends Product {
+// Extended Product type
+interface Product {
+  id: string;
+  name: string;
+  category: string;
+  price: number;
+  image: string;
+  description: string;
+  unit: string;
+  featured: boolean;
+  videoUrl?: string;
+  categoryLink?: boolean;
   stock?: number;
 }
 
 const ProductManager: React.FC = () => {
   const { toast } = useToast();
-  const [allProducts, setAllProducts] = useState<ExtendedProduct[]>([]);
-  const [selectedProduct, setSelectedProduct] = useState<ExtendedProduct | null>(null);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
+  const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [mediaType, setMediaType] = useState<'image' | 'video'>('image');
   const [isLoading, setIsLoading] = useState(true);
   
-  const emptyProduct: ExtendedProduct = {
+  const emptyProduct: Product = {
     id: '',
     name: '',
     category: 'fruit',
@@ -56,11 +58,34 @@ const ProductManager: React.FC = () => {
     stock: 0
   };
   
-  const [formData, setFormData] = useState<ExtendedProduct>(emptyProduct);
+  const [formData, setFormData] = useState<Product>(emptyProduct);
   
   // Fetch products from Supabase when component mounts
   useEffect(() => {
     loadProducts();
+
+    // Set up a subscription to listen for product changes
+    const productsChannel = supabase
+      .channel('products-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // Listen for all events
+          schema: 'public',
+          table: 'Products'
+        },
+        (payload) => {
+          console.log('Products table changed:', payload);
+          // Refresh the products
+          loadProducts();
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      // Unsubscribe when component unmounts
+      supabase.removeChannel(productsChannel);
+    };
   }, []);
   
   const loadProducts = async () => {
@@ -72,7 +97,14 @@ const ProductManager: React.FC = () => {
         .select('*');
       
       if (error) {
+        console.error('Error fetching products:', error);
         throw error;
+      }
+      
+      if (!data || data.length === 0) {
+        setAllProducts([]);
+        setIsLoading(false);
+        return;
       }
       
       // Transform data to match our Product interface
@@ -84,13 +116,14 @@ const ProductManager: React.FC = () => {
         image: product.image_url || '',
         description: product.description || '',
         unit: product.unit || 'kg',
-        featured: false,
+        featured: product.featured || false,
         videoUrl: product.media_type === 'video' ? product.image_url : '',
         categoryLink: product.link_to_category || false,
         stock: product.stock || 0
       }));
       
       setAllProducts(transformedProducts);
+      console.log('Products loaded:', transformedProducts);
     } catch (error) {
       console.error('Error fetching products:', error);
       toast({
@@ -132,7 +165,7 @@ const ProductManager: React.FC = () => {
     setIsDialogOpen(true);
   };
   
-  const handleEditProduct = (product: ExtendedProduct) => {
+  const handleEditProduct = (product: Product) => {
     setIsEditing(true);
     setSelectedProduct(product);
     setFormData({...product});
@@ -170,42 +203,41 @@ const ProductManager: React.FC = () => {
     }
     
     // If media type is image, clear videoUrl
+    const finalFormData = {...formData};
     if (mediaType === 'image') {
-      formData.videoUrl = '';
+      finalFormData.videoUrl = '';
     } else {
       // For video, ensure there's a placeholder image if image is empty
-      if (!formData.image) {
-        formData.image = '/images/placeholder.svg';
+      if (!finalFormData.image) {
+        finalFormData.image = '/images/placeholder.svg';
       }
     }
     
     try {
+      const productForSupabase = {
+        name: finalFormData.name,
+        category: finalFormData.category,
+        price: finalFormData.price,
+        image_url: mediaType === 'image' ? finalFormData.image : finalFormData.videoUrl,
+        description: finalFormData.description,
+        unit: finalFormData.unit,
+        link_to_category: finalFormData.categoryLink,
+        media_type: mediaType,
+        stock: finalFormData.stock || 0,
+        featured: finalFormData.featured || false
+      };
+      
       if (isEditing && selectedProduct) {
         // Update existing product in Supabase
-        const productForSupabase = {
-          name: formData.name,
-          category: formData.category,
-          price: formData.price,
-          image_url: formData.image,
-          description: formData.description,
-          unit: formData.unit,
-          link_to_category: formData.categoryLink,
-          media_type: mediaType,
-          stock: formData.stock || 0
-        };
-        
         const { error } = await supabase
           .from('Products')
           .update(productForSupabase)
           .eq('id', parseInt(selectedProduct.id));
           
-        if (error) throw error;
-        
-        // Update local state
-        const updatedProducts = allProducts.map(p => 
-          p.id === selectedProduct.id ? { ...formData } : p
-        );
-        setAllProducts(updatedProducts);
+        if (error) {
+          console.error('Update error:', error);
+          throw error;
+        }
         
         toast({
           title: "Succès",
@@ -213,32 +245,14 @@ const ProductManager: React.FC = () => {
         });
       } else {
         // Add new product to Supabase
-        const productForSupabase = {
-          name: formData.name,
-          category: formData.category,
-          price: formData.price,
-          image_url: formData.image,
-          description: formData.description,
-          unit: formData.unit,
-          link_to_category: formData.categoryLink,
-          media_type: mediaType,
-          stock: formData.stock || 0
-        };
-        
         const { data, error } = await supabase
           .from('Products')
           .insert([productForSupabase])
           .select();
           
-        if (error) throw error;
-        
-        // Add new product to local state with ID from Supabase
-        if (data && data.length > 0) {
-          const newProduct = {
-            ...formData,
-            id: String(data[0].id)
-          };
-          setAllProducts([...allProducts, newProduct]);
+        if (error) {
+          console.error('Insert error:', error);
+          throw error;
         }
         
         toast({
@@ -247,7 +261,10 @@ const ProductManager: React.FC = () => {
         });
       }
       
+      // Close the dialog and reload the products
       setIsDialogOpen(false);
+      loadProducts();
+      
     } catch (error) {
       console.error('Error saving product:', error);
       toast({
@@ -346,6 +363,17 @@ const ProductManager: React.FC = () => {
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-veggie-primary"></div>
         </div>
+      ) : allProducts.length === 0 ? (
+        <div className="text-center py-12">
+          <p className="text-gray-500">Aucun produit trouvé. Commencez par ajouter un nouveau produit.</p>
+          <Button 
+            onClick={handleAddNewProduct}
+            className="mt-4 bg-veggie-primary hover:bg-veggie-dark"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Ajouter un Produit
+          </Button>
+        </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {allProducts.map(product => (
@@ -408,6 +436,7 @@ const ProductManager: React.FC = () => {
         </div>
       )}
       
+      {/* Product Dialog */}
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
