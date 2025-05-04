@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from 'react';
-import { Order } from '@/types/order';
+import { Order, OrderStatus, RawOrder } from '@/types/order';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { 
@@ -28,7 +28,21 @@ export const useOrders = () => {
       const { orders: fetchedOrders, totalPages: calculatedTotalPages } = 
         await fetchPaginatedOrders(page, ordersPerPage);
       
-      setOrders(fetchedOrders);
+      // Transform raw orders to Order type
+      const transformedOrders = fetchedOrders.map((order: RawOrder): Order => ({
+        id: order.id,
+        'Client Name': order['Client Name'] || '',
+        'Adresse': order.Adresse || '',
+        'Phone': order.Phone,
+        order_items: Array.isArray(order.order_items) ? order.order_items : [],
+        total_amount: order.total_amount || 0,
+        preferred_time: order.preferred_time,
+        status: (order.status as OrderStatus) || 'new',
+        notified: order.notified || false,
+        created_at: order.created_at
+      }));
+      
+      setOrders(transformedOrders);
       setTotalPages(calculatedTotalPages);
     } catch (err) {
       toast({

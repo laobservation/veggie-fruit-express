@@ -5,78 +5,104 @@ import { Order, OrderItem, OrderStatus, RawOrder } from '@/types/order';
 
 export const createOrder = async (orderData: Partial<Order>): Promise<number | null> => {
   try {
-    // Create a new order record
-    const { data: order, error: orderError } = await supabase
+    // Transform order items to raw JSON for storage
+    const rawOrderData = {
+      'Client Name': orderData['Client Name'],
+      'Adresse': orderData['Adresse'],
+      'Phone': orderData['Phone'],
+      order_items: orderData.order_items || [],
+      total_amount: orderData.total_amount,
+      preferred_time: orderData.preferred_time,
+      status: orderData.status || 'new',
+      notified: orderData.notified || false
+    };
+
+    // Insert the order into Supabase
+    const { data, error } = await supabase
       .from('Orders')
-      .insert([orderData])
+      .insert(rawOrderData)
       .select('id')
       .single();
 
-    if (orderError) {
-      console.error('Error creating order:', orderError);
-      throw new Error(`Erreur lors de la création de la commande: ${orderError.message}`);
+    if (error) {
+      console.error('Error creating order:', error);
+      throw error;
     }
 
-    return order.id;
+    // Return the new order ID
+    return data?.id || null;
   } catch (error) {
     console.error('Order creation failed:', error);
-    toast.error("La création de la commande a échoué.");
     return null;
   }
 };
 
-export const addOrderItems = async (orderId: number, items: Omit<OrderItem, 'id' | 'order_id'>[]) => {
-  try {
-    // Add order items
-    const orderItems = items.map(item => ({
-      ...item,
-      order_id: orderId
-    }));
-
-    const { error: itemsError } = await supabase
-      .from('OrderItems')
-      .insert(orderItems);
-
-    if (itemsError) {
-      console.error('Error adding order items:', itemsError);
-      throw new Error(`Erreur lors de l'ajout des articles: ${itemsError.message}`);
-    }
-
-    return true;
-  } catch (error) {
-    console.error('Adding order items failed:', error);
-    toast.error("L'ajout des articles a échoué.");
-    return false;
-  }
+// Transform raw order data from Supabase to our application's Order type
+export const transformRawOrder = (rawOrder: RawOrder): Order => {
+  return {
+    id: rawOrder.id,
+    'Client Name': rawOrder['Client Name'] || '',
+    'Adresse': rawOrder.Adresse || '',
+    'Phone': rawOrder.Phone,
+    order_items: Array.isArray(rawOrder.order_items) ? rawOrder.order_items as OrderItem[] : [],
+    total_amount: rawOrder.total_amount || 0,
+    preferred_time: rawOrder.preferred_time,
+    status: (rawOrder.status as OrderStatus) || 'new',
+    notified: rawOrder.notified || false,
+    created_at: rawOrder.created_at
+  };
 };
 
-export const getOrderById = async (orderId: number) => {
+// Get a single order by ID
+export const getOrderById = async (orderId: number): Promise<Order | null> => {
   try {
-    const { data: order, error: orderError } = await supabase
+    const { data: order, error } = await supabase
       .from('Orders')
-      .select(`
-        *,
-        OrderItems (
-          *,
-          Products (*)
-        )
-      `)
+      .select('*')
       .eq('id', orderId)
       .single();
 
-    if (orderError) {
-      console.error('Error fetching order:', orderError);
+    if (error) {
+      console.error('Error fetching order:', error);
       return null;
     }
 
-    return order;
+    return transformRawOrder(order as RawOrder);
   } catch (error) {
     console.error('Order fetch failed:', error);
     return null;
   }
 };
 
-export const updateOrderStatus = async (orderId: number, status: OrderStatus) => {
+// Delete an order 
+export const deleteOrder = async (orderId: number): Promise<boolean> => {
+  try {
+    console.log('Attempting to delete order:', orderId);
+    
+    // First attempt: Try direct deletion
+    const { error } = await supabase
+      .from('Orders')
+      .delete()
+      .eq('id', orderId);
+
+    if (!error) {
+      console.log('Order deleted successfully');
+      return true;
+    }
+
+    console.error('Error deleting order on first attempt:', error);
+    
+    // If we have an error, log the detailed error info
+    console.error('Error deleting order:', error);
+    return false;
+  } catch (error) {
+    console.error('Order deletion failed:', error);
+    return false;
+  }
+};
+
+// Update order status
+export const updateOrderStatus = async (orderId: number, status: OrderStatus): Promise<boolean> => {
   try {
     const { error } = await supabase
       .from('Orders')
@@ -95,54 +121,12 @@ export const updateOrderStatus = async (orderId: number, status: OrderStatus) =>
   }
 };
 
-export const deleteOrder = async (orderId: number) => {
+// Get all orders
+export const getOrders = async (): Promise<Order[]> => {
   try {
-    // First attempt: Try using the custom delete_order_by_id PostgreSQL function
-    try {
-      const { error } = await supabase
-        .rpc('delete_order_by_id', { order_id: orderId });
-
-      if (!error) {
-        console.log('Order deleted successfully using RPC function');
-        return true;
-      }
-
-      console.error('RPC delete failed, falling back to manual delete:', error);
-    } catch (rpcError) {
-      console.error('RPC call error, falling back to manual delete:', rpcError);
-    }
-
-    // Second attempt: Try manually deleting the order items first, then the order
-    // Note: We're not using "OrderItems" here as it's not in our Supabase schema according to the types
-    // Instead, we're relying on the Orders table with its JSON order_items field
-    const { error: orderError } = await supabase
+    const { data: orders, error } = await supabase
       .from('Orders')
-      .delete()
-      .eq('id', orderId);
-
-    if (orderError) {
-      console.error('Error deleting order:', orderError);
-      return false;
-    }
-
-    return true;
-  } catch (error) {
-    console.error('Order deletion failed:', error);
-    return false;
-  }
-};
-
-export const getAllOrders = async () => {
-  try {
-    let { data: orders, error } = await supabase
-      .from('Orders')
-      .select(`
-        *,
-        OrderItems (
-          *,
-          Products (*)
-        )
-      `)
+      .select('*')
       .order('created_at', { ascending: false });
 
     if (error) {
@@ -150,7 +134,7 @@ export const getAllOrders = async () => {
       return [];
     }
 
-    return orders || [];
+    return (orders as RawOrder[]).map(transformRawOrder);
   } catch (error) {
     console.error('Orders fetch failed:', error);
     return [];
@@ -189,7 +173,7 @@ export const fetchPaginatedOrders = async (page: number, pageSize: number) => {
     const totalPages = Math.ceil((count || 0) / pageSize);
 
     return {
-      orders: orders || [],
+      orders: orders as RawOrder[],
       totalPages
     };
   } catch (error) {
@@ -198,58 +182,22 @@ export const fetchPaginatedOrders = async (page: number, pageSize: number) => {
   }
 };
 
-export const getOrdersByCustomerEmail = async (email: string) => {
+// Update order notification status
+export const updateOrderNotification = async (orderId: number, notified: boolean): Promise<boolean> => {
   try {
-    let { data: orders, error } = await supabase
+    const { error } = await supabase
       .from('Orders')
-      .select(`
-        *,
-        OrderItems (
-          *,
-          Products (*)
-        )
-      `)
-      .eq('email', email)
-      .order('created_at', { ascending: false });
+      .update({ notified })
+      .eq('id', orderId);
 
     if (error) {
-      console.error('Error fetching customer orders:', error);
-      return [];
+      console.error('Error updating order notification status:', error);
+      return false;
     }
 
-    return orders || [];
+    return true;
   } catch (error) {
-    console.error('Customer orders fetch failed:', error);
-    return [];
+    console.error('Order notification update failed:', error);
+    return false;
   }
-};
-
-export const getOrderCounts = async () => {
-  try {
-    const { count, error } = await supabase
-      .from('Orders')
-      .select('*', { count: 'exact', head: true });
-
-    if (error) {
-      console.error('Error counting orders:', error);
-      return 0;
-    }
-
-    return count || 0;
-  } catch (error) {
-    console.error('Order count failed:', error);
-    return 0;
-  }
-};
-
-// Fix type issues with Products imported from data vs types
-export const fixProductImportType = (products: any[]): any[] => {
-  return products.map(p => ({
-    ...p,
-    category: p.category === 'fruit' || p.category === 'vegetable' 
-      ? p.category 
-      : p.category.toLowerCase().includes('fruit') 
-        ? 'fruit' 
-        : 'vegetable'
-  }));
 };

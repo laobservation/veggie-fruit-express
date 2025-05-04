@@ -174,16 +174,18 @@ const ProductManager: React.FC = () => {
         featured: finalFormData.featured || false
       };
       
+      let result;
+      
       if (isEditing && selectedProduct) {
         // Update existing product in Supabase
-        const { error } = await supabase
+        result = await supabase
           .from('Products')
           .update(productForSupabase)
           .eq('id', parseInt(selectedProduct.id));
           
-        if (error) {
-          console.error('Update error:', error);
-          throw error;
+        if (result.error) {
+          console.error('Update error:', result.error);
+          throw result.error;
         }
         
         toast({
@@ -192,14 +194,14 @@ const ProductManager: React.FC = () => {
         });
       } else {
         // Add new product to Supabase
-        const { data, error } = await supabase
+        result = await supabase
           .from('Products')
           .insert([productForSupabase])
           .select();
           
-        if (error) {
-          console.error('Insert error:', error);
-          throw error;
+        if (result.error) {
+          console.error('Insert error:', result.error);
+          throw result.error;
         }
         
         toast({
@@ -230,7 +232,10 @@ const ProductManager: React.FC = () => {
           .delete()
           .eq('id', parseInt(productId));
           
-        if (error) throw error;
+        if (error) {
+          console.error('Delete error:', error);
+          throw error;
+        }
         
         // Remove product from local state
         setAllProducts(allProducts.filter(p => p.id !== productId));
@@ -239,6 +244,9 @@ const ProductManager: React.FC = () => {
           title: "Succès",
           description: "Le produit a été supprimé avec succès.",
         });
+        
+        // Reload products to ensure UI is in sync with database
+        loadProducts();
       } catch (error) {
         console.error('Error deleting product:', error);
         toast({
