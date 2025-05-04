@@ -8,6 +8,11 @@ interface DeleteOrderParams {
   order_id: number;
 }
 
+// Define return type for the delete_order_by_id RPC function
+interface DeleteOrderResult {
+  success: boolean;
+}
+
 // Fetch paginated orders
 export const fetchPaginatedOrders = async (page: number, ordersPerPage: number) => {
   try {
@@ -87,8 +92,8 @@ export const deleteOrder = async (orderId: number) => {
         
         // Third attempt: using RPC
         console.log(`Trying third delete approach with raw query for order ${orderId}`);
-        // Fix: Use unknown type to avoid type constraint issues
-        const { error: thirdAttemptError } = await supabase.rpc<unknown, DeleteOrderParams>(
+        // Fix: Use correct type parameters for the RPC call
+        const { error: thirdAttemptError } = await supabase.rpc<DeleteOrderResult, DeleteOrderParams>(
           'delete_order_by_id',
           { order_id: Number(orderId) }
         );
