@@ -10,23 +10,23 @@ interface ProductGridProps {
 
 const ProductGrid: React.FC<ProductGridProps> = ({ products, title, isLoading = false }) => {
   return (
-    <section className="py-8">
+    <section className="py-6">
       {title && (
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">{title}</h2>
+        <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-4">{title}</h2>
       )}
       
       {isLoading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {[1, 2, 3, 4, 5].map((i) => (
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
             <div key={i} className="bg-gray-100 animate-pulse rounded-lg aspect-square"></div>
           ))}
         </div>
       ) : products.length === 0 ? (
         <p className="text-center text-gray-500 py-8">Aucun produit trouvé.</p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {products.map((product) => (
-            <ProductCard key={product.id} product={product} discountPercentage={20} />
+            <ProductCard key={product.id} product={product} discountPercentage={0} />
           ))}
         </div>
       )}

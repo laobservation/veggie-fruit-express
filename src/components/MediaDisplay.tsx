@@ -47,7 +47,7 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({
     <img
       src={product.image}
       alt={product.name}
-      className={className}
+      className={`${className} object-contain`}
       loading="lazy"
       onError={(e) => {
         (e.target as HTMLImageElement).src = '/images/placeholder.svg';
