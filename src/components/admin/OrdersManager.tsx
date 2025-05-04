@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
-import { Order, RawOrder } from '@/types/order';
+import { Order, RawOrder, OrderItem } from '@/types/order';
 import { OrdersList } from './orders/OrdersList';
 import { OrderDetailsDialog } from './orders/OrderDetailsDialog';
 import { generateOrderPDF } from '@/utils/pdfUtils';
