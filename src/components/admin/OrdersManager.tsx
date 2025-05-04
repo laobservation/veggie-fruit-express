@@ -142,27 +142,7 @@ const OrdersManager: React.FC = () => {
     }
     
     try {
-      const { error } = await supabase
-        .from('Orders')
-        .delete()
-        .eq('id', orderId);
-
-      if (error) {
-        console.error('Error deleting order:', error);
-        toast({
-          title: "Erreur",
-          description: "Impossible de supprimer la commande.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      toast({
-        title: "Succès",
-        description: "La commande a été supprimée avec succès.",
-      });
-      
-      // Remove the deleted order from the local state immediately
+      // First, update the local state to give immediate feedback
       setOrders(prevOrders => prevOrders.filter(order => order.id !== orderId));
       
       // Close the dialog if the deleted order was being viewed
@@ -171,10 +151,34 @@ const OrdersManager: React.FC = () => {
         setSelectedOrder(null);
       }
       
-      // Refresh orders to ensure consistent pagination
-      fetchOrders();
+      // Then delete from the database
+      const { error } = await supabase
+        .from('Orders')
+        .delete()
+        .eq('id', orderId);
+
+      if (error) {
+        console.error('Error deleting order:', error);
+        // If there was an error, revert the UI change by fetching orders again
+        fetchOrders();
+        toast({
+          title: "Erreur",
+          description: "Impossible de supprimer la commande.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Show success notification
+      toast({
+        title: "Succès",
+        description: "La commande a été supprimée avec succès.",
+      });
+
     } catch (err) {
       console.error('Error in deleting order:', err);
+      // If there was an error, revert the UI change by fetching orders again
+      fetchOrders();
       toast({
         title: "Erreur",
         description: "Une erreur s'est produite lors de la suppression de la commande.",
