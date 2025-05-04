@@ -14,7 +14,7 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import { Json } from '@/integrations/supabase/types';
 import { formatPrice } from '@/lib/formatPrice';
 
@@ -248,8 +248,8 @@ const OrdersManager: React.FC = () => {
       });
     }
     
-    // @ts-ignore - jspdf-autotable types are not fully compatible
-    doc.autoTable({
+    // Use autoTable correctly
+    autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
       startY: 90,

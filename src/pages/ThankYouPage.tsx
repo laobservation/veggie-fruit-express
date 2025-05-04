@@ -10,6 +10,10 @@ import 'jspdf-autotable';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { formatPrice } from '@/lib/formatPrice';
+
+// Import autoTable explicitly to make it available on the jsPDF instance
+import autoTable from 'jspdf-autotable';
 
 const ThankYouPage = () => {
   const location = useLocation();
@@ -108,15 +112,15 @@ const ThankYouPage = () => {
           const itemData = [
             item.product.name,
             item.quantity,
-            `€${item.product.price.toFixed(2)}`,
-            `€${(item.product.price * item.quantity).toFixed(2)}`
+            formatPrice(item.product.price),
+            formatPrice(item.product.price * item.quantity)
           ];
           tableRows.push(itemData);
         });
       }
       
-      // @ts-ignore - jspdf-autotable types are not fully compatible
-      doc.autoTable({
+      // Use autoTable with proper type handling
+      autoTable(doc, {
         head: [tableColumn],
         body: tableRows,
         startY: 80,
@@ -127,7 +131,7 @@ const ThankYouPage = () => {
       // Total
       const finalY = (doc as any).lastAutoTable.finalY || 120;
       doc.setFontSize(12);
-      doc.text(`Total: €${orderDetails.totalAmount.toFixed(2)}`, 150, finalY + 15);
+      doc.text(`Total: ${formatPrice(orderDetails.totalAmount)}`, 150, finalY + 15);
       
       // Thank you note
       doc.setFontSize(10);
