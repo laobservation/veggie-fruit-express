@@ -167,8 +167,8 @@ const OrdersManager: React.FC = () => {
           
           // Try a third approach with a raw query if needed
           console.log(`Trying third delete approach with raw query for order ${orderId}`);
-          // Fix: Change the generic type parameters to match what supabase.rpc expects
-          const { error: thirdAttemptError } = await supabase.rpc<null, DeleteOrderParams>(
+          // Fix: Use any for the return type to avoid type constraint issues
+          const { error: thirdAttemptError } = await supabase.rpc<any, DeleteOrderParams>(
             'delete_order_by_id',
             { order_id: Number(orderId) }
           );
