@@ -38,16 +38,41 @@ serve(async (req) => {
     // Make sure order_id is a number
     const orderIdNumber = typeof order_id === 'string' ? parseInt(order_id, 10) : order_id
 
-    // Execute a direct DELETE operation 
+    console.log(`Edge function: Deleting order ${orderIdNumber}`)
+
+    // Execute a direct DELETE operation with service role privileges
     const { error } = await supabaseClient
       .from('Orders')
       .delete()
       .eq('id', orderIdNumber)
 
     if (error) {
-      console.error('Error deleting order:', error)
+      console.error('Edge function: Error deleting order:', error)
+      
+      // Try a raw SQL delete as a fallback
+      const { error: sqlError } = await supabaseClient.rpc(
+        'delete_order_by_id',
+        { order_id: orderIdNumber }
+      )
+      
+      if (sqlError) {
+        return new Response(
+          JSON.stringify({ error: sqlError.message }),
+          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+        )
+      }
+    }
+
+    // Verify deletion
+    const { data: checkData } = await supabaseClient
+      .from('Orders')
+      .select('id')
+      .eq('id', orderIdNumber)
+      .maybeSingle()
+
+    if (checkData) {
       return new Response(
-        JSON.stringify({ error: error.message }),
+        JSON.stringify({ error: "Order still exists after deletion attempt" }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
       )
     }
@@ -58,9 +83,9 @@ serve(async (req) => {
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     )
   } catch (error) {
-    console.error('Unexpected error:', error)
+    console.error('Edge function: Unexpected error:', error)
     return new Response(
-      JSON.stringify({ error: 'An unexpected error occurred' }),
+      JSON.stringify({ error: 'An unexpected error occurred', details: error.message }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     )
   }

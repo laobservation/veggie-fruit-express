@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Order } from '@/types/order';
 import { useToast } from '@/hooks/use-toast';
@@ -88,10 +89,10 @@ export const useOrders = () => {
     try {
       setLoading(true);
       
-      // Delete from the database
+      // Delete from the database first
       await deleteOrderService(orderId);
       
-      // Update the local state to give immediate feedback
+      // Then update the UI after confirmation of deletion
       setOrders(prevOrders => prevOrders.filter(order => order.id !== orderId));
       
       // Close the dialog if the deleted order was being viewed

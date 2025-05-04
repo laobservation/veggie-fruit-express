@@ -61,15 +61,43 @@ export const deleteOrder = async (orderId: number) => {
   try {
     console.log(`Attempting to delete order ${orderId} from database`);
     
-    // Direct deletion approach - this is the most straightforward way to delete an order
+    // First attempt: Try using the Edge Function
+    try {
+      const { data: edgeFunctionData, error: edgeFunctionError } = await supabase.functions.invoke(
+        'delete_order_by_id',
+        {
+          body: { order_id: orderId },
+        }
+      );
+      
+      if (edgeFunctionError) {
+        console.error('Edge function deletion error:', edgeFunctionError);
+      } else {
+        console.log('Edge function response:', edgeFunctionData);
+      }
+    } catch (edgeFuncErr) {
+      console.error('Error calling edge function:', edgeFuncErr);
+      // Continue with direct deletion even if edge function fails
+    }
+    
+    // Second attempt: direct SQL delete
     const { error } = await supabase
       .from('Orders')
       .delete()
       .eq('id', orderId);
     
     if (error) {
-      console.error('Error deleting order:', error);
-      throw new Error(`Failed to delete order ${orderId}: ${error.message}`);
+      console.error('Error with direct deletion:', error);
+      
+      // Third attempt: Try using PostgreSQL RPC function
+      try {
+        await supabase.rpc(
+          'delete_order_by_id',
+          { order_id: orderId }
+        );
+      } catch (rpcErr) {
+        console.error('RPC deletion error:', rpcErr);
+      }
     }
     
     // Verify the deletion
@@ -80,8 +108,8 @@ export const deleteOrder = async (orderId: number) => {
       .maybeSingle();
     
     if (checkData) {
-      console.error(`Order ${orderId} still exists after deletion attempt:`, checkData);
-      throw new Error("The order couldn't be deleted from the database");
+      console.error(`Order ${orderId} still exists after deletion attempts:`, checkData);
+      throw new Error("The order couldn't be deleted from the database - please try again or contact support");
     }
     
     console.log(`Order ${orderId} successfully deleted from database`);
