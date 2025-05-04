@@ -118,9 +118,6 @@ const OrdersManager: React.FC = () => {
                 setViewDialogOpen(false);
                 setSelectedOrder(null);
               }
-              
-              // Refresh the orders to ensure pagination is correct
-              fetchOrders();
             }
           } else {
             // For other changes (INSERT, UPDATE), refresh the orders
@@ -151,7 +148,7 @@ const OrdersManager: React.FC = () => {
         setSelectedOrder(null);
       }
       
-      // Then delete from the database - ENSURE we await this operation
+      // Delete from the database - Must be awaited to ensure completion
       const { error } = await supabase
         .from('Orders')
         .delete()
@@ -175,9 +172,30 @@ const OrdersManager: React.FC = () => {
         description: "La commande a été supprimée avec succès.",
       });
       
-      // Make sure our UI is in sync with the database by fetching orders again
-      // This ensures proper pagination and that the order is truly removed
+      // Force a complete refresh of the order list to ensure proper pagination and database sync
+      // This is critical to ensure the UI reflects the actual database state
       fetchOrders();
+      
+      // Double check deletion by querying the specific order - ensure it's really gone
+      const { data: checkData } = await supabase
+        .from('Orders')
+        .select('*')
+        .eq('id', orderId)
+        .single();
+      
+      if (checkData) {
+        console.error('Order still exists after deletion attempt:', checkData);
+        // Try deletion one more time if the order still exists
+        const { error: secondError } = await supabase
+          .from('Orders')
+          .delete()
+          .eq('id', orderId);
+        
+        if (!secondError) {
+          // If second attempt succeeded, refresh orders again
+          fetchOrders();
+        }
+      }
 
     } catch (err) {
       console.error('Error in deleting order:', err);
