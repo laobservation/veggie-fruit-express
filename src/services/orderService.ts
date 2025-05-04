@@ -16,11 +16,12 @@ const convertJsonToOrderItems = (json: Json | null): OrderItem[] => {
     return [];
   }
   
-  return json.map(item => ({
-    productId: Number(item.productId || 0),
-    productName: String(item.productName || ''),
-    quantity: Number(item.quantity || 0),
-    price: Number(item.price || 0)
+  // Type assertion to handle Json elements as record objects
+  return json.map((item: any) => ({
+    productId: Number(item?.productId || 0),
+    productName: String(item?.productName || ''),
+    quantity: Number(item?.quantity || 0),
+    price: Number(item?.price || 0)
   }));
 };
 
