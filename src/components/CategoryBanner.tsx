@@ -29,7 +29,7 @@ const CategoryBanner: React.FC<CategoryBannerProps> = ({ category }) => {
           // Ensure the data includes the featured property before transforming
           const productsWithFeatured = data.map(product => ({
             ...product,
-            featured: product.featured || false
+            featured: product.featured !== null ? product.featured : false
           }));
           
           // Transform Supabase products to our Product type

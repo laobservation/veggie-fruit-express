@@ -70,7 +70,7 @@ const ProductPage = () => {
           // Make sure featured property is present before transforming
           const productWithFeatured = {
             ...supabaseProduct,
-            featured: supabaseProduct.featured || false
+            featured: supabaseProduct.featured !== null ? supabaseProduct.featured : false
           };
           
           // Transform Supabase product data
@@ -89,7 +89,7 @@ const ProductPage = () => {
             // Ensure all related products have the featured property
             const relatedWithFeatured = relatedData.map(p => ({
               ...p,
-              featured: p.featured || false
+              featured: p.featured !== null ? p.featured : false
             }));
             
             setRelatedProducts(relatedWithFeatured.map(p => transformProductFromSupabase(p)));

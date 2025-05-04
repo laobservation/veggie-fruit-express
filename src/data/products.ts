@@ -152,7 +152,13 @@ export const getProductByIdFromSupabase = async (id: string) => {
       throw error;
     }
     
-    return transformProductFromSupabase(data);
+    // Ensure featured property exists before transforming
+    const productWithFeatured = {
+      ...data,
+      featured: data.featured !== null ? data.featured : false
+    };
+    
+    return transformProductFromSupabase(productWithFeatured);
   } catch (error) {
     console.error('Error fetching product from Supabase:', error);
     // Fall back to local data

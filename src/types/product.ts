@@ -7,7 +7,7 @@ export interface Product {
   image: string;
   description: string;
   unit: string;
-  featured: boolean; // Change from optional to required
+  featured: boolean; // Required property
   videoUrl?: string;
   categoryLink?: boolean;
   stock?: number;

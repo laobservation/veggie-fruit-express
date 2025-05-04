@@ -36,7 +36,7 @@ export const transformProductForSupabase = (product: ExtendedProduct): Omit<Supa
     link_to_category: product.categoryLink || false,
     media_type: product.videoUrl && product.videoUrl.trim() !== '' ? 'video' : 'image',
     stock: product.stock || 0,
-    featured: product.featured || false // Include featured flag
+    featured: product.featured // Include featured flag
   };
 };
 
@@ -75,7 +75,14 @@ export const fetchProducts = async (): Promise<ExtendedProduct[]> => {
     }
     
     console.log('Products fetched successfully:', data);
-    return (data as SupabaseProduct[]).map(transformProductFromSupabase);
+
+    // Ensure all products have the required featured property
+    const productsWithFeatured = data.map((product: any) => ({
+      ...product,
+      featured: product.featured || false
+    }));
+    
+    return productsWithFeatured.map(transformProductFromSupabase);
   } catch (error) {
     console.error('Error fetching products:', error);
     throw error;
