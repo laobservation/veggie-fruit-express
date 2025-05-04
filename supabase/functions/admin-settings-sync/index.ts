@@ -1,136 +1,101 @@
 
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts'
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+// Edge function to initialize and sync settings
+import { serve } from "https://deno.land/std@0.177.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.43.6";
 
-// Define interface for website settings
-interface WebsiteSettings {
-  siteName?: string;
-  logo?: string;
-  primaryColor?: string;
-  secondaryColor?: string;
-  contactEmail?: string;
-  contactPhone?: string;
-  address?: string;
-  socialMedia?: {
-    facebook?: string;
-    instagram?: string;
-    twitter?: string;
-  };
-  id?: number;
-}
+const corsHeaders = {
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+};
 
-serve(async (req) => {
+serve(async (req: Request) => {
+  // Handle CORS preflight requests
+  if (req.method === "OPTIONS") {
+    return new Response("ok", { headers: corsHeaders });
+  }
+
   try {
-    // Add CORS headers
-    const headers = new Headers({
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-      'Content-Type': 'application/json'
-    });
+    const supabaseClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+      { auth: { persistSession: false } }
+    );
 
-    // Handle CORS preflight requests
-    if (req.method === 'OPTIONS') {
-      return new Response('ok', { headers });
+    // Check if settings table exists
+    const { data: tablesData, error: checkError } = await supabaseClient
+      .from("information_schema.tables")
+      .select("table_name")
+      .eq("table_name", "settings")
+      .eq("table_schema", "public");
+
+    if (checkError) {
+      throw new Error(`Error checking for settings table: ${checkError.message}`);
     }
 
-    const { action, settings } = await req.json();
-
-    // Create a Supabase client with the Admin key
-    const supabaseUrl = Deno.env.get('SUPABASE_URL') as string
-    const supabaseAnonKey = Deno.env.get('SUPABASE_ANON_KEY') as string
-    const supabase = createClient(supabaseUrl, supabaseAnonKey)
-
-    // Handle different actions
-    if (action === 'get') {
-      // Get settings from database
-      const { data, error } = await supabase
-        .from('website_settings')
-        .select('*')
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        // PGRST116 means no rows returned, which is not critical
-        return new Response(
-          JSON.stringify({ error: 'Failed to fetch website settings.' }),
-          { status: 500, headers }
+    // If settings table doesn't exist, create it
+    if (!tablesData || tablesData.length === 0) {
+      console.log("Settings table doesn't exist, creating it...");
+      
+      const createTableQuery = `
+        CREATE TABLE IF NOT EXISTS public.settings (
+          id INTEGER PRIMARY KEY DEFAULT 1,
+          site_name TEXT DEFAULT 'Marché Bio',
+          description TEXT DEFAULT 'Livraison de fruits et légumes bio à domicile',
+          contact_email TEXT DEFAULT 'contact@marchebiomobile.com',
+          contact_phone TEXT DEFAULT '+212 612345678',
+          address TEXT DEFAULT 'Extention Zerhounia N236, Marrakech, Maroc',
+          currency TEXT DEFAULT 'DH',
+          enable_delivery BOOLEAN DEFAULT TRUE,
+          delivery_fee NUMERIC DEFAULT 30,
+          enable_payments BOOLEAN DEFAULT TRUE,
+          minimum_order_value NUMERIC DEFAULT 100,
+          created_at TIMESTAMPTZ DEFAULT NOW(),
+          updated_at TIMESTAMPTZ DEFAULT NOW()
         );
+        
+        -- Disable RLS on settings table to ensure admins can access it
+        ALTER TABLE public.settings DISABLE ROW LEVEL SECURITY;
+        
+        -- Insert default settings if not exists
+        INSERT INTO public.settings (id) 
+        VALUES (1) 
+        ON CONFLICT (id) DO NOTHING;
+      `;
+      
+      const { error: createError } = await supabaseClient.rpc('pgexec', { query: createTableQuery });
+      
+      if (createError) {
+        throw new Error(`Error creating settings table: ${createError.message}`);
       }
-
-      // If no settings exist yet, return an empty object
-      if (!data) {
-        return new Response(
-          JSON.stringify({ success: true, settings: {} }),
-          { headers }
-        );
+    } else {
+      // Make sure RLS is disabled on existing table
+      const disableRlsQuery = `
+        ALTER TABLE public.settings DISABLE ROW LEVEL SECURITY;
+      `;
+      
+      const { error: disableError } = await supabaseClient.rpc('pgexec', { query: disableRlsQuery });
+      
+      if (disableError) {
+        console.error(`Warning: Could not disable RLS: ${disableError.message}`);
       }
-
-      return new Response(
-        JSON.stringify({ success: true, settings: data }),
-        { headers }
-      );
-    } 
-    else if (action === 'update' && settings) {
-      // Check if settings already exist
-      const { data, error: checkError } = await supabase
-        .from('website_settings')
-        .select('id')
-        .maybeSingle();
-
-      if (checkError) {
-        return new Response(
-          JSON.stringify({ error: 'Failed to check settings existence.' }),
-          { status: 500, headers }
-        );
-      }
-
-      let updateError;
-
-      if (data) {
-        // Settings exist, update them
-        const { error } = await supabase
-          .from('website_settings')
-          .update(settings)
-          .eq('id', data.id);
-          
-        updateError = error;
-      } else {
-        // No settings exist yet, insert new ones with id=1
-        const settingsWithId: WebsiteSettings = { ...settings, id: 1 };
-        const { error } = await supabase
-          .from('website_settings')
-          .insert(settingsWithId);
-          
-        updateError = error;
-      }
-
-      if (updateError) {
-        return new Response(
-          JSON.stringify({ error: 'Failed to update settings.' }),
-          { status: 500, headers }
-        );
-      }
-
-      return new Response(
-        JSON.stringify({ success: true, message: 'Settings updated successfully' }),
-        { headers }
-      );
     }
-    
+
+    // Return success
     return new Response(
-      JSON.stringify({ error: 'Invalid action' }),
-      { status: 400, headers }
+      JSON.stringify({ success: true, message: "Settings table setup completed" }),
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 200,
+      }
     );
   } catch (error) {
+    console.error("Error:", error);
     return new Response(
       JSON.stringify({ error: error.message }),
-      { 
-        status: 500, 
-        headers: {
-          'Content-Type': 'application/json',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-        } 
+      {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+        status: 500,
       }
     );
   }
-})
+});

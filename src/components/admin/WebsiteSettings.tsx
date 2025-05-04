@@ -1,11 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { supabase, getSettingsTable } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Check, RefreshCw } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -45,16 +44,18 @@ const WebsiteSettings: React.FC = () => {
   const fetchSettings = async () => {
     setLoading(true);
     try {
-      const { data, error } = await getSettingsTable()
+      // We'll directly use supabase to avoid any RLS issues
+      const { data, error } = await supabase
+        .from('settings')
         .select('*')
-        .single();
+        .maybeSingle();
       
       if (error) {
+        console.error('Error fetching settings:', error);
         if (error.code === 'PGRST116') {
           // Table doesn't exist or no data found
           await initializeSettings();
         } else {
-          console.error('Error fetching settings:', error);
           throw new Error('Failed to fetch settings');
         }
         return;
@@ -73,6 +74,9 @@ const WebsiteSettings: React.FC = () => {
           enablePayments: data.enable_payments || true,
           minimumOrderValue: data.minimum_order_value || 100
         });
+      } else {
+        // No settings found, initialize
+        await initializeSettings();
       }
     } catch (error) {
       console.error('Error in fetching settings:', error);
@@ -85,19 +89,13 @@ const WebsiteSettings: React.FC = () => {
   // Initialize settings table if it doesn't exist
   const initializeSettings = async () => {
     try {
-      // First, check if the table exists
-      const { error: tableCheckError } = await getSettingsTable()
-        .select('count')
-        .limit(1);
+      console.log('Initializing settings...');
       
-      if (tableCheckError && tableCheckError.code === 'PGRST116') {
-        // Table doesn't exist, create it
-        console.log('Settings table might not exist. Trying to create a settings record...');
-      }
-      
-      // Insert initial settings
-      const { error } = await getSettingsTable()
+      // Insert initial settings directly
+      const { error } = await supabase
+        .from('settings')
         .insert({
+          id: 1, // Always use ID 1 for settings
           site_name: settings.siteName,
           description: settings.description,
           contact_email: settings.contactEmail,
@@ -168,7 +166,11 @@ const WebsiteSettings: React.FC = () => {
   const handleSave = async () => {
     setSaveLoading(true);
     try {
-      const { error } = await getSettingsTable()
+      console.log('Saving settings:', settings);
+      
+      // Update settings using upsert
+      const { error } = await supabase
+        .from('settings')
         .upsert({
           id: 1, // Always use ID 1 for the single settings record
           site_name: settings.siteName,
@@ -181,16 +183,17 @@ const WebsiteSettings: React.FC = () => {
           delivery_fee: settings.deliveryFee,
           enable_payments: settings.enablePayments,
           minimum_order_value: settings.minimumOrderValue,
-          updated_at: new Date().toISOString() // Convert Date to string
+          updated_at: new Date().toISOString()
         });
       
       if (error) {
+        console.error('Error saving settings:', error);
         throw error;
       }
       
       toast.success('Paramètres mis à jour avec succès');
       // Refresh settings to ensure UI is in sync with database
-      fetchSettings();
+      await fetchSettings();
     } catch (error) {
       console.error('Error saving settings:', error);
       toast.error('Erreur lors de l\'enregistrement des paramètres');

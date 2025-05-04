@@ -1,15 +1,44 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Hero from '@/components/Hero';
 import CategoryBanner from '@/components/CategoryBanner';
 import CallToAction from '@/components/CallToAction';
 import ProductGrid from '@/components/ProductGrid';
 import { Card, CardContent } from '@/components/ui/card';
-import { getFeaturedProducts } from '@/data/products';
+import { Product } from '@/types/product';
+import { getProductsWithStock } from '@/data/products';
 import Cart from '@/components/Cart';
+import { useToast } from '@/hooks/use-toast';
 
 const HomePage: React.FC = () => {
-  const featuredProducts = getFeaturedProducts();
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  // Load products from Supabase
+  useEffect(() => {
+    const loadProducts = async () => {
+      setIsLoading(true);
+      try {
+        const products = await getProductsWithStock();
+        
+        // Filter out featured products
+        const featured = products.filter((product: Product) => product.featured);
+        setFeaturedProducts(featured);
+      } catch (error) {
+        console.error('Error loading products:', error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de charger les produits.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadProducts();
+  }, []);
 
   return (
     <div>
@@ -26,7 +55,11 @@ const HomePage: React.FC = () => {
           </CardContent>
         </Card>
         
-        <ProductGrid products={featuredProducts} title="Produits Vedettes" />
+        <ProductGrid 
+          products={featuredProducts} 
+          title="Produits Vedettes" 
+          isLoading={isLoading}
+        />
         
         <div className="mt-12 grid grid-cols-1 md:grid-cols-2 gap-8">
           <CategoryBanner category="fruit" />
