@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
 import { Json } from "@/integrations/supabase/types";
@@ -15,7 +16,7 @@ export type SupabaseProduct = {
   media_type: string | null;  
   created_at: string | null;
   stock: number | null;  
-  featured?: boolean | null; // Make featured optional to match actual database schema
+  // Remove featured from the SupabaseProduct type since it doesn't exist in the DB
 };
 
 // Extended Product interface with optional stock
@@ -25,6 +26,7 @@ export interface ExtendedProduct extends Product {
 
 // Transform local product data format to Supabase format
 export const transformProductForSupabase = (product: ExtendedProduct): Omit<SupabaseProduct, 'id' | 'created_at'> => {
+  // Create a product object without the featured property since it doesn't exist in the database
   return {
     name: product.name,
     category: product.category,
@@ -34,8 +36,8 @@ export const transformProductForSupabase = (product: ExtendedProduct): Omit<Supa
     unit: product.unit,
     link_to_category: product.categoryLink || false,
     media_type: product.videoUrl && product.videoUrl.trim() !== '' ? 'video' : 'image',
-    stock: product.stock || 0,
-    featured: product.featured // Include featured flag
+    stock: product.stock || 0
+    // Remove featured from here - don't send it to Supabase
   };
 };
 
@@ -55,7 +57,7 @@ export const transformProductFromSupabase = (product: SupabaseProduct): Extended
     unit: product.unit || 'kg',
     categoryLink: product.link_to_category || false,
     videoUrl: product.media_type === 'video' ? product.image_url : undefined,
-    featured: !!product.featured, // Convert to boolean and default to false if missing
+    featured: true, // Always default to true since it doesn't exist in DB
     stock: product.stock || 0,
   };
 };
@@ -74,14 +76,9 @@ export const fetchProducts = async (): Promise<ExtendedProduct[]> => {
     }
     
     console.log('Products fetched successfully:', data);
-
-    // Ensure all products have the required featured property
-    const productsWithFeatured = data.map((product: any) => ({
-      ...product,
-      featured: product.featured || false
-    }));
     
-    return productsWithFeatured.map(transformProductFromSupabase);
+    // Transform all products, adding the featured property
+    return data.map(transformProductFromSupabase);
   } catch (error) {
     console.error('Error fetching products:', error);
     throw error;
@@ -167,6 +164,6 @@ export const fixProductImportType = (products: any[]): Product[] => {
     ...product,
     id: String(product.id),
     category: product.category as 'fruit' | 'vegetable', // Force type cast for compatibility
-    featured: product.featured || false // Ensure featured is present
+    featured: true // Always set featured to true since it doesn't exist in DB
   }));
 };
