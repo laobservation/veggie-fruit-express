@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -132,6 +133,10 @@ const OrdersManager: React.FC = () => {
   }, []);
 
   const handleDeleteOrder = async (orderId: number) => {
+    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) {
+      return;
+    }
+    
     try {
       const { error } = await supabase
         .from('Orders')

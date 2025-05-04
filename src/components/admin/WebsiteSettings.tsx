@@ -189,6 +189,8 @@ const WebsiteSettings: React.FC = () => {
       }
       
       toast.success('Paramètres mis à jour avec succès');
+      // Refresh settings to ensure UI is in sync with database
+      fetchSettings();
     } catch (error) {
       console.error('Error saving settings:', error);
       toast.error('Erreur lors de l\'enregistrement des paramètres');
