@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { Order, RawOrder, OrderItem } from '@/types/order';
 import { OrdersList } from './orders/OrdersList';
 import { OrderDetailsDialog } from './orders/OrderDetailsDialog';
@@ -105,8 +105,14 @@ const OrdersManager: React.FC = () => {
         (payload) => {
           console.log('Orders table changed:', payload);
           
-          // Force a refresh of orders on any database change to ensure UI syncs with DB
-          fetchOrders();
+          // If a delete event is received, update the UI
+          if (payload.eventType === 'DELETE' && payload.old && payload.old.id) {
+            const deletedOrderId = payload.old.id;
+            setOrders(prevOrders => prevOrders.filter(order => order.id !== deletedOrderId));
+          } else {
+            // For other events, refresh the order list to keep UI in sync
+            fetchOrders();
+          }
         }
       )
       .subscribe();
@@ -123,7 +129,7 @@ const OrdersManager: React.FC = () => {
     }
     
     try {
-      setLoading(true); // Set loading state to prevent user interaction during deletion
+      setLoading(true); // Set loading state
       
       // First, update the local state to give immediate feedback
       setOrders(prevOrders => prevOrders.filter(order => order.id !== orderId));
@@ -134,74 +140,62 @@ const OrdersManager: React.FC = () => {
         setSelectedOrder(null);
       }
       
-      // Delete from the database - Use multiple attempts if needed
-      let deletionSuccess = false;
-      let attempts = 0;
-      const maxAttempts = 3;
+      // Delete from the database - Use forceful approach
+      const { error } = await supabase
+        .from('Orders')
+        .delete()
+        .eq('id', orderId);
       
-      while (!deletionSuccess && attempts < maxAttempts) {
-        attempts++;
+      if (error) {
+        console.error('Error deleting order:', error);
+        toast({
+          title: "Erreur",
+          description: "Impossible de supprimer la commande.",
+          variant: "destructive",
+        });
         
-        const { error } = await supabase
+        // Try again with a different approach
+        const { error: secondAttemptError } = await supabase
           .from('Orders')
           .delete()
-          .eq('id', orderId);
+          .match({ id: orderId });
         
-        if (error) {
-          console.error(`Deletion attempt ${attempts} failed:`, error);
+        if (secondAttemptError) {
+          console.error('Second deletion attempt failed:', secondAttemptError);
+          toast({
+            title: "Erreur",
+            description: "La suppression a échoué après plusieurs tentatives.",
+            variant: "destructive",
+          });
           
-          // Short delay before retrying
-          if (attempts < maxAttempts) {
-            await new Promise(resolve => setTimeout(resolve, 500));
-          } else {
-            // If all attempts failed, show error and revert UI
-            toast({
-              title: "Erreur",
-              description: "Impossible de supprimer la commande après plusieurs tentatives.",
-              variant: "destructive",
-            });
-            
-            // Revert UI by fetching orders again
-            fetchOrders();
-            return;
-          }
-        } else {
-          // Success - no error
-          deletionSuccess = true;
-          
-          // Verify deletion by checking if the order still exists
-          const { data: checkData } = await supabase
-            .from('Orders')
-            .select('id')
-            .eq('id', orderId)
-            .maybeSingle();
-          
-          if (checkData) {
-            console.error('Order still exists after successful deletion request:', checkData);
-            deletionSuccess = false;
-            
-            // If last attempt and order still exists, show warning
-            if (attempts >= maxAttempts) {
-              toast({
-                title: "Avertissement",
-                description: "La commande semble toujours exister dans la base de données.",
-                variant: "destructive",
-              });
-            }
-          }
+          // Revert UI changes by fetching orders again to ensure accuracy
+          await fetchOrders();
+          return;
         }
       }
       
-      if (deletionSuccess) {
+      // Verify the deletion was successful by checking if the order still exists
+      const { data: checkData } = await supabase
+        .from('Orders')
+        .select('id')
+        .eq('id', orderId)
+        .maybeSingle();
+      
+      if (checkData) {
+        console.error('Order still exists after deletion attempts:', checkData);
+        toast({
+          title: "Avertissement",
+          description: "La commande est toujours dans la base de données. Essayez de rafraîchir.",
+          variant: "destructive",
+        });
+        await fetchOrders(); // Refresh to ensure UI accuracy
+      } else {
         // Show success notification
         toast({
           title: "Succès",
           description: "La commande a été supprimée avec succès.",
         });
       }
-      
-      // Refresh the orders list to ensure UI is in sync with database
-      await fetchOrders();
       
     } catch (err) {
       console.error('Error in deleting order:', err);
