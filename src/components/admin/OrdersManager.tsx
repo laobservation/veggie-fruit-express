@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -164,7 +165,7 @@ const OrdersManager: React.FC = () => {
           console.log(`Trying third delete approach with raw query for order ${orderId}`);
           const { error: thirdAttemptError } = await supabase.rpc(
             'delete_order_by_id', 
-            { order_id: orderId }
+            { order_id: Number(orderId) }  // Explicitly convert orderId to Number to match BIGINT
           );
           
           if (thirdAttemptError) {
