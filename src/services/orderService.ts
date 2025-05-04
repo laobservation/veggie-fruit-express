@@ -90,9 +90,10 @@ export const deleteOrder = async (orderId: number) => {
       console.error('Error with direct deletion:', error);
       
       // Third attempt: Try using PostgreSQL RPC function
+      // Fix TypeScript error by using type assertion for the function name
       try {
         await supabase.rpc(
-          'delete_order_by_id',
+          'delete_order_by_id' as any, // Type assertion to fix the TypeScript error
           { order_id: orderId }
         );
       } catch (rpcErr) {
