@@ -1,10 +1,11 @@
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Order, RawOrder, OrderItem } from '@/types/order';
 import { OrdersList } from './orders/OrdersList';
 import { OrderDetailsDialog } from './orders/OrderDetailsDialog';
-import { generateOrderPDF from '@/utils/pdfUtils';
+import { generateOrderPDF } from '@/utils/pdfUtils';
 
 const OrdersManager: React.FC = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -164,7 +165,7 @@ const OrdersManager: React.FC = () => {
           console.log(`Trying third delete approach with raw query for order ${orderId}`);
           const { error: thirdAttemptError } = await supabase.rpc(
             'delete_order_by_id', 
-            { order_id: orderId }
+            { order_id: Number(orderId) }  // Explicitly convert orderId to Number to match BIGINT
           );
           
           if (thirdAttemptError) {
