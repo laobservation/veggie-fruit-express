@@ -5,13 +5,13 @@ import CategoryBanner from '@/components/CategoryBanner';
 import CallToAction from '@/components/CallToAction';
 import ProductGrid from '@/components/ProductGrid';
 import { Card, CardContent } from '@/components/ui/card';
-import { Product } from '@/types/product';
 import { getProductsWithStock } from '@/data/products';
 import Cart from '@/components/Cart';
 import { useToast } from '@/hooks/use-toast';
+import { fixProductImportType } from '@/services/orderService';
 
 const HomePage: React.FC = () => {
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
@@ -23,8 +23,10 @@ const HomePage: React.FC = () => {
         const products = await getProductsWithStock();
         
         // Filter out featured products
-        const featured = products.filter((product: Product) => product.featured);
-        setFeaturedProducts(featured);
+        const featured = products.filter((product) => product.featured);
+        
+        // Fix product types to ensure compatibility
+        setFeaturedProducts(fixProductImportType(featured));
       } catch (error) {
         console.error('Error loading products:', error);
         toast({

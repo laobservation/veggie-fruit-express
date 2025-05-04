@@ -1,135 +1,82 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { Order, RawOrder } from '@/types/order';
-import { toast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
+import { Order, OrderItem, OrderStatus } from '@/types/order';
 
-// Fetch paginated orders
-export const fetchPaginatedOrders = async (page: number, ordersPerPage: number) => {
+export const createOrder = async (orderData: Partial<Order>): Promise<number | null> => {
   try {
-    // First get total count for pagination
-    const { count, error: countError } = await supabase
+    // Create a new order record
+    const { data: order, error: orderError } = await supabase
       .from('Orders')
-      .select('*', { count: 'exact', head: true });
+      .insert([orderData])
+      .select('id')
+      .single();
 
-    if (countError) {
-      console.error('Error getting order count:', countError);
-      throw countError;
+    if (orderError) {
+      console.error('Error creating order:', orderError);
+      throw new Error(`Erreur lors de la création de la commande: ${orderError.message}`);
     }
 
-    // Calculate total pages
-    const totalItems = count || 0;
-    const totalPages = Math.max(1, Math.ceil(totalItems / ordersPerPage));
+    return order.id;
+  } catch (error) {
+    console.error('Order creation failed:', error);
+    toast.error("La création de la commande a échoué.");
+    return null;
+  }
+};
 
-    // Fetch paginated orders
-    const fromIndex = (page - 1) * ordersPerPage;
-    const toIndex = fromIndex + ordersPerPage - 1;
-
-    const { data, error } = await supabase
-      .from('Orders')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .range(fromIndex, toIndex);
-
-    if (error) {
-      console.error('Error fetching orders:', error);
-      throw error;
-    }
-
-    // Transform raw data to match our Order interface
-    const transformedOrders: Order[] = (data as RawOrder[]).map(order => ({
-      id: order.id,
-      'Client Name': order['Client Name'] || '',
-      'Adresse': order['Adresse'] || '',
-      'Phone': order['Phone'],
-      order_items: Array.isArray(order.order_items) ? order.order_items as unknown as Order["order_items"] : [],
-      total_amount: order.total_amount || 0,
-      preferred_time: order.preferred_time || null,
-      status: order.status || 'new',
-      notified: order.notified || false,
-      created_at: order.created_at
+export const addOrderItems = async (orderId: number, items: Omit<OrderItem, 'id' | 'order_id'>[]) => {
+  try {
+    // Add order items
+    const orderItems = items.map(item => ({
+      ...item,
+      order_id: orderId
     }));
 
-    return { orders: transformedOrders, totalPages };
-  } catch (err) {
-    console.error('Error in fetching orders:', err);
-    throw err;
-  }
-};
+    const { error: itemsError } = await supabase
+      .from('OrderItems')
+      .insert(orderItems);
 
-// Delete an order
-export const deleteOrder = async (orderId: number) => {
-  try {
-    console.log(`Attempting to delete order ${orderId} from database`);
-    
-    // First attempt: Try using the Edge Function
-    try {
-      const { data: edgeFunctionData, error: edgeFunctionError } = await supabase.functions.invoke(
-        'delete_order_by_id',
-        {
-          body: { order_id: orderId },
-        }
-      );
-      
-      if (edgeFunctionError) {
-        console.error('Edge function deletion error:', edgeFunctionError);
-      } else {
-        console.log('Edge function response:', edgeFunctionData);
-      }
-    } catch (edgeFuncErr) {
-      console.error('Error calling edge function:', edgeFuncErr);
-      // Continue with direct deletion even if edge function fails
+    if (itemsError) {
+      console.error('Error adding order items:', itemsError);
+      throw new Error(`Erreur lors de l'ajout des articles: ${itemsError.message}`);
     }
-    
-    // Second attempt: direct SQL delete
-    const { error } = await supabase
-      .from('Orders')
-      .delete()
-      .eq('id', orderId);
-    
-    if (error) {
-      console.error('Error with direct deletion:', error);
-      
-      // Third attempt: Try using PostgreSQL RPC function
-      try {
-        // Since we're having type issues with generic parameters,
-        // we'll use the non-generic version of rpc which is more flexible
-        const { data: rpcData, error: rpcError } = await supabase.rpc(
-          'delete_order_by_id',
-          { order_id: orderId }
-        );
-        
-        if (rpcError) {
-          console.error('RPC function error:', rpcError);
-        } else {
-          console.log('RPC function response:', rpcData);
-        }
-      } catch (rpcErr) {
-        console.error('RPC deletion error:', rpcErr);
-      }
-    }
-    
-    // Verify the deletion
-    const { data: checkData } = await supabase
-      .from('Orders')
-      .select('id')
-      .eq('id', orderId)
-      .maybeSingle();
-    
-    if (checkData) {
-      console.error(`Order ${orderId} still exists after deletion attempts:`, checkData);
-      throw new Error("The order couldn't be deleted from the database - please try again or contact support");
-    }
-    
-    console.log(`Order ${orderId} successfully deleted from database`);
+
     return true;
-  } catch (err) {
-    console.error('Error in deleting order:', err);
-    throw err;
+  } catch (error) {
+    console.error('Adding order items failed:', error);
+    toast.error("L'ajout des articles a échoué.");
+    return false;
   }
 };
 
-// Update order status
-export const updateOrderStatus = async (orderId: number, status: string) => {
+export const getOrderById = async (orderId: number) => {
+  try {
+    const { data: order, error: orderError } = await supabase
+      .from('Orders')
+      .select(`
+        *,
+        OrderItems (
+          *,
+          Products (*)
+        )
+      `)
+      .eq('id', orderId)
+      .single();
+
+    if (orderError) {
+      console.error('Error fetching order:', orderError);
+      return null;
+    }
+
+    return order;
+  } catch (error) {
+    console.error('Order fetch failed:', error);
+    return null;
+  }
+};
+
+export const updateOrderStatus = async (orderId: number, status: OrderStatus) => {
   try {
     const { error } = await supabase
       .from('Orders')
@@ -138,12 +85,138 @@ export const updateOrderStatus = async (orderId: number, status: string) => {
 
     if (error) {
       console.error('Error updating order status:', error);
-      throw error;
+      return false;
     }
-    
+
     return true;
-  } catch (err) {
-    console.error('Error updating order status:', err);
-    throw err;
+  } catch (error) {
+    console.error('Order status update failed:', error);
+    return false;
   }
+};
+
+export const deleteOrder = async (orderId: number) => {
+  try {
+    // First attempt: Try using the custom delete_order_by_id PostgreSQL function
+    try {
+      const { error } = await supabase
+        .rpc('delete_order_by_id', { order_id: orderId });
+
+      if (!error) {
+        console.log('Order deleted successfully using RPC function');
+        return true;
+      }
+
+      console.error('RPC delete failed, falling back to manual delete:', error);
+    } catch (rpcError) {
+      console.error('RPC call error, falling back to manual delete:', rpcError);
+    }
+
+    // Second attempt: Try manually deleting the order items first, then the order
+    const { error: itemsError } = await supabase
+      .from('OrderItems')
+      .delete()
+      .eq('order_id', orderId);
+
+    if (itemsError) {
+      console.error('Error deleting order items:', itemsError);
+      return false;
+    }
+
+    const { error: orderError } = await supabase
+      .from('Orders')
+      .delete()
+      .eq('id', orderId);
+
+    if (orderError) {
+      console.error('Error deleting order:', orderError);
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Order deletion failed:', error);
+    return false;
+  }
+};
+
+export const getAllOrders = async () => {
+  try {
+    let { data: orders, error } = await supabase
+      .from('Orders')
+      .select(`
+        *,
+        OrderItems (
+          *,
+          Products (*)
+        )
+      `)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching orders:', error);
+      return [];
+    }
+
+    return orders || [];
+  } catch (error) {
+    console.error('Orders fetch failed:', error);
+    return [];
+  }
+};
+
+export const getOrdersByCustomerEmail = async (email: string) => {
+  try {
+    let { data: orders, error } = await supabase
+      .from('Orders')
+      .select(`
+        *,
+        OrderItems (
+          *,
+          Products (*)
+        )
+      `)
+      .eq('email', email)
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching customer orders:', error);
+      return [];
+    }
+
+    return orders || [];
+  } catch (error) {
+    console.error('Customer orders fetch failed:', error);
+    return [];
+  }
+};
+
+export const getOrderCounts = async () => {
+  try {
+    const { count, error } = await supabase
+      .from('Orders')
+      .select('*', { count: 'exact', head: true });
+
+    if (error) {
+      console.error('Error counting orders:', error);
+      return 0;
+    }
+
+    return count || 0;
+  } catch (error) {
+    console.error('Order count failed:', error);
+    return 0;
+  }
+};
+
+// Fix type issues with Products imported from data vs types
+export const fixProductImportType = (products: any[]): any[] => {
+  return products.map(p => ({
+    ...p,
+    category: p.category === 'fruit' || p.category === 'vegetable' 
+      ? p.category 
+      : p.category.toLowerCase().includes('fruit') 
+        ? 'fruit' 
+        : 'vegetable'
+  }));
 };
