@@ -123,7 +123,9 @@ export const getCategoryLinkedProducts = (category: 'fruit' | 'vegetable'): Prod
 export const getProductsWithStock = async () => {
   try {
     const { fetchProducts } = await import('@/services/productService');
-    return await fetchProducts();
+    const products = await fetchProducts();
+    console.log('Fetched products with stock:', products);
+    return products;
   } catch (error) {
     console.error('Error fetching products with stock:', error);
     return [];
