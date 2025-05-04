@@ -25,9 +25,15 @@ const CategoryBanner: React.FC<CategoryBannerProps> = ({ category }) => {
         
         if (error) throw error;
         
-        if (data) {
+        if (data && data.length > 0) {
+          // Ensure the data includes the featured property before transforming
+          const productsWithFeatured = data.map(product => ({
+            ...product,
+            featured: product.featured || false
+          }));
+          
           // Transform Supabase products to our Product type
-          const products = data.map(product => transformProductFromSupabase(product));
+          const products = productsWithFeatured.map(product => transformProductFromSupabase(product));
           setLinkedProducts(products);
         }
       } catch (error) {

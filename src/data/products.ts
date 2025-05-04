@@ -1,3 +1,4 @@
+
 export interface Product {
   id: string;
   name: string;
@@ -6,7 +7,7 @@ export interface Product {
   image: string;
   description: string;
   unit: string;
-  featured?: boolean;
+  featured: boolean; // Change from optional to required
   videoUrl?: string;
   categoryLink?: boolean;
   stock?: number;
@@ -31,7 +32,8 @@ export const products: Product[] = [
     price: 1.99,
     image: 'https://images-cdn.ubuy.co.id/634e2c65a0e13a0eb35bdb1a-fresh-organic-bananas-bundle-3-lbs.jpg',
     description: 'Naturally ripened organic bananas, rich in potassium and fiber.',
-    unit: 'bunch'
+    unit: 'bunch',
+    featured: false
   },
   {
     id: '3',
@@ -60,7 +62,8 @@ export const products: Product[] = [
     price: 2.49,
     image: 'https://gabbarfarms.com/cdn/shop/products/Spinach.jpg',
     description: 'Nutrient-rich spinach leaves, perfect for salads and cooking.',
-    unit: 'bunch'
+    unit: 'bunch',
+    featured: false
   },
   {
     id: '6',
@@ -79,7 +82,8 @@ export const products: Product[] = [
     price: 2.99,
     image: 'https://i5.walmartimages.com/asr/a1e8e44a-2b82-48ab-9c09-b68420f6954c.04f6e0e87807fc5457f57e3ec0770061.jpeg',
     description: 'Plump and juicy tomatoes, perfect for salads and cooking.',
-    unit: 'kg'
+    unit: 'kg',
+    featured: false
   },
   {
     id: '8',
@@ -141,7 +145,7 @@ export const getProductByIdFromSupabase = async (id: string) => {
     const { data, error } = await supabase
       .from('Products')
       .select('*')
-      .eq('id', id)
+      .eq('id', parseInt(id, 10)) // Convert string ID to number
       .single();
     
     if (error || !data) {

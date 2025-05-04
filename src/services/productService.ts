@@ -16,7 +16,7 @@ export type SupabaseProduct = {
   media_type: string | null;  
   created_at: string | null;
   stock: number | null;  
-  featured: boolean | null; // Added featured field to match our use case
+  featured: boolean | null; // Make sure featured is included here
 };
 
 // Extended Product interface with optional stock
@@ -36,7 +36,7 @@ export const transformProductForSupabase = (product: ExtendedProduct): Omit<Supa
     link_to_category: product.categoryLink || false,
     media_type: product.videoUrl && product.videoUrl.trim() !== '' ? 'video' : 'image',
     stock: product.stock || 0,
-    featured: product.featured || false // Store featured flag directly
+    featured: product.featured || false // Include featured flag
   };
 };
 
@@ -47,16 +47,16 @@ export const transformProductFromSupabase = (product: SupabaseProduct): Extended
   }
   
   return {
-    id: String(product.id),
+    id: String(product.id), // Convert number to string for compatibility
     name: product.name || '',
-    category: product.category as 'fruit' | 'vegetable',
+    category: (product.category || 'vegetable') as 'fruit' | 'vegetable', // Force to correct type
     price: product.price || 0,
     image: product.image_url || '',
     description: product.description || '',
     unit: product.unit || 'kg',
     categoryLink: product.link_to_category || false,
     videoUrl: product.media_type === 'video' ? product.image_url : undefined,
-    featured: product.featured || false, // Use the featured flag directly
+    featured: product.featured || false, // Default to false if not present
     stock: product.stock || 0,
   };
 };
@@ -159,6 +159,8 @@ export const deleteProduct = async (id: string): Promise<void> => {
 export const fixProductImportType = (products: any[]): Product[] => {
   return products.map(product => ({
     ...product,
-    id: String(product.id)
+    id: String(product.id),
+    category: product.category as 'fruit' | 'vegetable', // Force type cast for compatibility
+    featured: product.featured || false // Ensure featured is present
   }));
 };

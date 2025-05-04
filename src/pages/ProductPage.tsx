@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -32,32 +31,50 @@ const ProductPage = () => {
       setLoading(true);
       
       try {
+        if (!productId) {
+          throw new Error('No product ID provided');
+        }
+        
         // First try to get from Supabase
         const { data: supabaseProduct, error } = await supabase
           .from('Products')
           .select('*')
-          .eq('id', productId)
+          .eq('id', parseInt(productId, 10)) // Convert string ID to number
           .single();
         
         if (error || !supabaseProduct) {
           // If not found in Supabase, try local data
-          const localProduct = getProductById(productId || '');
+          const localProduct = getProductById(productId);
           if (localProduct) {
-            setProduct(localProduct);
+            setProduct({
+              ...localProduct,
+              // Ensure all required properties are present
+              category: localProduct.category as 'fruit' | 'vegetable',
+              featured: localProduct.featured || false
+            });
             
             // Get related products for this product
             const related = getProductsByCategory(localProduct.category)
               .filter(p => p.id !== localProduct.id)
               .slice(0, 4);
               
-            setRelatedProducts(related);
+            setRelatedProducts(related.map(p => ({
+              ...p,
+              featured: p.featured || false // Ensure featured property exists
+            })));
           } else {
             // Product not found anywhere
             console.error('Product not found');
           }
         } else {
+          // Make sure featured property is present before transforming
+          const productWithFeatured = {
+            ...supabaseProduct,
+            featured: supabaseProduct.featured || false
+          };
+          
           // Transform Supabase product data
-          const transformedProduct = transformProductFromSupabase(supabaseProduct);
+          const transformedProduct = transformProductFromSupabase(productWithFeatured);
           setProduct(transformedProduct);
           
           // Fetch related products from the same category
@@ -65,11 +82,17 @@ const ProductPage = () => {
             .from('Products')
             .select('*')
             .eq('category', transformedProduct.category)
-            .neq('id', productId)
+            .neq('id', parseInt(productId, 10))
             .limit(4);
             
           if (relatedData && relatedData.length > 0) {
-            setRelatedProducts(relatedData.map(p => transformProductFromSupabase(p)));
+            // Ensure all related products have the featured property
+            const relatedWithFeatured = relatedData.map(p => ({
+              ...p,
+              featured: p.featured || false
+            }));
+            
+            setRelatedProducts(relatedWithFeatured.map(p => transformProductFromSupabase(p)));
           }
         }
       } catch (err) {
