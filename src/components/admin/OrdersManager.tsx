@@ -14,13 +14,43 @@ const OrdersManager: React.FC = () => {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const { toast } = useToast();
 
+  // Pagination state
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const ordersPerPage = 10;
+
   const fetchOrders = async () => {
     setLoading(true);
     try {
+      // First get total count for pagination
+      const { count, error: countError } = await supabase
+        .from('Orders')
+        .select('*', { count: 'exact', head: true });
+
+      if (countError) {
+        console.error('Error getting order count:', countError);
+        toast({
+          title: "Erreur",
+          description: "Impossible de récupérer le nombre total de commandes.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Calculate total pages
+      const totalItems = count || 0;
+      const calculatedTotalPages = Math.max(1, Math.ceil(totalItems / ordersPerPage));
+      setTotalPages(calculatedTotalPages);
+
+      // Fetch paginated orders
+      const fromIndex = (page - 1) * ordersPerPage;
+      const toIndex = fromIndex + ordersPerPage - 1;
+
       const { data, error } = await supabase
         .from('Orders')
         .select('*')
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .range(fromIndex, toIndex);
 
       if (error) {
         console.error('Error fetching orders:', error);
@@ -88,6 +118,9 @@ const OrdersManager: React.FC = () => {
                 setViewDialogOpen(false);
                 setSelectedOrder(null);
               }
+              
+              // Refresh the orders to ensure pagination is correct
+              fetchOrders();
             }
           } else {
             // For other changes (INSERT, UPDATE), refresh the orders
@@ -101,7 +134,7 @@ const OrdersManager: React.FC = () => {
       // Unsubscribe when component unmounts
       supabase.removeChannel(ordersChannel);
     };
-  }, [selectedOrder]);
+  }, [selectedOrder, page]); // Add page as dependency to refetch when page changes
 
   const handleDeleteOrder = async (orderId: number) => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) {
@@ -137,6 +170,9 @@ const OrdersManager: React.FC = () => {
         setViewDialogOpen(false);
         setSelectedOrder(null);
       }
+      
+      // Refresh orders to ensure consistent pagination
+      fetchOrders();
     } catch (err) {
       console.error('Error in deleting order:', err);
       toast({
@@ -211,6 +247,10 @@ const OrdersManager: React.FC = () => {
     }
   };
 
+  const handlePageChange = (newPage: number) => {
+    setPage(newPage);
+  };
+
   return (
     <div>
       <OrdersList
@@ -221,6 +261,9 @@ const OrdersManager: React.FC = () => {
         onDelete={handleDeleteOrder}
         onUpdateStatus={handleUpdateStatus}
         onGeneratePDF={handleGeneratePDF}
+        currentPage={page}
+        totalPages={totalPages}
+        onPageChange={handlePageChange}
       />
       
       <OrderDetailsDialog
