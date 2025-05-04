@@ -151,7 +151,7 @@ const OrdersManager: React.FC = () => {
         setSelectedOrder(null);
       }
       
-      // Then delete from the database
+      // Then delete from the database - ENSURE we await this operation
       const { error } = await supabase
         .from('Orders')
         .delete()
@@ -174,6 +174,10 @@ const OrdersManager: React.FC = () => {
         title: "Succès",
         description: "La commande a été supprimée avec succès.",
       });
+      
+      // Make sure our UI is in sync with the database by fetching orders again
+      // This ensures proper pagination and that the order is truly removed
+      fetchOrders();
 
     } catch (err) {
       console.error('Error in deleting order:', err);
