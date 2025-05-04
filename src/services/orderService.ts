@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { Order, RawOrder } from '@/types/order';
 import { toast } from '@/hooks/use-toast';
@@ -90,12 +89,10 @@ export const deleteOrder = async (orderId: number) => {
       console.error('Error with direct deletion:', error);
       
       // Third attempt: Try using PostgreSQL RPC function
-      // Fix TypeScript error by using type assertion for the function name
+      // Use a more type-safe approach without type assertions
       try {
-        await supabase.rpc(
-          'delete_order_by_id' as any, // Type assertion to fix the TypeScript error
-          { order_id: orderId }
-        );
+        // Use raw PostgreSQL query instead of RPC
+        await supabase.from('rpc').select('*').functionname('delete_order_by_id').eq('order_id', orderId);
       } catch (rpcErr) {
         console.error('RPC deletion error:', rpcErr);
       }
