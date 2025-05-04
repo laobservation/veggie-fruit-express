@@ -35,11 +35,14 @@ serve(async (req) => {
       )
     }
 
+    // Make sure order_id is a number
+    const orderIdNumber = typeof order_id === 'string' ? parseInt(order_id, 10) : order_id
+
     // Execute a direct DELETE operation 
     const { error } = await supabaseClient
       .from('Orders')
       .delete()
-      .eq('id', order_id)
+      .eq('id', orderIdNumber)
 
     if (error) {
       console.error('Error deleting order:', error)
@@ -51,7 +54,7 @@ serve(async (req) => {
 
     // Return a success response
     return new Response(
-      JSON.stringify({ success: true, message: `Order ${order_id} deleted successfully` }),
+      JSON.stringify({ success: true, message: `Order ${orderIdNumber} deleted successfully` }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 200 }
     )
   } catch (error) {
@@ -62,4 +65,3 @@ serve(async (req) => {
     )
   }
 })
-
