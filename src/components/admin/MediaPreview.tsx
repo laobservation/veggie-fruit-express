@@ -5,9 +5,19 @@ interface MediaPreviewProps {
   mediaType: 'image' | 'video';
   imageUrl?: string;
   videoUrl?: string;
+  autoplay?: boolean;
+  muted?: boolean;
+  controls?: boolean;
 }
 
-const MediaPreview: React.FC<MediaPreviewProps> = ({ mediaType, imageUrl, videoUrl }) => {
+const MediaPreview: React.FC<MediaPreviewProps> = ({ 
+  mediaType, 
+  imageUrl, 
+  videoUrl,
+  autoplay = false,
+  muted = true,
+  controls = true
+}) => {
   if (mediaType === 'video' && videoUrl) {
     // Extract video ID from YouTube URL
     const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
@@ -20,7 +30,7 @@ const MediaPreview: React.FC<MediaPreviewProps> = ({ mediaType, imageUrl, videoU
           <iframe 
             width="100%" 
             height="100%" 
-            src={`https://www.youtube.com/embed/${videoId}`} 
+            src={`https://www.youtube.com/embed/${videoId}?autoplay=${autoplay ? '1' : '0'}&mute=${muted ? '1' : '0'}&controls=${controls ? '1' : '0'}`}
             title="YouTube video player" 
             frameBorder="0" 
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 

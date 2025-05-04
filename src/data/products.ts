@@ -131,3 +131,27 @@ export const getProductsWithStock = async () => {
     return [];
   }
 };
+
+// Get product by ID from Supabase
+export const getProductByIdFromSupabase = async (id: string) => {
+  try {
+    const { supabase } = await import('@/integrations/supabase/client');
+    const { transformProductFromSupabase } = await import('@/services/productService');
+    
+    const { data, error } = await supabase
+      .from('Products')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error || !data) {
+      throw error;
+    }
+    
+    return transformProductFromSupabase(data);
+  } catch (error) {
+    console.error('Error fetching product from Supabase:', error);
+    // Fall back to local data
+    return getProductById(id);
+  }
+};

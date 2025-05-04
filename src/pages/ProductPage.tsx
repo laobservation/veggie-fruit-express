@@ -10,18 +10,76 @@ import Footer from '@/components/Footer';
 import ProductGrid from '@/components/ProductGrid';
 import { getProductsByCategory } from '@/data/products';
 import { useIsMobile } from '@/hooks/use-mobile';
+import MediaDisplay from '@/components/MediaDisplay';
+import { supabase } from '@/integrations/supabase/client';
+import { transformProductFromSupabase } from '@/services/productService';
+import { Product } from '@/types/product';
 
 const ProductPage = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
   const { addItem } = useCart();
-  const product = getProductById(productId || '');
+  const [product, setProduct] = useState<Product | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const isMobile = useIsMobile();
   const [showStickyButton, setShowStickyButton] = useState(false);
   const [showSticky, setShowSticky] = useState(false);
   
-  // Scroll to top on page load
+  // Fetch product data from Supabase
   useEffect(() => {
+    const fetchProduct = async () => {
+      setLoading(true);
+      
+      try {
+        // First try to get from Supabase
+        const { data: supabaseProduct, error } = await supabase
+          .from('Products')
+          .select('*')
+          .eq('id', productId)
+          .single();
+        
+        if (error || !supabaseProduct) {
+          // If not found in Supabase, try local data
+          const localProduct = getProductById(productId || '');
+          if (localProduct) {
+            setProduct(localProduct);
+            
+            // Get related products for this product
+            const related = getProductsByCategory(localProduct.category)
+              .filter(p => p.id !== localProduct.id)
+              .slice(0, 4);
+              
+            setRelatedProducts(related);
+          } else {
+            // Product not found anywhere
+            console.error('Product not found');
+          }
+        } else {
+          // Transform Supabase product data
+          const transformedProduct = transformProductFromSupabase(supabaseProduct);
+          setProduct(transformedProduct);
+          
+          // Fetch related products from the same category
+          const { data: relatedData } = await supabase
+            .from('Products')
+            .select('*')
+            .eq('category', transformedProduct.category)
+            .neq('id', productId)
+            .limit(4);
+            
+          if (relatedData && relatedData.length > 0) {
+            setRelatedProducts(relatedData.map(p => transformProductFromSupabase(p)));
+          }
+        }
+      } catch (err) {
+        console.error('Error fetching product:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProduct();
     window.scrollTo(0, 0);
   }, [productId]);
 
@@ -52,6 +110,30 @@ const ProductPage = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col">
+        <Header />
+        <main className="flex-grow container mx-auto px-4 py-16 text-center">
+          <div className="animate-pulse">
+            <div className="h-8 bg-gray-200 rounded w-1/3 mx-auto mb-8"></div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="bg-gray-200 rounded-lg h-96"></div>
+              <div>
+                <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
+                <div className="h-8 bg-gray-200 rounded w-1/2 mb-4"></div>
+                <div className="h-6 bg-gray-200 rounded w-1/3 mb-8"></div>
+                <div className="h-32 bg-gray-200 rounded mb-8"></div>
+                <div className="h-12 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            </div>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
+  
   if (!product) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -65,11 +147,6 @@ const ProductPage = () => {
       </div>
     );
   }
-  
-  // Get related products from the same category
-  const relatedProducts = getProductsByCategory(product.category)
-    .filter(p => p.id !== product.id)
-    .slice(0, 4);
 
   const categoryText = product.category === 'fruit' ? 'Fruits' : 'Légumes';
 
@@ -92,13 +169,16 @@ const ProductPage = () => {
           </Button>
           
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-            {/* Product Image */}
+            {/* Product Media (Image or Video) */}
             <div className="bg-white rounded-lg overflow-hidden shadow-md">
-              <img 
-                src={product.image} 
-                alt={product.name} 
-                className="w-full h-auto object-cover aspect-square"
-              />
+              <div className="w-full h-auto aspect-square">
+                <MediaDisplay 
+                  product={product} 
+                  className="w-full h-full object-cover"
+                  autoplay={false}
+                  controls={true}
+                />
+              </div>
             </div>
             
             {/* Product Details */}

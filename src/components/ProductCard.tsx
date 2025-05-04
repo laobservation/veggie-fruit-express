@@ -7,6 +7,7 @@ import { Link } from 'react-router-dom';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { formatPrice } from '@/lib/formatPrice';
 import { Badge } from '@/components/ui/badge';
+import MediaDisplay from '@/components/MediaDisplay';
 
 interface ProductCardProps {
   product: Product;
@@ -24,11 +25,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
       <Link to={`/product/${product.id}`}>
         <div className="overflow-hidden">
           <AspectRatio ratio={1/1} className="bg-muted">
-            <img 
-              src={product.image} 
-              alt={product.name} 
+            <MediaDisplay 
+              product={product}
               className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-              loading="lazy"
             />
           </AspectRatio>
         </div>

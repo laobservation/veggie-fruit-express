@@ -16,6 +16,7 @@ export type SupabaseProduct = {
   media_type: string | null;  
   created_at: string | null;
   stock: number | null;  
+  featured: boolean | null; // Added featured field to match our use case
 };
 
 // Extended Product interface with optional stock
@@ -25,9 +26,6 @@ export interface ExtendedProduct extends Product {
 
 // Transform local product data format to Supabase format
 export const transformProductForSupabase = (product: ExtendedProduct): Omit<SupabaseProduct, 'id' | 'created_at'> => {
-  // Check if the product has the featured property
-  const featured = product.featured || false;
-  
   return {
     name: product.name,
     category: product.category,
@@ -38,7 +36,7 @@ export const transformProductForSupabase = (product: ExtendedProduct): Omit<Supa
     link_to_category: product.categoryLink || false,
     media_type: product.videoUrl && product.videoUrl.trim() !== '' ? 'video' : 'image',
     stock: product.stock || 0,
-    // We don't include featured since it's not in the database structure
+    featured: product.featured || false // Store featured flag directly
   };
 };
 
@@ -46,16 +44,6 @@ export const transformProductForSupabase = (product: ExtendedProduct): Omit<Supa
 export const transformProductFromSupabase = (product: SupabaseProduct): ExtendedProduct => {
   if (!product) {
     throw new Error('Invalid product data from database');
-  }
-  
-  // Map featured property based on a convention (e.g., link_to_category might indicate a featured product)
-  let isFeatured = false;
-  
-  // Try to determine if product is featured
-  // For now, we can use some heuristic like checking if it has stock > 5
-  // or any other business logic that makes sense for your application
-  if (product.stock && product.stock > 5) {
-    isFeatured = true;
   }
   
   return {
@@ -68,7 +56,7 @@ export const transformProductFromSupabase = (product: SupabaseProduct): Extended
     unit: product.unit || 'kg',
     categoryLink: product.link_to_category || false,
     videoUrl: product.media_type === 'video' ? product.image_url : undefined,
-    featured: isFeatured, // Use our determined value
+    featured: product.featured || false, // Use the featured flag directly
     stock: product.stock || 0,
   };
 };
