@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -140,21 +141,18 @@ const OrdersManager: React.FC = () => {
         setSelectedOrder(null);
       }
       
-      // Delete from the database - Use forceful approach
+      // Delete from the database using Supabase's delete method with explicit await
+      console.log(`Attempting to delete order ${orderId} from database`);
       const { error } = await supabase
         .from('Orders')
         .delete()
         .eq('id', orderId);
       
       if (error) {
-        console.error('Error deleting order:', error);
-        toast({
-          title: "Erreur",
-          description: "Impossible de supprimer la commande.",
-          variant: "destructive",
-        });
+        console.error('Error in first deletion attempt:', error);
         
-        // Try again with a different approach
+        // Try again with a different approach if the first attempt failed
+        console.log(`Trying second delete approach for order ${orderId}`);
         const { error: secondAttemptError } = await supabase
           .from('Orders')
           .delete()
@@ -162,19 +160,23 @@ const OrdersManager: React.FC = () => {
         
         if (secondAttemptError) {
           console.error('Second deletion attempt failed:', secondAttemptError);
-          toast({
-            title: "Erreur",
-            description: "La suppression a échoué après plusieurs tentatives.",
-            variant: "destructive",
-          });
           
-          // Revert UI changes by fetching orders again to ensure accuracy
-          await fetchOrders();
-          return;
+          // Try a third approach with a raw query if needed
+          console.log(`Trying third delete approach with raw query for order ${orderId}`);
+          const { error: thirdAttemptError } = await supabase.rpc(
+            'delete_order_by_id', 
+            { order_id: orderId }
+          ).single();
+          
+          if (thirdAttemptError) {
+            console.error('All deletion attempts failed:', thirdAttemptError);
+            throw new Error(`Failed to delete order ${orderId} after multiple attempts`);
+          }
         }
       }
       
       // Verify the deletion was successful by checking if the order still exists
+      console.log(`Verifying deletion of order ${orderId}`);
       const { data: checkData } = await supabase
         .from('Orders')
         .select('id')
@@ -182,21 +184,23 @@ const OrdersManager: React.FC = () => {
         .maybeSingle();
       
       if (checkData) {
-        console.error('Order still exists after deletion attempts:', checkData);
+        console.error(`Order ${orderId} still exists after deletion attempts:`, checkData);
         toast({
-          title: "Avertissement",
-          description: "La commande est toujours dans la base de données. Essayez de rafraîchir.",
+          title: "Erreur",
+          description: "La commande n'a pas pu être supprimée de la base de données.",
           variant: "destructive",
         });
-        await fetchOrders(); // Refresh to ensure UI accuracy
+        
+        // Force a complete refresh to ensure UI accuracy
+        await fetchOrders();
       } else {
-        // Show success notification
+        // The order was successfully deleted
+        console.log(`Order ${orderId} successfully deleted from database`);
         toast({
           title: "Succès",
           description: "La commande a été supprimée avec succès.",
         });
       }
-      
     } catch (err) {
       console.error('Error in deleting order:', err);
       toast({
@@ -307,3 +311,4 @@ const OrdersManager: React.FC = () => {
 };
 
 export default OrdersManager;
+
