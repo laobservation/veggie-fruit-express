@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, getSettingsTable } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Check, RefreshCw } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -45,8 +45,7 @@ const WebsiteSettings: React.FC = () => {
   const fetchSettings = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('Settings')
+      const { data, error } = await getSettingsTable()
         .select('*')
         .single();
       
@@ -87,8 +86,7 @@ const WebsiteSettings: React.FC = () => {
   const initializeSettings = async () => {
     try {
       // First, check if the table exists
-      const { error: tableCheckError } = await supabase
-        .from('Settings')
+      const { error: tableCheckError } = await getSettingsTable()
         .select('count')
         .limit(1);
       
@@ -98,8 +96,7 @@ const WebsiteSettings: React.FC = () => {
       }
       
       // Insert initial settings
-      const { error } = await supabase
-        .from('Settings')
+      const { error } = await getSettingsTable()
         .insert([
           {
             site_name: settings.siteName,
@@ -139,7 +136,7 @@ const WebsiteSettings: React.FC = () => {
         {
           event: '*',
           schema: 'public',
-          table: 'Settings'
+          table: 'settings'
         },
         (payload) => {
           console.log('Settings changed:', payload);
@@ -173,8 +170,7 @@ const WebsiteSettings: React.FC = () => {
   const handleSave = async () => {
     setSaveLoading(true);
     try {
-      const { error } = await supabase
-        .from('Settings')
+      const { error } = await getSettingsTable()
         .upsert([
           {
             id: 1, // Always use ID 1 for the single settings record

@@ -20,3 +20,8 @@ export const getProductsTable = () => {
 export const getOrdersTable = () => {
   return supabase.from('Orders');
 };
+
+// Function to fix type issues with Supabase Settings table
+export const getSettingsTable = () => {
+  return supabase.from('settings');
+};

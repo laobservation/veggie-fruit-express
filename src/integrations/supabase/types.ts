@@ -90,6 +90,54 @@ export type Database = {
         }
         Relationships: []
       }
+      settings: {
+        Row: {
+          address: string | null
+          contact_email: string | null
+          contact_phone: string | null
+          created_at: string | null
+          currency: string | null
+          delivery_fee: number | null
+          description: string | null
+          enable_delivery: boolean | null
+          enable_payments: boolean | null
+          id: number
+          minimum_order_value: number | null
+          site_name: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          currency?: string | null
+          delivery_fee?: number | null
+          description?: string | null
+          enable_delivery?: boolean | null
+          enable_payments?: boolean | null
+          id?: number
+          minimum_order_value?: number | null
+          site_name?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          address?: string | null
+          contact_email?: string | null
+          contact_phone?: string | null
+          created_at?: string | null
+          currency?: string | null
+          delivery_fee?: number | null
+          description?: string | null
+          enable_delivery?: boolean | null
+          enable_payments?: boolean | null
+          id?: number
+          minimum_order_value?: number | null
+          site_name?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
