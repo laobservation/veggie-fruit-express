@@ -63,6 +63,7 @@ export const transformProductFromSupabase = (product: SupabaseProduct): Extended
 // Fetch all products from Supabase
 export const fetchProducts = async (): Promise<ExtendedProduct[]> => {
   try {
+    console.log('Fetching products from Supabase...');
     const { data, error } = await supabase
       .from('Products')
       .select('*');
@@ -72,6 +73,7 @@ export const fetchProducts = async (): Promise<ExtendedProduct[]> => {
       throw error;
     }
     
+    console.log('Products fetched successfully:', data);
     return (data as SupabaseProduct[]).map(transformProductFromSupabase);
   } catch (error) {
     console.error('Error fetching products:', error);
@@ -83,6 +85,7 @@ export const fetchProducts = async (): Promise<ExtendedProduct[]> => {
 export const createProduct = async (product: ExtendedProduct): Promise<ExtendedProduct> => {
   try {
     const supabaseProduct = transformProductForSupabase(product);
+    console.log('Creating product with data:', supabaseProduct);
     
     const { data, error } = await supabase
       .from('Products')
@@ -95,6 +98,7 @@ export const createProduct = async (product: ExtendedProduct): Promise<ExtendedP
       throw error;
     }
     
+    console.log('Product created successfully:', data);
     return transformProductFromSupabase(data as SupabaseProduct);
   } catch (error) {
     console.error('Error creating product:', error);
@@ -106,6 +110,7 @@ export const createProduct = async (product: ExtendedProduct): Promise<ExtendedP
 export const updateProduct = async (id: string, product: ExtendedProduct): Promise<ExtendedProduct> => {
   try {
     const supabaseProduct = transformProductForSupabase(product);
+    console.log('Updating product with ID:', id, 'Data:', supabaseProduct);
     
     const { data, error } = await supabase
       .from('Products')
@@ -119,6 +124,7 @@ export const updateProduct = async (id: string, product: ExtendedProduct): Promi
       throw error;
     }
     
+    console.log('Product updated successfully:', data);
     return transformProductFromSupabase(data as SupabaseProduct);
   } catch (error) {
     console.error('Error updating product:', error);
@@ -129,6 +135,8 @@ export const updateProduct = async (id: string, product: ExtendedProduct): Promi
 // Delete a product from Supabase
 export const deleteProduct = async (id: string): Promise<void> => {
   try {
+    console.log('Deleting product with ID:', id);
+    
     const { error } = await supabase
       .from('Products')
       .delete()
@@ -138,6 +146,8 @@ export const deleteProduct = async (id: string): Promise<void> => {
       console.error('Error deleting product:', error);
       throw error;
     }
+    
+    console.log('Product deleted successfully');
   } catch (error) {
     console.error('Error deleting product:', error);
     throw error;

@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -14,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { 
   DialogHeader, DialogTitle, DialogFooter 
 } from '@/components/ui/dialog';
-import { Image, Youtube } from 'lucide-react';
+import { Image, Youtube, Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MediaPreview from './MediaPreview';
 import { Product } from '@/types/product';
@@ -22,6 +23,7 @@ import { Product } from '@/types/product';
 interface ProductFormProps {
   product: Product;
   isEditing: boolean;
+  isSaving?: boolean;
   onSave: (product: Product, mediaType: 'image' | 'video') => void;
   onCancel: () => void;
 }
@@ -29,6 +31,7 @@ interface ProductFormProps {
 const ProductForm: React.FC<ProductFormProps> = ({ 
   product, 
   isEditing, 
+  isSaving = false,
   onSave, 
   onCancel 
 }) => {
@@ -243,10 +246,22 @@ const ProductForm: React.FC<ProductFormProps> = ({
       </div>
       
       <DialogFooter>
-        <Button variant="outline" onClick={onCancel}>
+        <Button variant="outline" onClick={onCancel} disabled={isSaving}>
           Annuler
         </Button>
-        <Button onClick={handleSubmit}>Enregistrer</Button>
+        <Button 
+          onClick={handleSubmit} 
+          disabled={isSaving}
+        >
+          {isSaving ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Enregistrement...
+            </>
+          ) : (
+            'Enregistrer'
+          )}
+        </Button>
       </DialogFooter>
     </>
   );

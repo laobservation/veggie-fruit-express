@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -8,7 +9,7 @@ import { Link } from 'react-router-dom';
 import { Product } from '@/types/product';
 import ProductList from './ProductList';
 import ProductForm from './ProductForm';
-import { createProduct, updateProduct, fetchProducts } from '@/services/productService';
+import { createProduct, updateProduct, fetchProducts, deleteProduct } from '@/services/productService';
 
 const ProductManager: React.FC = () => {
   const { toast } = useToast();
@@ -17,6 +18,7 @@ const ProductManager: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   
   const emptyProduct: Product = {
     id: '',
@@ -130,6 +132,7 @@ const ProductManager: React.FC = () => {
       }
     }
     
+    setIsSaving(true);
     try {
       if (isEditing && selectedProduct) {
         // Update existing product
@@ -168,21 +171,15 @@ const ProductManager: React.FC = () => {
         description: "Une erreur s'est produite lors de l'enregistrement du produit.",
         variant: "destructive",
       });
+    } finally {
+      setIsSaving(false);
     }
   };
 
   const handleDeleteProduct = async (productId: string) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
       try {
-        const { error } = await supabase
-          .from('Products')
-          .delete()
-          .eq('id', parseInt(productId));
-          
-        if (error) {
-          console.error('Delete error:', error);
-          throw error;
-        }
+        await deleteProduct(productId);
         
         // Remove product from local state
         setAllProducts(allProducts.filter(p => p.id !== productId));
@@ -237,6 +234,7 @@ const ProductManager: React.FC = () => {
             isEditing={isEditing}
             onSave={handleSaveProduct}
             onCancel={() => setIsDialogOpen(false)}
+            isSaving={isSaving}
           />
         </DialogContent>
       </Dialog>
