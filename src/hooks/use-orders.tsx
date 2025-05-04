@@ -60,6 +60,12 @@ export const useOrders = () => {
           if (payload.eventType === 'DELETE' && payload.old && payload.old.id) {
             const deletedOrderId = payload.old.id;
             setOrders(prevOrders => prevOrders.filter(order => order.id !== deletedOrderId));
+            
+            // Close the dialog if the deleted order was being viewed
+            if (selectedOrder && selectedOrder.id === deletedOrderId) {
+              setViewDialogOpen(false);
+              setSelectedOrder(null);
+            }
           } else {
             // For other events, refresh the order list to keep UI in sync
             fetchOrders();
@@ -82,7 +88,10 @@ export const useOrders = () => {
     try {
       setLoading(true);
       
-      // First, update the local state to give immediate feedback
+      // Delete from the database
+      await deleteOrderService(orderId);
+      
+      // Update the local state to give immediate feedback
       setOrders(prevOrders => prevOrders.filter(order => order.id !== orderId));
       
       // Close the dialog if the deleted order was being viewed
@@ -90,9 +99,6 @@ export const useOrders = () => {
         setViewDialogOpen(false);
         setSelectedOrder(null);
       }
-      
-      // Delete from the database
-      await deleteOrderService(orderId);
       
       toast({
         title: "Succès",

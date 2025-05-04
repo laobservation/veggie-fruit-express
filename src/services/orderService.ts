@@ -3,16 +3,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Order, RawOrder } from '@/types/order';
 import { toast } from '@/hooks/use-toast';
 
-// Define the type for the delete_order_by_id RPC function parameters
-interface DeleteOrderParams {
-  order_id: number;
-}
-
-// Define return type for the delete_order_by_id RPC function
-interface DeleteOrderResult {
-  success: boolean;
-}
-
 // Fetch paginated orders
 export const fetchPaginatedOrders = async (page: number, ordersPerPage: number) => {
   try {
@@ -71,38 +61,15 @@ export const deleteOrder = async (orderId: number) => {
   try {
     console.log(`Attempting to delete order ${orderId} from database`);
     
-    // First attempt: standard delete
+    // Direct deletion approach - this is the most straightforward way to delete an order
     const { error } = await supabase
       .from('Orders')
       .delete()
       .eq('id', orderId);
     
     if (error) {
-      console.error('Error in first deletion attempt:', error);
-      
-      // Second attempt: using match
-      console.log(`Trying second delete approach for order ${orderId}`);
-      const { error: secondAttemptError } = await supabase
-        .from('Orders')
-        .delete()
-        .match({ id: orderId });
-      
-      if (secondAttemptError) {
-        console.error('Second deletion attempt failed:', secondAttemptError);
-        
-        // Third attempt: using RPC
-        console.log(`Trying third delete approach with raw query for order ${orderId}`);
-        // Fix: Remove type parameters to let TypeScript infer types automatically
-        const { error: thirdAttemptError } = await supabase.rpc<DeleteOrderResult>(
-          'delete_order_by_id' as any, // Use type assertion to bypass TypeScript constraint
-          { order_id: Number(orderId) }
-        );
-        
-        if (thirdAttemptError) {
-          console.error('All deletion attempts failed:', thirdAttemptError);
-          throw new Error(`Failed to delete order ${orderId} after multiple attempts`);
-        }
-      }
+      console.error('Error deleting order:', error);
+      throw new Error(`Failed to delete order ${orderId}: ${error.message}`);
     }
     
     // Verify the deletion
@@ -113,7 +80,7 @@ export const deleteOrder = async (orderId: number) => {
       .maybeSingle();
     
     if (checkData) {
-      console.error(`Order ${orderId} still exists after deletion attempts:`, checkData);
+      console.error(`Order ${orderId} still exists after deletion attempt:`, checkData);
       throw new Error("The order couldn't be deleted from the database");
     }
     
