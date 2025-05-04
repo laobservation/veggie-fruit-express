@@ -91,8 +91,9 @@ export const deleteOrder = async (orderId: number) => {
       
       // Third attempt: Try using PostgreSQL RPC function
       try {
-        // Use the correct rpc method with proper typing - provide both input and output types
-        const { data: rpcData, error: rpcError } = await supabase.rpc<boolean, { order_id: number }>(
+        // Fix the type parameters to match Supabase's expectations
+        // The correct format is rpc<TOutput>(functionName, params)
+        const { data: rpcData, error: rpcError } = await supabase.rpc(
           'delete_order_by_id',
           { order_id: orderId }
         );
