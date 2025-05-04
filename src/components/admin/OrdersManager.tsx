@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Trash2, RefreshCw, Eye, Download, Check, X } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { 
   DropdownMenu, 
@@ -120,8 +120,24 @@ const OrdersManager: React.FC = () => {
         },
         (payload) => {
           console.log('Orders table changed:', payload);
-          // Refresh the orders to ensure UI is in sync
-          fetchOrders();
+          
+          // Direct state update based on the operation type
+          if (payload.eventType === 'DELETE') {
+            // Immediately remove the deleted order from local state
+            const deletedId = payload.old?.id;
+            if (deletedId) {
+              setOrders(prevOrders => prevOrders.filter(order => order.id !== deletedId));
+              
+              // Close dialog if deleted order was being viewed
+              if (selectedOrder?.id === deletedId) {
+                setViewDialogOpen(false);
+                setSelectedOrder(null);
+              }
+            }
+          } else {
+            // For other changes (INSERT, UPDATE), refresh the orders
+            fetchOrders();
+          }
         }
       )
       .subscribe();
@@ -130,7 +146,7 @@ const OrdersManager: React.FC = () => {
       // Unsubscribe when component unmounts
       supabase.removeChannel(ordersChannel);
     };
-  }, []);
+  }, [selectedOrder]);
 
   const handleDeleteOrder = async (orderId: number) => {
     if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) {
@@ -158,12 +174,14 @@ const OrdersManager: React.FC = () => {
         description: "La commande a été supprimée avec succès.",
       });
       
-      // Remove the deleted order from the local state
-      setOrders(orders.filter(order => order.id !== orderId));
+      // Remove the deleted order from the local state immediately
+      // This ensures the UI updates right away without waiting for subscription
+      setOrders(prevOrders => prevOrders.filter(order => order.id !== orderId));
       
       // Close the dialog if the deleted order was being viewed
       if (selectedOrder && selectedOrder.id === orderId) {
         setViewDialogOpen(false);
+        setSelectedOrder(null);
       }
     } catch (err) {
       console.error('Error in deleting order:', err);
