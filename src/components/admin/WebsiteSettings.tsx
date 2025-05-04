@@ -97,20 +97,18 @@ const WebsiteSettings: React.FC = () => {
       
       // Insert initial settings
       const { error } = await getSettingsTable()
-        .insert([
-          {
-            site_name: settings.siteName,
-            description: settings.description,
-            contact_email: settings.contactEmail,
-            contact_phone: settings.contactPhone,
-            address: settings.address,
-            currency: settings.currency,
-            enable_delivery: settings.enableDelivery,
-            delivery_fee: settings.deliveryFee,
-            enable_payments: settings.enablePayments,
-            minimum_order_value: settings.minimumOrderValue
-          }
-        ]);
+        .insert({
+          site_name: settings.siteName,
+          description: settings.description,
+          contact_email: settings.contactEmail,
+          contact_phone: settings.contactPhone,
+          address: settings.address,
+          currency: settings.currency,
+          enable_delivery: settings.enableDelivery,
+          delivery_fee: settings.deliveryFee,
+          enable_payments: settings.enablePayments,
+          minimum_order_value: settings.minimumOrderValue
+        });
       
       if (error) {
         console.error('Error creating settings:', error);
@@ -171,22 +169,20 @@ const WebsiteSettings: React.FC = () => {
     setSaveLoading(true);
     try {
       const { error } = await getSettingsTable()
-        .upsert([
-          {
-            id: 1, // Always use ID 1 for the single settings record
-            site_name: settings.siteName,
-            description: settings.description,
-            contact_email: settings.contactEmail,
-            contact_phone: settings.contactPhone,
-            address: settings.address,
-            currency: settings.currency,
-            enable_delivery: settings.enableDelivery,
-            delivery_fee: settings.deliveryFee,
-            enable_payments: settings.enablePayments,
-            minimum_order_value: settings.minimumOrderValue,
-            updated_at: new Date()
-          }
-        ]);
+        .upsert({
+          id: 1, // Always use ID 1 for the single settings record
+          site_name: settings.siteName,
+          description: settings.description,
+          contact_email: settings.contactEmail,
+          contact_phone: settings.contactPhone,
+          address: settings.address,
+          currency: settings.currency,
+          enable_delivery: settings.enableDelivery,
+          delivery_fee: settings.deliveryFee,
+          enable_payments: settings.enablePayments,
+          minimum_order_value: settings.minimumOrderValue,
+          updated_at: new Date().toISOString() // Convert Date to string
+        });
       
       if (error) {
         throw error;
