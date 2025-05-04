@@ -125,7 +125,7 @@ export const useOrders = () => {
 
   const handleUpdateStatus = async (orderId: number, status: string) => {
     try {
-      await updateOrderStatusService(orderId, status);
+      await updateOrderStatusService(orderId, status as OrderStatus);
 
       toast({
         title: "Succès",
@@ -134,12 +134,12 @@ export const useOrders = () => {
       
       // Update the order in the local state
       setOrders(orders.map(order => 
-        order.id === orderId ? { ...order, status } : order
+        order.id === orderId ? { ...order, status: status as OrderStatus } : order
       ));
       
       // Update the selected order if it's the one being viewed
       if (selectedOrder && selectedOrder.id === orderId) {
-        setSelectedOrder({ ...selectedOrder, status });
+        setSelectedOrder({ ...selectedOrder, status: status as OrderStatus });
       }
     } catch (err) {
       toast({

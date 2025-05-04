@@ -1,11 +1,16 @@
 
 import { Json } from '@/integrations/supabase/types';
 
+export type OrderStatus = 'new' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+
 export interface OrderItem {
+  id?: number;
+  order_id?: number;
   productId: number;
   productName: string;
   quantity: number;
   price: number;
+  Products?: any; // For joins with the Products table
 }
 
 export interface Order {
@@ -16,7 +21,7 @@ export interface Order {
   order_items?: OrderItem[];
   total_amount?: number;
   preferred_time?: string | null;
-  status?: string;
+  status?: OrderStatus;
   notified?: boolean;
   created_at: string;
 }

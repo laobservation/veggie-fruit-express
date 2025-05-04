@@ -1,7 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { Order, OrderItem, OrderStatus } from '@/types/order';
+import { Order, OrderItem, OrderStatus, RawOrder } from '@/types/order';
 
 export const createOrder = async (orderData: Partial<Order>): Promise<number | null> => {
   try {
@@ -113,16 +113,8 @@ export const deleteOrder = async (orderId: number) => {
     }
 
     // Second attempt: Try manually deleting the order items first, then the order
-    const { error: itemsError } = await supabase
-      .from('OrderItems')
-      .delete()
-      .eq('order_id', orderId);
-
-    if (itemsError) {
-      console.error('Error deleting order items:', itemsError);
-      return false;
-    }
-
+    // Note: We're not using "OrderItems" here as it's not in our Supabase schema according to the types
+    // Instead, we're relying on the Orders table with its JSON order_items field
     const { error: orderError } = await supabase
       .from('Orders')
       .delete()
@@ -162,6 +154,47 @@ export const getAllOrders = async () => {
   } catch (error) {
     console.error('Orders fetch failed:', error);
     return [];
+  }
+};
+
+export const fetchPaginatedOrders = async (page: number, pageSize: number) => {
+  try {
+    // Calculate start and end indices for pagination
+    const from = (page - 1) * pageSize;
+    const to = from + pageSize - 1;
+
+    // Get total count for pagination
+    const { count, error: countError } = await supabase
+      .from('Orders')
+      .select('*', { count: 'exact', head: true });
+
+    if (countError) {
+      console.error('Error counting orders:', countError);
+      return { orders: [], totalPages: 0 };
+    }
+
+    // Fetch paginated orders
+    const { data: orders, error } = await supabase
+      .from('Orders')
+      .select('*')
+      .order('created_at', { ascending: false })
+      .range(from, to);
+
+    if (error) {
+      console.error('Error fetching paginated orders:', error);
+      return { orders: [], totalPages: 0 };
+    }
+
+    // Calculate total pages
+    const totalPages = Math.ceil((count || 0) / pageSize);
+
+    return {
+      orders: orders || [],
+      totalPages
+    };
+  } catch (error) {
+    console.error('Paginated orders fetch failed:', error);
+    return { orders: [], totalPages: 0 };
   }
 };
 
