@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import Header from '@/components/Header';
@@ -34,14 +33,16 @@ const ThankYouPage = () => {
         // This is a placeholder - would typically call an edge function
         console.log('Order notification would be sent to store owner', orderDetails);
         
-        // Log the order for demonstration purposes
-        const { error } = await supabase
-          .from('Orders')
-          .update({ notified: true })
-          .eq('id', orderDetails.orderId);
-          
-        if (error) {
-          console.error('Failed to update order notification status:', error);
+        // Only update if we have an orderId
+        if (orderDetails.orderId) {
+          const { error } = await supabase
+            .from('Orders')
+            .update({ notified: true })
+            .eq('id', orderDetails.orderId);
+            
+          if (error) {
+            console.error('Failed to update order notification status:', error);
+          }
         }
       } catch (err) {
         console.error('Error sending notification:', err);

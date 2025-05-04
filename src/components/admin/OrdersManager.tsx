@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -9,6 +8,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Badge } from '@/components/ui/badge';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import { Json } from '@/integrations/supabase/types';
 
 interface OrderItem {
   productId: number;
@@ -27,6 +27,20 @@ interface Order {
   preferred_time?: string | null;
   status?: string;
   notified?: boolean;
+  created_at: string;
+}
+
+// Type for raw order data from Supabase
+interface RawOrder {
+  id: number;
+  'Client Name': string | null;
+  'Adresse': string | null;
+  'Phone': number | null;
+  order_items?: Json;
+  total_amount?: number | null;
+  preferred_time?: string | null;
+  status?: string | null;
+  notified?: boolean | null;
   created_at: string;
 }
 
@@ -55,8 +69,22 @@ const OrdersManager: React.FC = () => {
         return;
       }
 
-      // Ensure the data matches our Order interface
-      setOrders(data as Order[]);
+      // Transform raw data to match our Order interface
+      const transformedOrders: Order[] = (data as RawOrder[]).map(order => ({
+        id: order.id,
+        'Client Name': order['Client Name'] || '',
+        'Adresse': order['Adresse'] || '',
+        'Phone': order['Phone'],
+        // Parse the JSON string into OrderItem[] if it exists
+        order_items: Array.isArray(order.order_items) ? order.order_items as unknown as OrderItem[] : [],
+        total_amount: order.total_amount || 0,
+        preferred_time: order.preferred_time || null,
+        status: order.status || 'new',
+        notified: order.notified || false,
+        created_at: order.created_at
+      }));
+
+      setOrders(transformedOrders);
     } catch (err) {
       console.error('Error in fetching orders:', err);
       toast({
