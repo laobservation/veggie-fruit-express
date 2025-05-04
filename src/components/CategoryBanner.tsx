@@ -1,13 +1,42 @@
 
 import { Link } from 'react-router-dom';
 import { getCategoryLinkedProducts } from '@/data/products';
+import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect } from 'react';
+import { transformProductFromSupabase } from '@/services/productService';
+import { Product } from '@/types/product';
 
 interface CategoryBannerProps {
   category: 'fruit' | 'vegetable';
 }
 
 const CategoryBanner: React.FC<CategoryBannerProps> = ({ category }) => {
-  const linkedProducts = getCategoryLinkedProducts(category);
+  const [linkedProducts, setLinkedProducts] = useState<Product[]>([]);
+  
+  useEffect(() => {
+    const fetchCategoryLinkedProducts = async () => {
+      try {
+        // Fetch products from Supabase that are linked to this category
+        const { data, error } = await supabase
+          .from('Products')
+          .select('*')
+          .eq('category', category)
+          .eq('link_to_category', true);
+        
+        if (error) throw error;
+        
+        if (data) {
+          // Transform Supabase products to our Product type
+          const products = data.map(product => transformProductFromSupabase(product));
+          setLinkedProducts(products);
+        }
+      } catch (error) {
+        console.error('Error fetching category linked products:', error);
+      }
+    };
+    
+    fetchCategoryLinkedProducts();
+  }, [category]);
   
   return (
     <div 

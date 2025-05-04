@@ -23,8 +23,6 @@ const HomePage: React.FC = () => {
         const products = await getProductsWithStock();
         
         // Filter out featured products
-        // Note: Since featured is a clientside-only field, we can't filter by it in the database
-        // so we need to do it here in the UI
         const featured = products.filter((product) => product.featured);
         
         // Fix product types to ensure compatibility
