@@ -26,12 +26,7 @@ const convertJsonToOrderItems = (json: Json | null): OrderItem[] => {
 };
 
 // Helper function to fix product type imports for HomePage
-export const fixProductImportType = (products: any[]): Product[] => {
-  return products.map(product => ({
-    ...product,
-    id: String(product.id)
-  }));
-};
+// Note: This function has been moved to productService.ts
 
 export const createOrder = async (orderData: Partial<Order>): Promise<number | null> => {
   try {

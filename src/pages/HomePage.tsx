@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { getProductsWithStock } from '@/data/products';
 import Cart from '@/components/Cart';
 import { useToast } from '@/hooks/use-toast';
-import { fixProductImportType } from '@/services/orderService';
+import { fixProductImportType } from '@/services/productService';
 
 const HomePage: React.FC = () => {
   const [featuredProducts, setFeaturedProducts] = useState([]);

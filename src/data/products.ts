@@ -122,29 +122,8 @@ export const getCategoryLinkedProducts = (category: 'fruit' | 'vegetable'): Prod
 // Get products with stock information from Supabase
 export const getProductsWithStock = async () => {
   try {
-    const { supabase } = await import('@/integrations/supabase/client');
-    
-    const { data, error } = await supabase
-      .from('Products')
-      .select('*');
-      
-    if (error) {
-      throw error;
-    }
-    
-    return data.map((product: any) => ({
-      id: String(product.id),
-      name: product.name || '',
-      category: product.category || 'fruit',
-      price: product.price || 0,
-      image: product.image_url || '',
-      description: product.description || '',
-      unit: product.unit || 'kg',
-      featured: product.featured || false,
-      videoUrl: product.media_type === 'video' ? product.image_url : undefined,
-      categoryLink: product.link_to_category || false,
-      stock: product.stock || 0
-    }));
+    const { fetchProducts } = await import('@/services/productService');
+    return await fetchProducts();
   } catch (error) {
     console.error('Error fetching products with stock:', error);
     return [];

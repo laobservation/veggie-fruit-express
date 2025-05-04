@@ -9,6 +9,7 @@ import { Link } from 'react-router-dom';
 import { Product } from '@/types/product';
 import ProductList from './ProductList';
 import ProductForm from './ProductForm';
+import { createProduct, updateProduct, fetchProducts } from '@/services/productService';
 
 const ProductManager: React.FC = () => {
   const { toast } = useToast();
@@ -63,39 +64,9 @@ const ProductManager: React.FC = () => {
   const loadProducts = async () => {
     setIsLoading(true);
     try {
-      // Fetch products from Supabase
-      const { data, error } = await supabase
-        .from('Products')
-        .select('*');
-      
-      if (error) {
-        console.error('Error fetching products:', error);
-        throw error;
-      }
-      
-      if (!data || data.length === 0) {
-        setAllProducts([]);
-        setIsLoading(false);
-        return;
-      }
-      
-      // Transform data to match our Product interface
-      const transformedProducts = data.map((product: any) => ({
-        id: String(product.id),
-        name: product.name || '',
-        category: product.category || 'fruit',
-        price: product.price || 0,
-        image: product.image_url || '',
-        description: product.description || '',
-        unit: product.unit || 'kg',
-        featured: product.featured || false,
-        videoUrl: product.media_type === 'video' ? product.image_url : '',
-        categoryLink: product.link_to_category || false,
-        stock: product.stock || 0
-      }));
-      
-      setAllProducts(transformedProducts);
-      console.log('Products loaded:', transformedProducts);
+      const products = await fetchProducts();
+      setAllProducts(products);
+      console.log('Products loaded:', products);
     } catch (error) {
       console.error('Error fetching products:', error);
       toast({
@@ -161,48 +132,25 @@ const ProductManager: React.FC = () => {
     }
     
     try {
-      const productForSupabase = {
-        name: finalFormData.name,
-        category: finalFormData.category,
-        price: finalFormData.price,
-        image_url: mediaType === 'image' ? finalFormData.image : finalFormData.videoUrl,
-        description: finalFormData.description,
-        unit: finalFormData.unit,
-        link_to_category: finalFormData.categoryLink,
-        media_type: mediaType,
-        stock: finalFormData.stock || 0,
-        featured: finalFormData.featured || false
-      };
-      
-      let result;
-      
       if (isEditing && selectedProduct) {
-        // Update existing product in Supabase
-        result = await supabase
-          .from('Products')
-          .update(productForSupabase)
-          .eq('id', parseInt(selectedProduct.id));
-          
-        if (result.error) {
-          console.error('Update error:', result.error);
-          throw result.error;
-        }
+        // Update existing product
+        await updateProduct(selectedProduct.id, {
+          ...finalFormData,
+          // Ensure media_type is properly set based on the selected type
+          videoUrl: mediaType === 'video' ? finalFormData.videoUrl : undefined
+        });
         
         toast({
           title: "Succès",
           description: "Le produit a été mis à jour avec succès.",
         });
       } else {
-        // Add new product to Supabase
-        result = await supabase
-          .from('Products')
-          .insert([productForSupabase])
-          .select();
-          
-        if (result.error) {
-          console.error('Insert error:', result.error);
-          throw result.error;
-        }
+        // Add new product
+        await createProduct({
+          ...finalFormData,
+          // Ensure media_type is properly set based on the selected type
+          videoUrl: mediaType === 'video' ? finalFormData.videoUrl : undefined
+        });
         
         toast({
           title: "Succès",
