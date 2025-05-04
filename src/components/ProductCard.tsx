@@ -1,11 +1,12 @@
 
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
-import { ShoppingCart } from 'lucide-react';
+import { ShoppingCart, AlertCircle } from 'lucide-react';
 import { Product } from '@/data/products';
 import { Link } from 'react-router-dom';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { formatPrice } from '@/lib/formatPrice';
+import { Badge } from '@/components/ui/badge';
 
 interface ProductCardProps {
   product: Product;
@@ -13,6 +14,10 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addItem } = useCart();
+  
+  // Check if product has stock information
+  const hasStock = typeof product.stock !== 'undefined';
+  const isInStock = hasStock && (product.stock || 0) > 0;
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
@@ -47,6 +52,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
               {formatPrice(product.price)}
               <span className="text-sm text-gray-500 ml-1">/ {product.unit}</span>
             </p>
+            {hasStock && (
+              <p className={`text-xs ${isInStock ? 'text-green-600' : 'text-red-500'}`}>
+                {isInStock ? `Stock: ${product.stock}` : 'Épuisé'}
+              </p>
+            )}
           </div>
           
           <Button 
@@ -56,9 +66,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
             }}
             size="sm"
             className="bg-veggie-primary hover:bg-veggie-dark text-white rounded-md"
+            disabled={hasStock && !isInStock}
           >
-            <ShoppingCart className="h-4 w-4 mr-2" />
-            Ajouter
+            {hasStock && !isInStock ? (
+              <AlertCircle className="h-4 w-4 mr-2" />
+            ) : (
+              <ShoppingCart className="h-4 w-4 mr-2" />
+            )}
+            {hasStock && !isInStock ? 'Épuisé' : 'Ajouter'}
           </Button>
         </div>
       </div>

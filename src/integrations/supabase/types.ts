@@ -59,6 +59,7 @@ export type Database = {
           media_type: string | null
           name: string | null
           price: number | null
+          stock: number | null
           unit: string | null
         }
         Insert: {
@@ -71,6 +72,7 @@ export type Database = {
           media_type?: string | null
           name?: string | null
           price?: number | null
+          stock?: number | null
           unit?: string | null
         }
         Update: {
@@ -83,6 +85,7 @@ export type Database = {
           media_type?: string | null
           name?: string | null
           price?: number | null
+          stock?: number | null
           unit?: string | null
         }
         Relationships: []

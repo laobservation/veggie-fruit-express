@@ -6,15 +6,15 @@ import { Product } from "@/data/products";
 export type SupabaseProduct = {
   id: number;
   name: string | null;
-  category: string | null;  // Changed from 'fruit' | 'vegetable' to string | null to match Supabase
+  category: string | null;  
   price: number | null;
   image_url: string | null;
   description: string | null;
   unit: string | null;
   link_to_category: boolean | null;
-  media_type: string | null;  // Changed from 'image' | 'video' to string | null
+  media_type: string | null;  
   created_at: string | null;
-  stock: number | null;  // Added stock field
+  stock: number | null;  
 };
 
 // Extended Product interface with optional stock
@@ -33,7 +33,7 @@ export const transformProductForSupabase = (product: ExtendedProduct): Omit<Supa
     unit: product.unit,
     link_to_category: product.categoryLink,
     media_type: product.videoUrl ? 'video' : 'image',
-    stock: product.stock || 0,  // Default to 0 if not provided
+    stock: product.stock || 0,  
   };
 };
 
@@ -47,15 +47,15 @@ export const transformProductFromSupabase = (product: SupabaseProduct): Extended
   return {
     id: String(product.id),
     name: product.name,
-    category: product.category as 'fruit' | 'vegetable', // Type assertion to match Product type
+    category: product.category as 'fruit' | 'vegetable',
     price: product.price,
     image: product.image_url,
     description: product.description,
     unit: product.unit,
     categoryLink: product.link_to_category || false,
     videoUrl: product.media_type === 'video' ? product.image_url : undefined,
-    featured: false, // Default value as it's not stored in Supabase
-    stock: product.stock || 0,  // Added stock field
+    featured: false,
+    stock: product.stock || 0,
   };
 };
 
@@ -70,7 +70,6 @@ export const fetchProducts = async (): Promise<ExtendedProduct[]> => {
     throw error;
   }
   
-  // Use type assertion to handle the response from Supabase
   return (data as SupabaseProduct[]).map(transformProductFromSupabase);
 };
 
@@ -99,7 +98,7 @@ export const updateProduct = async (id: string, product: ExtendedProduct): Promi
   const { data, error } = await supabase
     .from('Products')
     .update(supabaseProduct)
-    .eq('id', parseInt(id, 10)) // Convert string id to number
+    .eq('id', parseInt(id, 10))
     .select()
     .single();
   
@@ -116,7 +115,7 @@ export const deleteProduct = async (id: string): Promise<void> => {
   const { error } = await supabase
     .from('Products')
     .delete()
-    .eq('id', parseInt(id, 10)); // Convert string id to number
+    .eq('id', parseInt(id, 10));
   
   if (error) {
     console.error('Error deleting product:', error);

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -329,16 +328,14 @@ const ProductManager: React.FC = () => {
   
   return (
     <div>
-      <div className="flex justify-between items-center mb-4">
-        <div className="flex items-center gap-4">
-          <Link to="/">
-            <Button variant="outline" className="flex items-center gap-2">
-              <ArrowLeft className="h-4 w-4" />
-              Retourner au Site
-            </Button>
-          </Link>
-          <h2 className="text-xl font-semibold">Gestion des Produits</h2>
-        </div>
+      <div className="flex justify-between items-center mb-8">
+        <Link to="/">
+          <Button variant="outline" className="flex items-center gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Retourner au Site
+          </Button>
+        </Link>
+        <h2 className="text-2xl font-bold">Gestion des Produits</h2>
         <Button onClick={handleAddNewProduct} className="bg-veggie-primary hover:bg-veggie-dark">
           <Plus className="h-4 w-4 mr-2" />
           Ajouter un Produit
@@ -354,7 +351,7 @@ const ProductManager: React.FC = () => {
           {allProducts.map(product => (
             <div key={product.id} className="border rounded-md p-4 flex flex-col">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="font-medium text-lg">{product.name}</h3>
+                <h3 className="font-bold text-lg">{product.name}</h3>
                 <Button 
                   variant="ghost" 
                   size="sm" 
@@ -448,7 +445,7 @@ const ProductManager: React.FC = () => {
             
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label htmlFor="price">Prix</Label>
+                <Label htmlFor="price">Prix (DH)</Label>
                 <Input 
                   id="price" 
                   name="price" 
