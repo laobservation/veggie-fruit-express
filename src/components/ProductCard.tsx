@@ -1,11 +1,9 @@
 
-import { Heart, ShoppingBag } from 'lucide-react';
+import { Heart, Plus } from 'lucide-react';
 import { Product } from '@/types/product';
 import { Link } from 'react-router-dom';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { formatPrice } from '@/lib/formatPrice';
 import { useCart } from '@/hooks/use-cart';
-import MediaDisplay from '@/components/MediaDisplay';
 import { useState } from 'react';
 import '@/components/ui/heart-animation.css';
 
@@ -39,39 +37,34 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
 
   return (
     <Link to={`/product/${product.id}`} className="block">
-      <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+      <div className="bg-white rounded-xl overflow-hidden shadow-sm relative">
         <div className="relative">
           {discountPercentage > 0 && (
-            <div className="absolute top-2 left-2 bg-yellow-400 text-black font-medium px-2 py-1 rounded-full text-sm z-10">
+            <div className="absolute bottom-2 right-2 bg-yellow-400 text-black font-medium px-2 py-1 rounded-full text-xs z-10">
               {discountPercentage}%
             </div>
           )}
           
           <button 
             onClick={handleFavoriteClick}
-            className="absolute top-2 right-2 p-2 rounded-full bg-white/80 hover:bg-white z-10"
+            className="absolute top-2 right-2 p-1 rounded-full bg-white/80 hover:bg-white z-10"
             aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
           >
             <Heart 
-              className={`h-5 w-5 heart-animation ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'} ${animating ? 'active' : ''}`} 
+              className={`h-4 w-4 heart-animation ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'} ${animating ? 'active' : ''}`} 
             />
           </button>
           
-          <AspectRatio ratio={1/1} className="bg-gray-50">
-            <MediaDisplay 
-              product={product}
-              className="w-full h-full object-cover"
-            />
-          </AspectRatio>
+          <img 
+            src={product.image}
+            alt={product.name}
+            className="w-full h-32 object-cover bg-gray-50"
+          />
         </div>
         
         <div className="p-3">
-          <div className="mb-1">
-            <h3 className="text-gray-800 font-medium">{product.name}</h3>
-            <p className="text-gray-500 text-sm">{product.category === 'fruit' ? 'Fresh fruits' : 'Fresh vegetables'}</p>
-          </div>
-          
-          <div className="flex items-center justify-between">
+          <h3 className="text-gray-800 font-medium text-sm">{product.name}</h3>
+          <div className="flex justify-between items-center mt-2">
             <div className="font-bold text-gray-900">
               {formatPrice(product.price)}
               <span className="text-xs text-gray-500 font-normal ml-1">/{product.unit}</span>
@@ -87,7 +80,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
               } transition-colors`}
               aria-label="Add to cart"
             >
-              <ShoppingBag className="h-4 w-4 text-white" />
+              <Plus className="h-4 w-4 text-white" />
             </button>
           </div>
           

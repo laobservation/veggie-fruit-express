@@ -24,9 +24,9 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, title, isLoading = 
       ) : products.length === 0 ? (
         <p className="text-center text-gray-500 py-8">Aucun produit trouvé.</p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-4">
           {products.map((product) => (
-            <ProductCard key={product.id} product={product} discountPercentage={0} />
+            <ProductCard key={product.id} product={product} discountPercentage={20} />
           ))}
         </div>
       )}
