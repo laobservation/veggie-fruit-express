@@ -1,80 +1,92 @@
 
-import { Button } from '@/components/ui/button';
-import { useCart } from '@/hooks/use-cart';
-import { ShoppingCart, AlertCircle } from 'lucide-react';
-import { Product } from '@/data/products';
+import { Heart, ShoppingBag } from 'lucide-react';
+import { Product } from '@/types/product';
 import { Link } from 'react-router-dom';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { formatPrice } from '@/lib/formatPrice';
-import { Badge } from '@/components/ui/badge';
+import { useCart } from '@/hooks/use-cart';
 import MediaDisplay from '@/components/MediaDisplay';
+import { useState } from 'react';
 
 interface ProductCardProps {
   product: Product;
+  discountPercentage?: number;
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage = 20 }) => {
   const { addItem } = useCart();
+  const [isFavorite, setIsFavorite] = useState(false);
   
   // Check if product has stock information
   const hasStock = typeof product.stock !== 'undefined';
   const isInStock = hasStock && (product.stock || 0) > 0;
 
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem(product);
+  };
+
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsFavorite(!isFavorite);
+  };
+
   return (
-    <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow">
-      <Link to={`/product/${product.id}`}>
-        <div className="overflow-hidden">
-          <AspectRatio ratio={1/1} className="bg-muted">
-            <MediaDisplay 
-              product={product}
-              className="w-full h-full object-cover transition-transform duration-300 hover:scale-110"
-            />
-          </AspectRatio>
-        </div>
-        
-        <div className="p-4">
-          <div className="flex justify-between items-start mb-2">
-            <h3 className="text-lg font-medium text-gray-900 line-clamp-1">{product.name}</h3>
-            <span className="inline-flex items-center rounded-full bg-veggie-light px-2 py-1 text-xs font-medium text-veggie-dark">
-              {product.category === 'fruit' ? 'Fruit' : 'Légume'}
-            </span>
+    <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-300">
+      <Link to={`/product/${product.id}`} className="block relative">
+        {discountPercentage > 0 && (
+          <div className="absolute top-2 left-2 bg-yellow-400 text-black font-medium px-2 py-1 rounded-full text-sm z-10">
+            {discountPercentage}%
           </div>
-          
-          <p className="text-gray-600 text-sm line-clamp-2 h-10 mb-3">{product.description}</p>
-        </div>
+        )}
+        
+        <button 
+          onClick={handleFavoriteClick}
+          className="absolute top-2 right-2 p-2 rounded-full bg-white/80 hover:bg-white z-10"
+        >
+          <Heart 
+            className={`h-5 w-5 ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 
+          />
+        </button>
+        
+        <AspectRatio ratio={1/1} className="bg-gray-50">
+          <MediaDisplay 
+            product={product}
+            className="w-full h-full object-cover"
+          />
+        </AspectRatio>
       </Link>
       
-      <div className="px-4 pb-4">
-        <div className="flex justify-between items-center">
-          <div>
-            <p className="text-xl font-semibold text-veggie-dark">
-              {formatPrice(product.price)}
-              <span className="text-sm text-gray-500 ml-1">/ {product.unit}</span>
-            </p>
-            {hasStock && (
-              <p className={`text-xs ${isInStock ? 'text-green-600' : 'text-red-500'}`}>
-                {isInStock ? `Stock: ${product.stock}` : 'Épuisé'}
-              </p>
-            )}
+      <div className="p-3">
+        <div className="mb-1">
+          <h3 className="text-gray-500 text-sm font-medium">{product.name}</h3>
+        </div>
+        
+        <div className="flex items-center justify-between">
+          <div className="font-bold text-gray-900">
+            {formatPrice(product.price)}
+            <span className="text-xs text-gray-500 font-normal ml-1">/{product.unit}</span>
           </div>
           
-          <Button 
-            onClick={(e) => {
-              e.preventDefault();
-              addItem(product);
-            }}
-            size="sm"
-            className="bg-veggie-primary hover:bg-veggie-dark text-white rounded-md"
+          <button 
+            onClick={handleAddToCart}
             disabled={hasStock && !isInStock}
+            className={`rounded-full p-2 ${
+              hasStock && !isInStock 
+                ? 'bg-gray-300 cursor-not-allowed' 
+                : 'bg-yellow-400 hover:bg-yellow-500'
+            } transition-colors`}
+            aria-label="Add to cart"
           >
-            {hasStock && !isInStock ? (
-              <AlertCircle className="h-4 w-4 mr-2" />
-            ) : (
-              <ShoppingCart className="h-4 w-4 mr-2" />
-            )}
-            {hasStock && !isInStock ? 'Épuisé' : 'Ajouter'}
-          </Button>
+            <ShoppingBag className="h-4 w-4 text-white" />
+          </button>
         </div>
+        
+        {hasStock && !isInStock && (
+          <p className="text-xs text-red-500 mt-1">Épuisé</p>
+        )}
       </div>
     </div>
   );
