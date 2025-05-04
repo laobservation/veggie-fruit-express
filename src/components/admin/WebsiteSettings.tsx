@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -149,7 +148,7 @@ const WebsiteSettings: React.FC = () => {
       setSettings({
         ...settings,
         [parent]: {
-          ...settings[parent as keyof WebsiteSettings],
+          ...(settings[parent as keyof WebsiteSettings] as Record<string, unknown> || {}),
           [child]: value,
         },
       });
