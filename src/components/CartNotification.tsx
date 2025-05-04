@@ -4,6 +4,7 @@ import { ShoppingCart, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/formatPrice';
 import { Product } from '@/data/products';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface CartNotificationProps {
   product: Product;
@@ -23,6 +24,7 @@ const CartNotification: React.FC<CartNotificationProps> = ({
   autoCloseTime = 4000,
 }) => {
   const [isVisible, setIsVisible] = useState(false);
+  const isMobile = useIsMobile();
   
   useEffect(() => {
     // Trigger animation after a small delay
@@ -53,27 +55,33 @@ const CartNotification: React.FC<CartNotificationProps> = ({
   return (
     <div
       className={cn(
-        "fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 transition-all duration-300 transform",
-        isVisible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0"
+        "fixed z-50 bg-white shadow-lg transition-all duration-300 transform",
+        isVisible ? "opacity-100" : "opacity-0",
+        isMobile 
+          ? "bottom-0 left-0 right-0 border-t border-gray-200 translate-y-0" 
+          : "bottom-4 right-4 w-80 rounded-lg border border-gray-200",
+        !isVisible && (isMobile ? "translate-y-4" : "translate-y-2")
       )}
       role="alert"
     >
-      <div className="container mx-auto p-4">
+      <div className="p-4">
         <div className="flex justify-between items-start">
           <div className="flex items-center">
-            <ShoppingCart className="h-5 w-5 text-veggie-primary mr-2" />
-            <h3 className="text-sm font-medium text-gray-900">Produit ajouté au panier</h3>
+            <div className="bg-veggie-light p-2 rounded-full mr-2">
+              <ShoppingCart className="h-5 w-5 text-veggie-primary" />
+            </div>
+            <h3 className="text-sm font-semibold text-gray-900">Produit ajouté au panier</h3>
           </div>
           <button
             onClick={handleClose}
-            className="text-gray-400 hover:text-gray-600 transition-colors"
+            className="text-gray-400 hover:text-gray-600 transition-colors bg-gray-100 rounded-full p-1"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
         
-        <div className="mt-2 flex items-center">
-          <div className="h-10 w-10 rounded overflow-hidden mr-3 bg-gray-100">
+        <div className="mt-3 flex items-center">
+          <div className="h-14 w-14 rounded-md overflow-hidden mr-3 bg-gray-100 shadow-sm border border-gray-200">
             <img
               src={product.image}
               alt={product.name}
@@ -82,7 +90,7 @@ const CartNotification: React.FC<CartNotificationProps> = ({
           </div>
           <div>
             <p className="text-sm font-medium text-gray-900 line-clamp-1">{product.name}</p>
-            <p className="text-xs text-gray-500">
+            <p className="text-sm text-veggie-dark font-semibold">
               {quantity} × {formatPrice(product.price)}
             </p>
           </div>
@@ -90,7 +98,7 @@ const CartNotification: React.FC<CartNotificationProps> = ({
         
         <button
           onClick={onViewCart}
-          className="mt-3 w-full bg-veggie-light hover:bg-veggie-light/80 text-veggie-dark text-sm py-1.5 px-2 rounded transition-colors"
+          className="mt-3 w-full bg-veggie-primary hover:bg-veggie-dark text-white text-sm py-2 px-4 rounded transition-colors font-medium"
         >
           Voir le panier
         </button>

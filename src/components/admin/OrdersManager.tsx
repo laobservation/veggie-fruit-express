@@ -1,11 +1,18 @@
+
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Trash2, RefreshCw, Eye, Download, Mail } from 'lucide-react';
+import { Trash2, RefreshCw, Eye, Download, Check, X } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { Json } from '@/integrations/supabase/types';
@@ -102,36 +109,38 @@ const OrdersManager: React.FC = () => {
   }, []);
 
   const handleDeleteOrder = async (orderId: number) => {
-    try {
-      const { error } = await supabase
-        .from('Orders')
-        .delete()
-        .eq('id', orderId);
+    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) {
+      try {
+        const { error } = await supabase
+          .from('Orders')
+          .delete()
+          .eq('id', orderId);
 
-      if (error) {
-        console.error('Error deleting order:', error);
+        if (error) {
+          console.error('Error deleting order:', error);
+          toast({
+            title: "Erreur",
+            description: "Impossible de supprimer la commande.",
+            variant: "destructive",
+          });
+          return;
+        }
+
+        toast({
+          title: "Succès",
+          description: "La commande a été supprimée avec succès.",
+        });
+        
+        // Refresh the orders list
+        fetchOrders();
+      } catch (err) {
+        console.error('Error in deleting order:', err);
         toast({
           title: "Erreur",
-          description: "Impossible de supprimer la commande.",
+          description: "Une erreur s'est produite lors de la suppression de la commande.",
           variant: "destructive",
         });
-        return;
       }
-
-      toast({
-        title: "Succès",
-        description: "La commande a été supprimée avec succès.",
-      });
-      
-      // Refresh the orders list
-      fetchOrders();
-    } catch (err) {
-      console.error('Error in deleting order:', err);
-      toast({
-        title: "Erreur",
-        description: "Une erreur s'est produite lors de la suppression de la commande.",
-        variant: "destructive",
-      });
     }
   };
 
@@ -277,6 +286,14 @@ const OrdersManager: React.FC = () => {
     }
   };
 
+  const statusOptions = [
+    { value: 'new', label: 'Nouvelle', color: 'bg-gray-500' },
+    { value: 'processing', label: 'En traitement', color: 'bg-blue-500' },
+    { value: 'shipped', label: 'Expédiée', color: 'bg-orange-500' },
+    { value: 'delivered', label: 'Livrée', color: 'bg-green-500' },
+    { value: 'cancelled', label: 'Annulée', color: 'bg-red-500' }
+  ];
+
   return (
     <div>
       <div className="flex justify-between items-center mb-4">
@@ -297,56 +314,80 @@ const OrdersManager: React.FC = () => {
           {loading ? 'Chargement des commandes...' : 'Aucune commande trouvée.'}
         </p>
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>ID</TableHead>
-              <TableHead>Client</TableHead>
-              <TableHead>Adresse</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Statut</TableHead>
-              <TableHead>Total</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {orders.map((order) => (
-              <TableRow key={order.id}>
-                <TableCell>#{order.id}</TableCell>
-                <TableCell>{order['Client Name']}</TableCell>
-                <TableCell className="truncate max-w-[200px]">{order['Adresse']}</TableCell>
-                <TableCell>{formatDate(order.created_at)}</TableCell>
-                <TableCell>{getStatusBadge(order.status)}</TableCell>
-                <TableCell>€{order.total_amount?.toFixed(2) || '0.00'}</TableCell>
-                <TableCell className="text-right">
-                  <div className="flex justify-end space-x-1">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleViewOrder(order)}
-                    >
-                      <Eye className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => generateOrderPDF(order)}
-                    >
-                      <Download className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleDeleteOrder(order.id)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Client</TableHead>
+                <TableHead>Adresse</TableHead>
+                <TableHead>Date</TableHead>
+                <TableHead>Statut</TableHead>
+                <TableHead>Total</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {orders.map((order) => (
+                <TableRow key={order.id}>
+                  <TableCell>#{order.id}</TableCell>
+                  <TableCell>{order['Client Name']}</TableCell>
+                  <TableCell className="truncate max-w-[200px]">{order['Adresse']}</TableCell>
+                  <TableCell>{formatDate(order.created_at)}</TableCell>
+                  <TableCell>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-fit px-2">
+                          {getStatusBadge(order.status)}
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="start">
+                        {statusOptions.map(option => (
+                          <DropdownMenuItem 
+                            key={option.value}
+                            onClick={() => handleUpdateStatus(order.id, option.value)}
+                            className="flex items-center gap-2"
+                          >
+                            <span className={`w-3 h-3 rounded-full ${option.color}`}></span>
+                            {option.label}
+                            {order.status === option.value && <Check className="h-4 w-4 ml-1" />}
+                          </DropdownMenuItem>
+                        ))}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                  <TableCell>€{order.total_amount?.toFixed(2) || '0.00'}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex justify-end space-x-1">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleViewOrder(order)}
+                      >
+                        <Eye className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => generateOrderPDF(order)}
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteOrder(order.id)}
+                        className="text-red-500 hover:text-red-700 hover:bg-red-50"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       )}
 
       {/* Order Details Dialog */}
@@ -358,7 +399,7 @@ const OrdersManager: React.FC = () => {
           
           {selectedOrder && (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <h3 className="font-semibold mb-1">Informations Client</h3>
                   <p><span className="font-medium">Nom:</span> {selectedOrder['Client Name']}</p>
@@ -411,41 +452,17 @@ const OrdersManager: React.FC = () => {
               <div>
                 <h3 className="font-semibold mb-2">Mettre à jour le statut</h3>
                 <div className="flex flex-wrap gap-2">
-                  <Button 
-                    size="sm" 
-                    variant={selectedOrder.status === 'new' ? 'default' : 'outline'}
-                    onClick={() => handleUpdateStatus(selectedOrder.id, 'new')}
-                  >
-                    Nouvelle
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant={selectedOrder.status === 'processing' ? 'default' : 'outline'}
-                    onClick={() => handleUpdateStatus(selectedOrder.id, 'processing')}
-                  >
-                    En traitement
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant={selectedOrder.status === 'shipped' ? 'default' : 'outline'}
-                    onClick={() => handleUpdateStatus(selectedOrder.id, 'shipped')}
-                  >
-                    Expédiée
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant={selectedOrder.status === 'delivered' ? 'default' : 'outline'}
-                    onClick={() => handleUpdateStatus(selectedOrder.id, 'delivered')}
-                  >
-                    Livrée
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant={selectedOrder.status === 'cancelled' ? 'default' : 'outline'}
-                    onClick={() => handleUpdateStatus(selectedOrder.id, 'cancelled')}
-                  >
-                    Annulée
-                  </Button>
+                  {statusOptions.map(option => (
+                    <Button 
+                      key={option.value}
+                      size="sm" 
+                      variant={selectedOrder.status === option.value ? 'default' : 'outline'}
+                      onClick={() => handleUpdateStatus(selectedOrder.id, option.value)}
+                      className={selectedOrder.status === option.value ? option.color : ''}
+                    >
+                      {option.label}
+                    </Button>
+                  ))}
                 </div>
               </div>
               

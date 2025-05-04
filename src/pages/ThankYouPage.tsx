@@ -1,5 +1,6 @@
+
 import React, { useEffect, useRef } from 'react';
-import { useLocation, Link } from 'react-router-dom';
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
@@ -8,11 +9,14 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const ThankYouPage = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const { toast } = useToast();
   const orderContentRef = useRef<HTMLDivElement>(null);
+  const isMobile = useIsMobile();
   
   const { orderDetails } = location.state || { 
     orderDetails: {
@@ -24,6 +28,18 @@ const ThankYouPage = () => {
       items: []
     } 
   };
+
+  // Redirect to homepage if no order details
+  useEffect(() => {
+    if (!orderDetails.name) {
+      navigate('/');
+    } else {
+      // Auto-generate and download PDF for the user
+      setTimeout(() => {
+        generatePDF();
+      }, 1000);
+    }
+  }, [orderDetails, navigate]);
 
   // Send notification to store owner
   useEffect(() => {
@@ -60,70 +76,79 @@ const ThankYouPage = () => {
   }, []);
 
   const generatePDF = () => {
-    const doc = new jsPDF();
-    
-    // Add company logo/header
-    doc.setFontSize(20);
-    doc.setTextColor(39, 174, 96);
-    doc.text("Marché Bio", 105, 20, { align: 'center' });
-    
-    doc.setFontSize(14);
-    doc.setTextColor(0, 0, 0);
-    doc.text("Récapitulatif de Commande", 105, 30, { align: 'center' });
-    
-    // Customer information
-    doc.setFontSize(12);
-    doc.text("Informations Client", 20, 45);
-    doc.setFontSize(10);
-    doc.text(`Nom: ${orderDetails.name}`, 20, 55);
-    doc.text(`Adresse: ${orderDetails.address}`, 20, 60);
-    doc.text(`Téléphone: ${orderDetails.phone}`, 20, 65);
-    if (orderDetails.preferredTime) {
-      doc.text(`Heure de livraison préférée: ${orderDetails.preferredTime}`, 20, 70);
-    }
-    
-    // Items table
-    const tableColumn = ["Produit", "Quantité", "Prix unitaire", "Total"];
-    const tableRows: any[] = [];
-    
-    if (orderDetails.items && orderDetails.items.length > 0) {
-      orderDetails.items.forEach((item: any) => {
-        const itemData = [
-          item.product.name,
-          item.quantity,
-          `€${item.product.price.toFixed(2)}`,
-          `€${(item.product.price * item.quantity).toFixed(2)}`
-        ];
-        tableRows.push(itemData);
+    try {
+      const doc = new jsPDF();
+      
+      // Add company logo/header
+      doc.setFontSize(20);
+      doc.setTextColor(39, 174, 96);
+      doc.text("Marché Bio", 105, 20, { align: 'center' });
+      
+      doc.setFontSize(14);
+      doc.setTextColor(0, 0, 0);
+      doc.text("Récapitulatif de Commande", 105, 30, { align: 'center' });
+      
+      // Customer information
+      doc.setFontSize(12);
+      doc.text("Informations Client", 20, 45);
+      doc.setFontSize(10);
+      doc.text(`Nom: ${orderDetails.name}`, 20, 55);
+      doc.text(`Adresse: ${orderDetails.address}`, 20, 60);
+      doc.text(`Téléphone: ${orderDetails.phone}`, 20, 65);
+      if (orderDetails.preferredTime) {
+        doc.text(`Heure de livraison préférée: ${orderDetails.preferredTime}`, 20, 70);
+      }
+      
+      // Items table
+      const tableColumn = ["Produit", "Quantité", "Prix unitaire", "Total"];
+      const tableRows: any[] = [];
+      
+      if (orderDetails.items && orderDetails.items.length > 0) {
+        orderDetails.items.forEach((item: any) => {
+          const itemData = [
+            item.product.name,
+            item.quantity,
+            `€${item.product.price.toFixed(2)}`,
+            `€${(item.product.price * item.quantity).toFixed(2)}`
+          ];
+          tableRows.push(itemData);
+        });
+      }
+      
+      // @ts-ignore - jspdf-autotable types are not fully compatible
+      doc.autoTable({
+        head: [tableColumn],
+        body: tableRows,
+        startY: 80,
+        theme: 'striped',
+        headStyles: { fillColor: [39, 174, 96] }
+      });
+      
+      // Total
+      const finalY = (doc as any).lastAutoTable.finalY || 120;
+      doc.setFontSize(12);
+      doc.text(`Total: €${orderDetails.totalAmount.toFixed(2)}`, 150, finalY + 15);
+      
+      // Thank you note
+      doc.setFontSize(10);
+      doc.text("Merci pour votre commande!", 105, finalY + 30, { align: 'center' });
+      doc.text("Notre équipe prépare vos produits avec soin.", 105, finalY + 35, { align: 'center' });
+      
+      // Save PDF
+      doc.save(`commande-${new Date().toISOString().split('T')[0]}.pdf`);
+      
+      toast({
+        title: "PDF téléchargé",
+        description: "Le récapitulatif de votre commande a été téléchargé."
+      });
+    } catch (err) {
+      console.error('Error generating PDF:', err);
+      toast({
+        title: "Erreur",
+        description: "Impossible de générer le PDF. Veuillez réessayer.",
+        variant: "destructive"
       });
     }
-    
-    // @ts-ignore - jspdf-autotable types are not fully compatible
-    doc.autoTable({
-      head: [tableColumn],
-      body: tableRows,
-      startY: 80,
-      theme: 'striped',
-      headStyles: { fillColor: [39, 174, 96] }
-    });
-    
-    // Total
-    const finalY = (doc as any).lastAutoTable.finalY || 120;
-    doc.setFontSize(12);
-    doc.text(`Total: €${orderDetails.totalAmount.toFixed(2)}`, 150, finalY + 15);
-    
-    // Thank you note
-    doc.setFontSize(10);
-    doc.text("Merci pour votre commande!", 105, finalY + 30, { align: 'center' });
-    doc.text("Notre équipe prépare vos produits avec soin.", 105, finalY + 35, { align: 'center' });
-    
-    // Save PDF
-    doc.save(`commande-${new Date().toISOString().split('T')[0]}.pdf`);
-    
-    toast({
-      title: "PDF téléchargé",
-      description: "Le récapitulatif de votre commande a été téléchargé."
-    });
   };
 
   return (
