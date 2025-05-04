@@ -92,8 +92,8 @@ export const deleteOrder = async (orderId: number) => {
         
         // Third attempt: using RPC
         console.log(`Trying third delete approach with raw query for order ${orderId}`);
-        // Fix: Use correct type parameters for the RPC call
-        const { error: thirdAttemptError } = await supabase.rpc<DeleteOrderResult, DeleteOrderParams>(
+        // Fix: Use appropriate generic typing for the RPC call
+        const { error: thirdAttemptError } = await supabase.rpc(
           'delete_order_by_id',
           { order_id: Number(orderId) }
         );
