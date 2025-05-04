@@ -89,6 +89,21 @@ interface TopClient {
   amount: string;
 }
 
+// Define an interface for the Products table from Supabase
+interface SupabaseProduct {
+  id: number;
+  name: string | null;
+  category: string | null;
+  price: number | null;
+  image_url: string | null;
+  description: string | null;
+  unit: string | null;
+  link_to_category: boolean | null;
+  media_type: string | null;
+  created_at: string | null;
+  stock: number | null;
+}
+
 const AdminPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [stats, setStats] = useState({
@@ -158,11 +173,11 @@ const AdminPage: React.FC = () => {
 
       if (productsError) throw productsError;
 
-      // Format products for display
-      const formattedProducts = (productsData || []).map(product => ({
+      // Format products for display - casting to SupabaseProduct to access stock property
+      const formattedProducts = (productsData || []).map((product: SupabaseProduct) => ({
         id: String(product.id),
         name: product.name || 'Produit sans nom',
-        orderId: `#${1000 + parseInt(product.id)}`, 
+        orderId: `#${1000 + product.id}`, // Here we convert the ID to string by concatenation
         stock: (product.stock && product.stock > 0) ? 'In Stock' : 'Out of Stock',
         review: 4.0 + Math.random() * 0.9, // Mock review score between 4.0-4.9
         sold: Math.floor(Math.random() * 100) + 50, // Mock sales number between 50-150
