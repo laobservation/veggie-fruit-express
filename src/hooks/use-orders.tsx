@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Order, OrderStatus, RawOrder } from '@/types/order';
 import { useToast } from '@/hooks/use-toast';
@@ -6,7 +5,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { 
   fetchPaginatedOrders, 
   deleteOrder as deleteOrderService,
-  updateOrderStatus as updateOrderStatusService
+  updateOrderStatus as updateOrderStatusService,
+  transformRawOrder
 } from '@/services/orderService';
 import { generateOrderPDF } from '@/utils/pdfUtils';
 
@@ -29,18 +29,7 @@ export const useOrders = () => {
         await fetchPaginatedOrders(page, ordersPerPage);
       
       // Transform raw orders to Order type
-      const transformedOrders = fetchedOrders.map((order: RawOrder): Order => ({
-        id: order.id,
-        'Client Name': order['Client Name'] || '',
-        'Adresse': order.Adresse || '',
-        'Phone': order.Phone,
-        order_items: Array.isArray(order.order_items) ? order.order_items : [],
-        total_amount: order.total_amount || 0,
-        preferred_time: order.preferred_time,
-        status: (order.status as OrderStatus) || 'new',
-        notified: order.notified || false,
-        created_at: order.created_at
-      }));
+      const transformedOrders = fetchedOrders.map(transformRawOrder);
       
       setOrders(transformedOrders);
       setTotalPages(calculatedTotalPages);

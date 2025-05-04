@@ -4,12 +4,12 @@ import { Json } from '@/integrations/supabase/types';
 export type OrderStatus = 'new' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
 
 export interface OrderItem {
-  id?: number;
-  order_id?: number;
   productId: number;
   productName: string;
   quantity: number;
   price: number;
+  id?: number;
+  order_id?: number;
   Products?: any; // For joins with the Products table
 }
 
@@ -18,11 +18,11 @@ export interface Order {
   'Client Name': string;
   'Adresse': string;
   'Phone': number | null;
-  order_items?: OrderItem[];
+  order_items: OrderItem[];
   total_amount?: number;
   preferred_time?: string | null;
-  status?: OrderStatus;
-  notified?: boolean;
+  status: OrderStatus;
+  notified: boolean;
   created_at: string;
 }
 

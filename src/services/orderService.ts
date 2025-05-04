@@ -2,6 +2,35 @@
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { Order, OrderItem, OrderStatus, RawOrder } from '@/types/order';
+import { Json } from '@/integrations/supabase/types';
+import { Product } from '@/types/product';
+
+// Helper function to convert OrderItem[] to Json for Supabase storage
+const convertOrderItemsToJson = (items: OrderItem[]): Json => {
+  return items as unknown as Json;
+};
+
+// Helper function to convert Json to OrderItem[] from Supabase retrieval
+const convertJsonToOrderItems = (json: Json | null): OrderItem[] => {
+  if (!json || !Array.isArray(json)) {
+    return [];
+  }
+  
+  return json.map(item => ({
+    productId: Number(item.productId || 0),
+    productName: String(item.productName || ''),
+    quantity: Number(item.quantity || 0),
+    price: Number(item.price || 0)
+  }));
+};
+
+// Helper function to fix product type imports for HomePage
+export const fixProductImportType = (products: any[]): Product[] => {
+  return products.map(product => ({
+    ...product,
+    id: String(product.id)
+  }));
+};
 
 export const createOrder = async (orderData: Partial<Order>): Promise<number | null> => {
   try {
@@ -10,7 +39,7 @@ export const createOrder = async (orderData: Partial<Order>): Promise<number | n
       'Client Name': orderData['Client Name'],
       'Adresse': orderData['Adresse'],
       'Phone': orderData['Phone'],
-      order_items: orderData.order_items || [],
+      order_items: convertOrderItemsToJson(orderData.order_items || []),
       total_amount: orderData.total_amount,
       preferred_time: orderData.preferred_time,
       status: orderData.status || 'new',
@@ -44,7 +73,7 @@ export const transformRawOrder = (rawOrder: RawOrder): Order => {
     'Client Name': rawOrder['Client Name'] || '',
     'Adresse': rawOrder.Adresse || '',
     'Phone': rawOrder.Phone,
-    order_items: Array.isArray(rawOrder.order_items) ? rawOrder.order_items as OrderItem[] : [],
+    order_items: convertJsonToOrderItems(rawOrder.order_items),
     total_amount: rawOrder.total_amount || 0,
     preferred_time: rawOrder.preferred_time,
     status: (rawOrder.status as OrderStatus) || 'new',
@@ -141,7 +170,7 @@ export const getOrders = async (): Promise<Order[]> => {
   }
 };
 
-export const fetchPaginatedOrders = async (page: number, pageSize: number) => {
+export const fetchPaginatedOrders = async (page: number, pageSize: number): Promise<{ orders: RawOrder[], totalPages: number }> => {
   try {
     // Calculate start and end indices for pagination
     const from = (page - 1) * pageSize;
