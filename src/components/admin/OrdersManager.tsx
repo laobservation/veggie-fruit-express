@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -166,7 +165,7 @@ const OrdersManager: React.FC = () => {
           const { error: thirdAttemptError } = await supabase.rpc(
             'delete_order_by_id', 
             { order_id: orderId }
-          ).single();
+          );
           
           if (thirdAttemptError) {
             console.error('All deletion attempts failed:', thirdAttemptError);
@@ -311,4 +310,3 @@ const OrdersManager: React.FC = () => {
 };
 
 export default OrdersManager;
-
