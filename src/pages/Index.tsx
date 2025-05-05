@@ -3,15 +3,18 @@ import React from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import HomePage from './HomePage';
-import { Home, Heart, ShoppingCart, Wallet, Settings } from 'lucide-react';
+import { Home, Heart, ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useCart } from '@/hooks/use-cart';
 
 const Index = () => {
+  const { getTotalItems } = useCart();
+  
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
       <main className="flex-grow">
-        <div className="container mx-auto">
+        <div className="container mx-auto px-0 md:px-4">
           <HomePage />
         </div>
       </main>
@@ -67,17 +70,14 @@ const Index = () => {
           <Heart className="h-5 w-5 text-gray-500" />
           <span className="text-xs text-gray-600 mt-1">Favorites</span>
         </Link>
-        <Link to="/cart" className="flex flex-col items-center p-2">
+        <Link to="/cart" className="flex flex-col items-center p-2 relative">
           <ShoppingCart className="h-5 w-5 text-gray-500" />
+          {getTotalItems() > 0 && (
+            <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+              {getTotalItems()}
+            </span>
+          )}
           <span className="text-xs text-gray-600 mt-1">Cart</span>
-        </Link>
-        <Link to="/profile" className="flex flex-col items-center p-2">
-          <Wallet className="h-5 w-5 text-gray-500" />
-          <span className="text-xs text-gray-600 mt-1">Wallet</span>
-        </Link>
-        <Link to="/settings" className="flex flex-col items-center p-2">
-          <Settings className="h-5 w-5 text-gray-500" />
-          <span className="text-xs text-gray-600 mt-1">Profile</span>
         </Link>
       </div>
       

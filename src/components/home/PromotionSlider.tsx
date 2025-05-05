@@ -15,7 +15,7 @@ interface PromotionSliderProps {
 
 const PromotionSlider: React.FC<PromotionSliderProps> = ({ promotions }) => {
   return (
-    <div className="flex gap-4 overflow-x-auto scrollbar-none pb-2 mb-8">
+    <div className="flex gap-4 overflow-x-auto scrollbar-none pb-2 mb-8 px-4 md:px-0">
       {promotions.map((promo) => (
         <div 
           key={promo.id} 

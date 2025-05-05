@@ -21,12 +21,12 @@ const NewArrivalSection: React.FC<NewArrivalSectionProps> = ({ products, isLoadi
   };
 
   return (
-    <div>
+    <div className="px-4 md:px-0 pb-16">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-800">New Arrival</h2>
       </div>
       
-      <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
         {isLoading ? (
           Array(6).fill(0).map((_, index) => (
             <div key={index} className="bg-white p-4 rounded-lg shadow-sm animate-pulse">
