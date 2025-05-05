@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Order, OrderStatus, RawOrder } from '@/types/order';
 import { useToast } from '@/hooks/use-toast';
@@ -8,8 +7,8 @@ import {
   deleteOrder as deleteOrderService,
   updateOrderStatus as updateOrderStatusService,
   transformRawOrder
-} from '@/services/order';
-import { generateOrderPDF } from '@/utils/pdf';
+} from '@/services/orderService';
+import { generateOrderPDF } from '@/utils/pdfUtils';
 
 export const useOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
@@ -71,19 +70,8 @@ export const useOrders = () => {
               setViewDialogOpen(false);
               setSelectedOrder(null);
             }
-          } else if (payload.eventType === 'UPDATE' && payload.new) {
-            // For update events, update the specific order in the UI
-            const updatedOrder = transformRawOrder(payload.new as RawOrder);
-            setOrders(prevOrders => prevOrders.map(order => 
-              order.id === updatedOrder.id ? updatedOrder : order
-            ));
-            
-            // Also update the selected order if it's being viewed
-            if (selectedOrder && selectedOrder.id === updatedOrder.id) {
-              setSelectedOrder(updatedOrder);
-            }
-          } else if (payload.eventType === 'INSERT') {
-            // For insert events, refresh the order list
+          } else {
+            // For other events, refresh the order list to keep UI in sync
             fetchOrders();
           }
         }

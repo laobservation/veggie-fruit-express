@@ -6,7 +6,6 @@ import HomePage from './HomePage';
 import { Home, Heart, ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useCart } from '@/hooks/use-cart';
-import BottomNavBar from '@/components/BottomNavBar';
 
 const Index = () => {
   const { getTotalItems, openCart } = useCart();
@@ -14,7 +13,7 @@ const Index = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
-      <main className="flex-grow pb-16 md:pb-0">
+      <main className="flex-grow">
         <div className="container mx-auto px-0 md:px-4">
           <HomePage />
         </div>
@@ -60,9 +59,6 @@ const Index = () => {
           </Link>
         </div>
       </div>
-      
-      {/* Bottom Navigation Bar (Mobile) */}
-      <BottomNavBar />
       
       {/* Desktop Footer - Only shown on desktop */}
       <div className="hidden md:block">

@@ -5,7 +5,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { generateThankYouPDF } from '@/utils/pdf';
+import { generateThankYouPDF } from '@/utils/pdfUtils';
 import OrderConfirmation from '@/components/thankyou/OrderConfirmation';
 
 const ThankYouPage = () => {
@@ -13,7 +13,7 @@ const ThankYouPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  const { orderDetails, autoDownload } = location.state || { 
+  const { orderDetails } = location.state || { 
     orderDetails: {
       name: '',
       address: '',
@@ -21,19 +21,20 @@ const ThankYouPage = () => {
       preferredTime: '',
       totalAmount: 0,
       items: []
-    },
-    autoDownload: false
+    } 
   };
 
   // Redirect to homepage if no order details
   useEffect(() => {
     if (!orderDetails.name) {
       navigate('/');
-    } else if (autoDownload) {
-      // Auto-generate and download PDF if flag is set
-      generatePDF();
+    } else {
+      // Auto-generate and download PDF for the user
+      setTimeout(() => {
+        generatePDF();
+      }, 1000);
     }
-  }, [orderDetails, navigate, autoDownload]);
+  }, [orderDetails, navigate]);
 
   // Send notification to store owner
   useEffect(() => {
