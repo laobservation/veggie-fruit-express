@@ -66,8 +66,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
         
         <div className="p-3">
           <h3 className="text-gray-800 font-medium text-sm">{product.name}</h3>
-          <div className="flex justify-between items-center mt-2">
-            <div className="font-bold text-gray-900">
+          <div className="flex flex-col items-center mt-2">
+            <div className="font-bold text-gray-900 self-start">
               {formatPrice(product.price)}
               <span className="text-xs text-gray-500 font-normal ml-1">/{product.unit}</span>
             </div>
@@ -75,7 +75,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
             <button 
               onClick={handleAddToCart}
               disabled={hasStock && !isInStock}
-              className={`rounded-full p-2 ${
+              className={`rounded-full p-2 mt-2 ${
                 hasStock && !isInStock 
                   ? 'bg-gray-300 cursor-not-allowed' 
                   : 'bg-yellow-400 hover:bg-yellow-500'
