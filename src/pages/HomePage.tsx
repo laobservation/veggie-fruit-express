@@ -8,7 +8,6 @@ import { Product } from '@/types/product';
 import PromotionSlider from '@/components/home/PromotionSlider';
 import CategoriesSection from '@/components/home/CategoriesSection';
 import PopularItemsSection from '@/components/home/PopularItemsSection';
-import NewArrivalSection from '@/components/home/NewArrivalSection';
 
 const HomePage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -72,9 +71,6 @@ const HomePage: React.FC = () => {
 
       {/* Popular Items Section */}
       <PopularItemsSection products={products} isLoading={isLoading} />
-      
-      {/* New Arrival Section */}
-      <NewArrivalSection products={products} isLoading={isLoading} />
     </div>
   );
 };
