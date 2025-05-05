@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { submitOrderToSupabase } from './delivery-utils';
 import CustomerInfoFields from './CustomerInfoFields';
 import DeliveryTimeFields from './DeliveryTimeFields';
+import { OrderItem } from '@/types/order';
 
 interface DeliveryFormContainerProps {
   onClose: () => void;
@@ -40,9 +41,9 @@ const DeliveryFormContainer: React.FC<DeliveryFormContainerProps> = ({ onClose }
 
   const onSubmit = async (data: FormValues) => {
     try {
-      // Prepare order items data
-      const itemsData = items.map(item => ({
-        productId: item.product.id,
+      // Prepare order items data with proper type conversion
+      const itemsData: OrderItem[] = items.map(item => ({
+        productId: Number(item.product.id), // Explicitly convert to number
         productName: item.product.name,
         quantity: item.quantity,
         price: item.product.price

@@ -7,7 +7,7 @@ import { OrderItemJson } from './types';
 export const convertOrderItemsToJson = (items: OrderItem[]): Json => {
   // Convert items to plain objects that match the Json type
   return items.map(item => ({
-    productId: item.productId,
+    productId: Number(item.productId), // Ensure productId is a number
     productName: item.productName,
     quantity: item.quantity,
     price: item.price
@@ -22,7 +22,7 @@ export const convertJsonToOrderItems = (json: Json | null): OrderItem[] => {
   
   // Type assertion to handle Json elements as record objects
   return json.map((item: any) => ({
-    productId: Number(item?.productId || 0),
+    productId: Number(item?.productId || 0), // Ensure productId is a number
     productName: String(item?.productName || ''),
     quantity: Number(item?.quantity || 0),
     price: Number(item?.price || 0)

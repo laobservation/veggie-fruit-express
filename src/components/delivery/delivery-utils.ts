@@ -2,13 +2,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { FormValues } from './DeliveryFormContainer';
 import { convertOrderItemsToJson } from '@/services/order';
-
-interface OrderItem {
-  productId: number | string;
-  productName: string;
-  quantity: number;
-  price: number;
-}
+import { OrderItem } from '@/types/order';
 
 export const submitOrderToSupabase = async (
   formData: FormValues,
