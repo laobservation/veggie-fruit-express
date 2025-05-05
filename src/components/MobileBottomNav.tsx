@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Heart, MessageSquare } from 'lucide-react';
+import { Home, Heart, MessageSquare, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
 import { useFavorites } from '@/hooks/use-favorites';
 
@@ -53,9 +53,12 @@ const MobileBottomNav = () => {
         className="flex flex-col items-center relative"
       >
         <div className="bg-green-50 rounded-full p-3">
-          <span className="text-green-600 font-semibold">
-            {getTotalItems() < 10 ? `0${getTotalItems()}` : getTotalItems()}
-          </span>
+          <ShoppingCart className="h-5 w-5 text-green-600 stroke-[2.5px]" />
+          {getTotalItems() > 0 && (
+            <span className="absolute -top-1 -right-1 bg-green-600 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-bold">
+              {getTotalItems()}
+            </span>
+          )}
         </div>
         <span className="text-xs font-medium text-gray-800 mt-1">Cart</span>
       </button>
