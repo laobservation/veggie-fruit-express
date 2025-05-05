@@ -1,15 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
-import ProductGrid from '@/components/ProductGrid';
+import { useNavigate } from 'react-router-dom';
 import { getProductsWithStock } from '@/data/products';
 import { useToast } from '@/hooks/use-toast';
 import { fixProductImportType } from '@/services/productService';
-import { CategoryNavigation } from '@/components/CategoryNavigation';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 const HomePage: React.FC = () => {
-  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [products, setProducts] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Load products from Supabase
   useEffect(() => {
@@ -18,16 +19,13 @@ const HomePage: React.FC = () => {
       try {
         const products = await getProductsWithStock();
         
-        // Filter out featured products
-        const featured = products.filter((product) => product.featured);
-        
         // Fix product types to ensure compatibility
-        setFeaturedProducts(fixProductImportType(featured));
+        setProducts(fixProductImportType(products));
       } catch (error) {
         console.error('Error loading products:', error);
         toast({
-          title: "Erreur",
-          description: "Impossible de charger les produits.",
+          title: "Error",
+          description: "Unable to load products.",
           variant: "destructive",
         });
       } finally {
@@ -38,62 +36,163 @@ const HomePage: React.FC = () => {
     loadProducts();
   }, []);
 
+  const handleCategoryClick = (category: string) => {
+    if (category === 'fruits') {
+      navigate('/fruits');
+    } else if (category === 'vegetables') {
+      navigate('/vegetables');
+    }
+  };
+
+  // Featured promotions for the slider
+  const promotions = [
+    {
+      id: 1,
+      title: "MEAL PLAN WITH GROCERY STORE",
+      color: "bg-emerald-800",
+      image: "/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png"
+    },
+    {
+      id: 2,
+      title: "MAKING THE MOST OF YOUR GROCERY",
+      color: "bg-purple-700",
+      image: "/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png"
+    },
+    {
+      id: 3,
+      title: "SHOPPING WITH GROCERY STORE",
+      color: "bg-teal-700",
+      image: "/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png"
+    }
+  ];
+
+  // Category icons for the categories section
+  const categories = [
+    { id: 'snacks', name: 'Snacks', icon: '🥪', bg: 'bg-orange-100' },
+    { id: 'breakfast', name: 'Breakfast', icon: '🍳', bg: 'bg-yellow-100' },
+    { id: 'drinks', name: 'Drinks', icon: '🥤', bg: 'bg-blue-100' },
+    { id: 'coffee', name: 'Coffee', icon: '☕', bg: 'bg-amber-100' },
+    { id: 'canned', name: 'Canned', icon: '🥫', bg: 'bg-pink-100' },
+    { id: 'fruits', name: 'Fruits', icon: '🍎', bg: 'bg-red-100' },
+    { id: 'sauce', name: 'Sauce', icon: '🧂', bg: 'bg-orange-100' },
+    { id: 'vegetables', name: 'Vegetables', icon: '🥦', bg: 'bg-green-100' },
+  ];
+
   return (
-    <div>
-      {/* Hero Banner */}
-      <div className="bg-yellow-400 rounded-lg overflow-hidden mx-4 my-4">
-        <div className="flex items-center">
-          <div className="p-4 flex-1">
-            <h1 className="text-2xl font-bold text-white">Shop Smarter,<br/>Save More!</h1>
-            <button className="mt-3 bg-white text-yellow-500 rounded-full px-4 py-2 text-sm font-medium">
-              Get 40% Off
+    <div className="bg-gray-50 py-4 px-4">
+      {/* Promotions Slider */}
+      <div className="flex gap-4 overflow-x-auto scrollbar-none pb-2 mb-8">
+        {promotions.map((promo) => (
+          <div 
+            key={promo.id} 
+            className={`${promo.color} rounded-xl flex-shrink-0 w-full md:w-1/3 h-48 flex items-center p-6 text-white`}
+          >
+            <h3 className="text-2xl font-bold max-w-[50%] leading-tight">{promo.title}</h3>
+          </div>
+        ))}
+      </div>
+
+      {/* Categories Section */}
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-gray-800">Categories</h2>
+          <button className="text-gray-500 text-sm">View All</button>
+        </div>
+        
+        <div className="grid grid-cols-4 md:grid-cols-8 gap-4">
+          {categories.map((category) => (
+            <button
+              key={category.id}
+              className="flex flex-col items-center"
+              onClick={() => handleCategoryClick(category.id)}
+            >
+              <div className={`${category.bg} w-16 h-16 rounded-lg flex items-center justify-center mb-2`}>
+                <span className="text-3xl">{category.icon}</span>
+              </div>
+              <span className="text-sm text-gray-700">{category.name}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Popular Items Section */}
+      <div className="mb-8">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-gray-800">Popular Items</h2>
+          <div className="flex gap-2">
+            <button className="p-1 rounded-full border border-gray-300 text-gray-600">
+              <ChevronLeft size={18} />
+            </button>
+            <button className="p-1 rounded-full border border-gray-300 text-gray-600">
+              <ChevronRight size={18} />
             </button>
           </div>
-          <div className="flex-1 flex justify-end">
-            <img
-              src="/lovable-uploads/6f3cacf5-5377-47c9-8cba-3837c17f4d36.png"
-              alt="Shop Smart"
-              className="h-32 object-cover"
-            />
-          </div>
+        </div>
+        
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+          {isLoading ? (
+            Array(6).fill(0).map((_, index) => (
+              <div key={index} className="bg-white p-4 rounded-lg shadow-sm animate-pulse">
+                <div className="w-full h-28 bg-gray-200 rounded mb-3"></div>
+                <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            ))
+          ) : (
+            products.slice(0, 6).map((product) => (
+              <div key={product.id} className="bg-white p-4 rounded-lg shadow-sm">
+                <div className="flex justify-center mb-3">
+                  <img src={product.image} alt={product.name} className="h-28 object-cover" />
+                </div>
+                <h3 className="text-sm font-medium mb-1">{product.name}</h3>
+                <div className="flex items-baseline">
+                  <span className="text-sm text-gray-500 mr-1">{product.unit}</span>
+                  <span className="text-sm text-gray-500 mr-1">•</span>
+                  <span className="text-lg font-bold">${product.price.toFixed(2)}</span>
+                </div>
+                <button className="absolute bottom-3 right-3 bg-gray-700 rounded-full p-1">
+                  <span className="text-white text-xl">+</span>
+                </button>
+              </div>
+            ))
+          )}
         </div>
       </div>
       
-      {/* Search Bar */}
-      <div className="mx-4 my-4">
-        <div className="relative flex items-center">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </div>
-          <input
-            type="text"
-            placeholder="Search product..."
-            className="pl-10 pr-4 py-2 w-full border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
-          />
-          <button className="absolute right-2 p-1 bg-gray-100 rounded-md">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
-            </svg>
-          </button>
+      {/* New Arrival Section */}
+      <div>
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-gray-800">New Arrival</h2>
         </div>
-      </div>
-      
-      {/* Categories */}
-      <div className="mx-4 my-4">
-        <div className="flex justify-between items-center mb-2">
-          <h2 className="text-lg font-bold">Categories</h2>
-          <a href="#" className="text-sm text-gray-500">See All</a>
+        
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+          {isLoading ? (
+            Array(6).fill(0).map((_, index) => (
+              <div key={index} className="bg-white p-4 rounded-lg shadow-sm animate-pulse">
+                <div className="w-full h-28 bg-gray-200 rounded mb-3"></div>
+                <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+              </div>
+            ))
+          ) : (
+            products.slice(6, 12).map((product) => (
+              <div key={product.id} className="bg-white p-4 rounded-lg shadow-sm">
+                <div className="flex justify-center mb-3">
+                  <img src={product.image} alt={product.name} className="h-28 object-cover" />
+                </div>
+                <h3 className="text-sm font-medium mb-1">{product.name}</h3>
+                <div className="flex items-baseline">
+                  <span className="text-sm text-gray-500 mr-1">{product.unit}</span>
+                  <span className="text-sm text-gray-500 mr-1">•</span>
+                  <span className="text-lg font-bold">${product.price.toFixed(2)}</span>
+                </div>
+                <button className="absolute bottom-3 right-3 bg-gray-700 rounded-full p-1">
+                  <span className="text-white text-xl">+</span>
+                </button>
+              </div>
+            ))
+          )}
         </div>
-        <CategoryNavigation />
-      </div>
-      
-      <div className="container mx-auto px-4 py-2">
-        <ProductGrid 
-          products={featuredProducts.slice(0, 4)} 
-          isLoading={isLoading}
-        />
       </div>
     </div>
   );

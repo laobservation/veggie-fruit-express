@@ -16,17 +16,21 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, title, isLoading = 
       )}
       
       {isLoading ? (
-        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-gray-100 animate-pulse rounded-lg aspect-square"></div>
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="bg-white p-4 rounded-lg shadow-sm animate-pulse">
+              <div className="w-full h-28 bg-gray-200 rounded mb-3"></div>
+              <div className="h-4 bg-gray-200 rounded mb-2"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+            </div>
           ))}
         </div>
       ) : products.length === 0 ? (
-        <p className="text-center text-gray-500 py-8">Aucun produit trouvé.</p>
+        <p className="text-center text-gray-500 py-8">No products found.</p>
       ) : (
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
           {products.map((product) => (
-            <ProductCard key={product.id} product={product} discountPercentage={20} />
+            <ProductCard key={product.id} product={product} discountPercentage={product.discount || 0} />
           ))}
         </div>
       )}

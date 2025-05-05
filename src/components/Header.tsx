@@ -2,17 +2,15 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
-import { Menu, Search, ShoppingCart, X } from 'lucide-react';
+import { Menu, Search, ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Cart from './Cart';
 import MobileMenu from './MobileMenu';
-import SearchBar from './SearchBar';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const Header = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
   const { getTotalItems } = useCart();
   const isMobile = useIsMobile();
   
@@ -24,9 +22,9 @@ const Header = () => {
   }, [isMobile, isMobileMenuOpen]);
 
   return (
-    <header className="bg-white">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        <div className="flex items-center">
+    <header className="bg-gray-50 py-4">
+      <div className="container mx-auto px-4 flex justify-between items-center">
+        <div className="flex items-center gap-6">
           {isMobile && (
             <Button 
               variant="ghost" 
@@ -37,46 +35,51 @@ const Header = () => {
               {!isMobileMenuOpen ? (
                 <Menu className="h-6 w-6 text-gray-700" />
               ) : (
-                <X className="h-6 w-6 text-gray-700" />
+                <span className="h-6 w-6 text-gray-700">✕</span>
               )}
               <span className="sr-only">Menu</span>
             </Button>
           )}
           
-          <Link to="/" className="flex items-center gap-2">
-            <img 
-              src="/lovable-uploads/7eb3dccd-9b4a-4f2b-afbe-ca6658b17929.png" 
-              alt="Marché Bio Logo" 
-              className="h-10"
-            />
-          </Link>
-        </div>
-        
-        <div className="flex items-center gap-2">
-          {/* Delivery Address - New addition */}
-          <div className="hidden md:flex items-center mr-4">
-            <div className="bg-yellow-100 p-1 rounded-full mr-2">
-              <span className="text-yellow-600 text-lg">📍</span>
+          <Link to="/" className="flex items-center">
+            <div className="bg-green-500 text-white p-2 rounded">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" />
+                <path d="M8 12L11 15L16 9" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
             </div>
-            <div>
-              <p className="text-xs text-gray-500">Delivery Address</p>
-              <p className="text-sm font-medium">Dhaka, Bangladesh</p>
+          </Link>
+          
+          <div className="hidden md:block">
+            <div className="flex flex-col">
+              <h3 className="font-semibold text-gray-800">2464 Royal Ln. Mesa</h3>
+              <p className="text-sm text-gray-500">Your address</p>
             </div>
           </div>
-          
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="relative"
-            onClick={() => setIsCartOpen(true)}
-          >
-            <ShoppingCart className="h-6 w-6 text-gray-700" />
-            {getTotalItems() > 0 && (
-              <span className="absolute -top-1 -right-1 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                {getTotalItems()}
+        </div>
+        
+        <div className="flex-1 max-w-md mx-4">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search"
+              className="w-full bg-gray-100 border-0 rounded-full py-2 pl-10 pr-4 focus:outline-none focus:ring-1 focus:ring-green-500"
+            />
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Search className="h-5 w-5 text-gray-400" />
+            </div>
+          </div>
+        </div>
+        
+        <div>
+          <Link to="/cart" className="relative">
+            <div className="bg-green-50 rounded-full p-2 flex items-center">
+              <ShoppingCart className="h-5 w-5 text-green-600" />
+              <span className="text-green-600 font-semibold ml-2">
+                {getTotalItems() < 10 ? `0${getTotalItems()}` : getTotalItems()}
               </span>
-            )}
-          </Button>
+            </div>
+          </Link>
         </div>
       </div>
       
