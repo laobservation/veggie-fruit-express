@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useFavorites } from '@/hooks/use-favorites';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -10,6 +10,26 @@ import { useNavigate } from 'react-router-dom';
 const FavoritesPage: React.FC = () => {
   const { favorites } = useFavorites();
   const navigate = useNavigate();
+  const [isLoaded, setIsLoaded] = useState(false);
+  
+  useEffect(() => {
+    // This ensures the favorites are loaded from localStorage
+    setIsLoaded(true);
+  }, []);
+  
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen flex flex-col bg-gray-50">
+        <Header />
+        <main className="flex-grow container mx-auto px-4 py-6 flex items-center justify-center">
+          <div className="text-center">
+            <p>Loading favorites...</p>
+          </div>
+        </main>
+        <Footer />
+      </div>
+    );
+  }
   
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">

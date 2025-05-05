@@ -1,6 +1,6 @@
 
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
 import { Product } from '@/types/product';
 
 interface FavoritesState {
@@ -58,6 +58,9 @@ export const useFavorites = create<FavoritesState>()(
     }),
     {
       name: 'favorites-storage',
+      storage: createJSONStorage(() => localStorage),
+      // Make sure the data is hydrated as soon as possible
+      skipHydration: false,
     }
   )
 );
