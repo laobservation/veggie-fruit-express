@@ -66,19 +66,21 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({ products, isL
               <div className="flex justify-center mb-3">
                 <img src={product.image} alt={product.name} className="h-28 object-cover" />
               </div>
-              <h3 className="text-sm font-medium mb-1">{product.name}</h3>
-              <div className="flex items-baseline">
-                <span className="text-sm text-gray-500 mr-1">{product.unit}</span>
-                <span className="text-sm text-gray-500 mr-1">•</span>
-                <span className="text-lg font-bold">{formatPrice(product.price)}</span>
+              <div className="flex flex-col items-center">
+                <h3 className="text-sm font-medium mb-1 text-center">{product.name}</h3>
+                <div className="flex items-baseline justify-center">
+                  <span className="text-sm text-gray-500 mr-1">{product.unit}</span>
+                  <span className="text-sm text-gray-500 mr-1">•</span>
+                  <span className="text-lg font-bold">{formatPrice(product.price)}</span>
+                </div>
+                <button 
+                  className="mt-2 bg-yellow-400 hover:bg-yellow-500 rounded-full p-2 transition-colors"
+                  onClick={(e) => handleAddToCart(e, product)}
+                  aria-label="Add to cart"
+                >
+                  <Plus className="h-4 w-4 text-white" />
+                </button>
               </div>
-              <button 
-                className="absolute bottom-3 right-3 bg-yellow-400 hover:bg-yellow-500 rounded-full p-2 transition-colors z-10"
-                onClick={(e) => handleAddToCart(e, product)}
-                aria-label="Add to cart"
-              >
-                <Plus className="h-4 w-4 text-white" />
-              </button>
             </Link>
           ))
         )}
