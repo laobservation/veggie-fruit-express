@@ -4,6 +4,7 @@ import { Product } from '@/types/product';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect } from 'react';
 import { useToast } from "@/components/ui/use-toast";
+import { Json } from '@/integrations/supabase/types';
 
 interface FavoritesState {
   favorites: Product[];
@@ -41,12 +42,12 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
       const isAlreadyFavorite = favorites.some(item => item.id === product.id);
       
       if (!isAlreadyFavorite) {
-        // Save to Supabase
+        // Save to Supabase - here we need to ensure the product is JSON-compatible
         const { error } = await supabase
           .from('favorites')
           .insert({
             product_id: product.id,
-            product_data: product
+            product_data: product as unknown as Json // Cast to Json type
           });
           
         if (error) throw error;
@@ -107,8 +108,15 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
       
       if (data) {
         // Transform data from Supabase format to our Product format
-        const favorites = data.map(item => item.product_data as Product);
+        const favorites = data.map(item => {
+          // Safely cast the product_data back to Product type
+          const productData = item.product_data as unknown as Product;
+          return productData;
+        });
+        
         set({ favorites, isLoading: false });
+      } else {
+        set({ isLoading: false });
       }
     } catch (error) {
       console.error('Error fetching favorites:', error);
