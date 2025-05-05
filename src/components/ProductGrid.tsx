@@ -30,7 +30,11 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, title, isLoading = 
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
           {products.map((product) => (
-            <ProductCard key={product.id} product={product} discountPercentage={product.discount || 0} />
+            <ProductCard 
+              key={product.id} 
+              product={product} 
+              discountPercentage={0} // Default to 0 since 'discount' doesn't exist on Product
+            />
           ))}
         </div>
       )}
