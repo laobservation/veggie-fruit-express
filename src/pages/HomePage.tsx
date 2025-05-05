@@ -4,20 +4,17 @@ import { useNavigate } from 'react-router-dom';
 import { getProductsWithStock } from '@/data/products';
 import { useToast } from '@/hooks/use-toast';
 import { fixProductImportType } from '@/services/productService';
-import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
-import CategoryNavigation from '@/components/CategoryNavigation';
-import ProductGrid from '@/components/ProductGrid';
 import { Product } from '@/types/product';
-import { useCart } from '@/hooks/use-cart';
-import { formatPrice } from '@/lib/formatPrice';
-import { Link } from 'react-router-dom';
+import PromotionSlider from '@/components/home/PromotionSlider';
+import CategoriesSection from '@/components/home/CategoriesSection';
+import PopularItemsSection from '@/components/home/PopularItemsSection';
+import NewArrivalSection from '@/components/home/NewArrivalSection';
 
 const HomePage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const { addItem } = useCart();
 
   // Load products from Supabase
   useEffect(() => {
@@ -42,20 +39,6 @@ const HomePage: React.FC = () => {
 
     loadProducts();
   }, []);
-
-  const handleCategoryClick = (category: string) => {
-    if (category === 'fruits') {
-      navigate('/fruits');
-    } else if (category === 'vegetables') {
-      navigate('/vegetables');
-    }
-  };
-
-  const handleAddToCart = (e: React.MouseEvent, product: Product) => {
-    e.preventDefault();
-    e.stopPropagation();
-    addItem(product);
-  };
 
   // Featured promotions for the slider
   const promotions = [
@@ -82,114 +65,16 @@ const HomePage: React.FC = () => {
   return (
     <div className="bg-gray-50 py-4 px-4 min-h-screen">
       {/* Promotions Slider */}
-      <div className="flex gap-4 overflow-x-auto scrollbar-none pb-2 mb-8">
-        {promotions.map((promo) => (
-          <div 
-            key={promo.id} 
-            className={`${promo.color} rounded-xl flex-shrink-0 w-full md:w-1/3 h-48 flex items-center p-6 text-white`}
-          >
-            <h3 className="text-2xl font-bold max-w-[50%] leading-tight">{promo.title}</h3>
-          </div>
-        ))}
-      </div>
+      <PromotionSlider promotions={promotions} />
 
       {/* Categories Section */}
-      <div className="mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-800">Categories</h2>
-          <button className="text-gray-500 text-sm">View All</button>
-        </div>
-        
-        <CategoryNavigation />
-      </div>
+      <CategoriesSection />
 
       {/* Popular Items Section */}
-      <div className="mb-8">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-800">Popular Items</h2>
-          <div className="flex gap-2">
-            <button className="p-1 rounded-full border border-gray-300 text-gray-600">
-              <ChevronLeft size={18} />
-            </button>
-            <button className="p-1 rounded-full border border-gray-300 text-gray-600">
-              <ChevronRight size={18} />
-            </button>
-          </div>
-        </div>
-        
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-          {isLoading ? (
-            Array(6).fill(0).map((_, index) => (
-              <div key={index} className="bg-white p-4 rounded-lg shadow-sm animate-pulse">
-                <div className="w-full h-28 bg-gray-200 rounded mb-3"></div>
-                <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-              </div>
-            ))
-          ) : (
-            products.slice(0, 6).map((product) => (
-              <Link key={product.id} to={`/product/${product.id}`} className="bg-white p-4 rounded-lg shadow-sm relative">
-                <div className="flex justify-center mb-3">
-                  <img src={product.image} alt={product.name} className="h-28 object-cover" />
-                </div>
-                <h3 className="text-sm font-medium mb-1">{product.name}</h3>
-                <div className="flex items-baseline">
-                  <span className="text-sm text-gray-500 mr-1">{product.unit}</span>
-                  <span className="text-sm text-gray-500 mr-1">•</span>
-                  <span className="text-lg font-bold">{formatPrice(product.price)}</span>
-                </div>
-                <button 
-                  className="absolute bottom-3 right-3 bg-yellow-400 hover:bg-yellow-500 rounded-full p-2 transition-colors z-10"
-                  onClick={(e) => handleAddToCart(e, product)}
-                  aria-label="Add to cart"
-                >
-                  <Plus className="h-4 w-4 text-white" />
-                </button>
-              </Link>
-            ))
-          )}
-        </div>
-      </div>
+      <PopularItemsSection products={products} isLoading={isLoading} />
       
       {/* New Arrival Section */}
-      <div>
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-gray-800">New Arrival</h2>
-        </div>
-        
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-          {isLoading ? (
-            Array(6).fill(0).map((_, index) => (
-              <div key={index} className="bg-white p-4 rounded-lg shadow-sm animate-pulse">
-                <div className="w-full h-28 bg-gray-200 rounded mb-3"></div>
-                <div className="h-4 bg-gray-200 rounded mb-2"></div>
-                <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-              </div>
-            ))
-          ) : (
-            products.slice(6, 12).map((product) => (
-              <Link key={product.id} to={`/product/${product.id}`} className="bg-white p-4 rounded-lg shadow-sm relative">
-                <div className="flex justify-center mb-3">
-                  <img src={product.image} alt={product.name} className="h-28 object-cover" />
-                </div>
-                <h3 className="text-sm font-medium mb-1">{product.name}</h3>
-                <div className="flex items-baseline">
-                  <span className="text-sm text-gray-500 mr-1">{product.unit}</span>
-                  <span className="text-sm text-gray-500 mr-1">•</span>
-                  <span className="text-lg font-bold">{formatPrice(product.price)}</span>
-                </div>
-                <button 
-                  className="absolute bottom-3 right-3 bg-yellow-400 hover:bg-yellow-500 rounded-full p-2 transition-colors z-10"
-                  onClick={(e) => handleAddToCart(e, product)}
-                  aria-label="Add to cart"
-                >
-                  <Plus className="h-4 w-4 text-white" />
-                </button>
-              </Link>
-            ))
-          )}
-        </div>
-      </div>
+      <NewArrivalSection products={products} isLoading={isLoading} />
     </div>
   );
 };
