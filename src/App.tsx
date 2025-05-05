@@ -11,7 +11,7 @@ import AdminPage from '@/pages/AdminPage';
 import { CartNotificationProvider } from '@/hooks/use-cart';
 import { Toaster } from "@/components/ui/toaster"
 import FavoritesPage from '@/pages/FavoritesPage';
-import { Home, Heart, WhatsApp } from 'lucide-react';
+import { Home, Heart, MessageSquare } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '@/hooks/use-cart';
 import Cart from '@/components/Cart';
@@ -56,7 +56,7 @@ const MobileBottomNav = () => {
         className="flex flex-col items-center"
       >
         <div className="bg-green-400 rounded-full p-3">
-          <WhatsApp className="h-5 w-5 text-white stroke-[2.5px]" />
+          <MessageSquare className="h-5 w-5 text-white stroke-[2.5px]" />
         </div>
         <span className="text-xs font-medium text-gray-800 mt-1">WhatsApp</span>
       </a>

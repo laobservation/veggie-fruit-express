@@ -1,0 +1,61 @@
+
+import React, { useRef } from 'react';
+import { Check } from 'lucide-react';
+import DeliveryDetails from './DeliveryDetails';
+import OrderSummary from './OrderSummary';
+import ActionButtons from './ActionButtons';
+
+interface OrderDetails {
+  name: string;
+  address: string;
+  phone: string;
+  preferredTime?: string;
+  totalAmount: number;
+  items: any[];
+  orderId?: string;
+}
+
+interface OrderConfirmationProps {
+  orderDetails: OrderDetails;
+  onGeneratePDF: () => void;
+}
+
+const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ 
+  orderDetails, 
+  onGeneratePDF 
+}) => {
+  const orderContentRef = useRef<HTMLDivElement>(null);
+  
+  return (
+    <div className="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-md">
+      <div className="flex items-center justify-center mb-6">
+        <div className="bg-veggie-primary rounded-full p-3">
+          <Check className="h-6 w-6 text-white" />
+        </div>
+      </div>
+      
+      <h1 className="text-2xl font-bold text-center mb-6">Merci pour votre commande !</h1>
+      <p className="text-center text-gray-600 mb-8">
+        Votre commande a été reçue et sera livrée bientôt.
+      </p>
+      
+      <div ref={orderContentRef}>
+        <DeliveryDetails 
+          name={orderDetails.name}
+          address={orderDetails.address}
+          phone={orderDetails.phone}
+          preferredTime={orderDetails.preferredTime}
+        />
+        
+        <OrderSummary 
+          items={orderDetails.items}
+          totalAmount={orderDetails.totalAmount}
+        />
+      </div>
+      
+      <ActionButtons onGeneratePDF={onGeneratePDF} />
+    </div>
+  );
+};
+
+export default OrderConfirmation;
