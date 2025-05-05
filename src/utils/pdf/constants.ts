@@ -1,8 +1,8 @@
 
 // PDF styling and formatting constants
 
-// Colors
-export const PDF_PRIMARY_COLOR = [39, 174, 96]; // Green color
+// Colors - defined as tuple to match jsPDF color type
+export const PDF_PRIMARY_COLOR: [number, number, number] = [39, 174, 96]; // Green color
 
 // Positioning
 export const LOGO_SIZE = 40;
