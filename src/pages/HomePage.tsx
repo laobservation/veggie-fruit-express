@@ -4,13 +4,20 @@ import { useNavigate } from 'react-router-dom';
 import { getProductsWithStock } from '@/data/products';
 import { useToast } from '@/hooks/use-toast';
 import { fixProductImportType } from '@/services/productService';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import CategoryNavigation from '@/components/CategoryNavigation';
+import ProductGrid from '@/components/ProductGrid';
+import { Product } from '@/types/product';
+import { useCart } from '@/hooks/use-cart';
+import { formatPrice } from '@/lib/formatPrice';
+import { Link } from 'react-router-dom';
 
 const HomePage: React.FC = () => {
-  const [products, setProducts] = useState([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { addItem } = useCart();
 
   // Load products from Supabase
   useEffect(() => {
@@ -44,6 +51,12 @@ const HomePage: React.FC = () => {
     }
   };
 
+  const handleAddToCart = (e: React.MouseEvent, product: Product) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem(product);
+  };
+
   // Featured promotions for the slider
   const promotions = [
     {
@@ -66,20 +79,8 @@ const HomePage: React.FC = () => {
     }
   ];
 
-  // Category icons for the categories section
-  const categories = [
-    { id: 'snacks', name: 'Snacks', icon: '🥪', bg: 'bg-orange-100' },
-    { id: 'breakfast', name: 'Breakfast', icon: '🍳', bg: 'bg-yellow-100' },
-    { id: 'drinks', name: 'Drinks', icon: '🥤', bg: 'bg-blue-100' },
-    { id: 'coffee', name: 'Coffee', icon: '☕', bg: 'bg-amber-100' },
-    { id: 'canned', name: 'Canned', icon: '🥫', bg: 'bg-pink-100' },
-    { id: 'fruits', name: 'Fruits', icon: '🍎', bg: 'bg-red-100' },
-    { id: 'sauce', name: 'Sauce', icon: '🧂', bg: 'bg-orange-100' },
-    { id: 'vegetables', name: 'Vegetables', icon: '🥦', bg: 'bg-green-100' },
-  ];
-
   return (
-    <div className="bg-gray-50 py-4 px-4">
+    <div className="bg-gray-50 py-4 px-4 min-h-screen">
       {/* Promotions Slider */}
       <div className="flex gap-4 overflow-x-auto scrollbar-none pb-2 mb-8">
         {promotions.map((promo) => (
@@ -99,20 +100,7 @@ const HomePage: React.FC = () => {
           <button className="text-gray-500 text-sm">View All</button>
         </div>
         
-        <div className="grid grid-cols-4 md:grid-cols-8 gap-4">
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              className="flex flex-col items-center"
-              onClick={() => handleCategoryClick(category.id)}
-            >
-              <div className={`${category.bg} w-16 h-16 rounded-lg flex items-center justify-center mb-2`}>
-                <span className="text-3xl">{category.icon}</span>
-              </div>
-              <span className="text-sm text-gray-700">{category.name}</span>
-            </button>
-          ))}
-        </div>
+        <CategoryNavigation />
       </div>
 
       {/* Popular Items Section */}
@@ -140,7 +128,7 @@ const HomePage: React.FC = () => {
             ))
           ) : (
             products.slice(0, 6).map((product) => (
-              <div key={product.id} className="bg-white p-4 rounded-lg shadow-sm">
+              <Link key={product.id} to={`/product/${product.id}`} className="bg-white p-4 rounded-lg shadow-sm relative">
                 <div className="flex justify-center mb-3">
                   <img src={product.image} alt={product.name} className="h-28 object-cover" />
                 </div>
@@ -148,12 +136,16 @@ const HomePage: React.FC = () => {
                 <div className="flex items-baseline">
                   <span className="text-sm text-gray-500 mr-1">{product.unit}</span>
                   <span className="text-sm text-gray-500 mr-1">•</span>
-                  <span className="text-lg font-bold">${product.price.toFixed(2)}</span>
+                  <span className="text-lg font-bold">{formatPrice(product.price)}</span>
                 </div>
-                <button className="absolute bottom-3 right-3 bg-gray-700 rounded-full p-1">
-                  <span className="text-white text-xl">+</span>
+                <button 
+                  className="absolute bottom-3 right-3 bg-yellow-400 hover:bg-yellow-500 rounded-full p-2 transition-colors z-10"
+                  onClick={(e) => handleAddToCart(e, product)}
+                  aria-label="Add to cart"
+                >
+                  <Plus className="h-4 w-4 text-white" />
                 </button>
-              </div>
+              </Link>
             ))
           )}
         </div>
@@ -176,7 +168,7 @@ const HomePage: React.FC = () => {
             ))
           ) : (
             products.slice(6, 12).map((product) => (
-              <div key={product.id} className="bg-white p-4 rounded-lg shadow-sm">
+              <Link key={product.id} to={`/product/${product.id}`} className="bg-white p-4 rounded-lg shadow-sm relative">
                 <div className="flex justify-center mb-3">
                   <img src={product.image} alt={product.name} className="h-28 object-cover" />
                 </div>
@@ -184,12 +176,16 @@ const HomePage: React.FC = () => {
                 <div className="flex items-baseline">
                   <span className="text-sm text-gray-500 mr-1">{product.unit}</span>
                   <span className="text-sm text-gray-500 mr-1">•</span>
-                  <span className="text-lg font-bold">${product.price.toFixed(2)}</span>
+                  <span className="text-lg font-bold">{formatPrice(product.price)}</span>
                 </div>
-                <button className="absolute bottom-3 right-3 bg-gray-700 rounded-full p-1">
-                  <span className="text-white text-xl">+</span>
+                <button 
+                  className="absolute bottom-3 right-3 bg-yellow-400 hover:bg-yellow-500 rounded-full p-2 transition-colors z-10"
+                  onClick={(e) => handleAddToCart(e, product)}
+                  aria-label="Add to cart"
+                >
+                  <Plus className="h-4 w-4 text-white" />
                 </button>
-              </div>
+              </Link>
             ))
           )}
         </div>

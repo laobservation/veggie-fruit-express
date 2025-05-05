@@ -15,7 +15,7 @@ export const CategoryNavigation: React.FC = () => {
   ];
   
   return (
-    <div className="grid grid-cols-4 md:grid-cols-8 gap-4">
+    <div className="grid grid-cols-4 md:grid-cols-8 gap-4 w-full pb-2">
       {categories.map((category) => (
         <Link
           to={category.path}

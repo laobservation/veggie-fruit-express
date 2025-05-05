@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/formatPrice';
 import { Product } from '@/data/products';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useNavigate } from 'react-router-dom';
 
 interface CartNotificationProps {
   product: Product;
@@ -25,6 +26,7 @@ const CartNotification: React.FC<CartNotificationProps> = ({
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   
   useEffect(() => {
     // Trigger animation after a small delay
@@ -50,6 +52,11 @@ const CartNotification: React.FC<CartNotificationProps> = ({
   const handleClose = () => {
     setIsVisible(false);
     setTimeout(onClose, 300); // Wait for fade out animation before removing
+  };
+  
+  const handleViewCart = () => {
+    onViewCart();
+    navigate('/cart');
   };
   
   return (
@@ -97,7 +104,7 @@ const CartNotification: React.FC<CartNotificationProps> = ({
         </div>
         
         <button
-          onClick={onViewCart}
+          onClick={handleViewCart}
           className="mt-3 w-full bg-veggie-primary hover:bg-veggie-dark text-white text-sm py-2 px-4 rounded transition-colors font-medium"
         >
           Voir le panier

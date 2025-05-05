@@ -10,7 +10,7 @@ interface ProductGridProps {
 
 const ProductGrid: React.FC<ProductGridProps> = ({ products, title, isLoading = false }) => {
   return (
-    <section className="py-6">
+    <section className="py-6 w-full">
       {title && (
         <h2 className="text-xl md:text-2xl font-bold text-gray-900 mb-4">{title}</h2>
       )}

@@ -72,14 +72,15 @@ const Header = () => {
         </div>
         
         <div>
-          <Link to="/cart" className="relative">
-            <div className="bg-green-50 rounded-full p-2 flex items-center">
-              <ShoppingCart className="h-5 w-5 text-green-600" />
-              <span className="text-green-600 font-semibold ml-2">
-                {getTotalItems() < 10 ? `0${getTotalItems()}` : getTotalItems()}
-              </span>
-            </div>
-          </Link>
+          <button 
+            onClick={() => setIsCartOpen(true)} 
+            className="relative bg-green-50 rounded-full p-2 flex items-center"
+          >
+            <ShoppingCart className="h-5 w-5 text-green-600" />
+            <span className="text-green-600 font-semibold ml-2">
+              {getTotalItems() < 10 ? `0${getTotalItems()}` : getTotalItems()}
+            </span>
+          </button>
         </div>
       </div>
       
