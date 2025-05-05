@@ -58,8 +58,8 @@ const Header = () => {
           <Link to="/" className="flex items-center">
             <img 
               src="/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png" 
-              alt="Logo" 
-              className="h-12 w-auto object-contain"
+              alt="Marché Bio Logo" 
+              className="h-14 w-auto object-contain" 
             />
           </Link>
         </div>

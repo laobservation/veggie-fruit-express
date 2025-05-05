@@ -1,19 +1,14 @@
-
 import React, { useEffect, useRef } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, Check, Download } from 'lucide-react';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/components/ui/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { formatPrice } from '@/lib/formatPrice';
-
-// Import autoTable explicitly to make it available on the jsPDF instance
-import autoTable from 'jspdf-autotable';
+import { generateThankYouPDF } from '@/utils/pdfUtils';
 
 const ThankYouPage = () => {
   const location = useLocation();
@@ -81,65 +76,7 @@ const ThankYouPage = () => {
 
   const generatePDF = () => {
     try {
-      const doc = new jsPDF();
-      
-      // Add company logo/header
-      doc.setFontSize(20);
-      doc.setTextColor(39, 174, 96);
-      doc.text("Marché Bio", 105, 20, { align: 'center' });
-      
-      doc.setFontSize(14);
-      doc.setTextColor(0, 0, 0);
-      doc.text("Récapitulatif de Commande", 105, 30, { align: 'center' });
-      
-      // Customer information
-      doc.setFontSize(12);
-      doc.text("Informations Client", 20, 45);
-      doc.setFontSize(10);
-      doc.text(`Nom: ${orderDetails.name}`, 20, 55);
-      doc.text(`Adresse: ${orderDetails.address}`, 20, 60);
-      doc.text(`Téléphone: ${orderDetails.phone}`, 20, 65);
-      if (orderDetails.preferredTime) {
-        doc.text(`Heure de livraison préférée: ${orderDetails.preferredTime}`, 20, 70);
-      }
-      
-      // Items table
-      const tableColumn = ["Produit", "Quantité", "Prix unitaire", "Total"];
-      const tableRows: any[] = [];
-      
-      if (orderDetails.items && orderDetails.items.length > 0) {
-        orderDetails.items.forEach((item: any) => {
-          const itemData = [
-            item.product.name,
-            item.quantity,
-            formatPrice(item.product.price),
-            formatPrice(item.product.price * item.quantity)
-          ];
-          tableRows.push(itemData);
-        });
-      }
-      
-      // Use autoTable with proper type handling
-      autoTable(doc, {
-        head: [tableColumn],
-        body: tableRows,
-        startY: 80,
-        theme: 'striped',
-        headStyles: { fillColor: [39, 174, 96] }
-      });
-      
-      // Total
-      const finalY = (doc as any).lastAutoTable.finalY || 120;
-      doc.setFontSize(12);
-      doc.text(`Total: ${formatPrice(orderDetails.totalAmount)}`, 150, finalY + 15);
-      
-      // Thank you note
-      doc.setFontSize(10);
-      doc.text("Merci pour votre commande!", 105, finalY + 30, { align: 'center' });
-      doc.text("Notre équipe prépare vos produits avec soin.", 105, finalY + 35, { align: 'center' });
-      
-      // Save PDF
-      doc.save(`commande-${new Date().toISOString().split('T')[0]}.pdf`);
+      generateThankYouPDF(orderDetails);
       
       toast({
         title: "PDF téléchargé",

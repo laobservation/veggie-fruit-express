@@ -62,15 +62,17 @@ const HomePage: React.FC = () => {
   ];
 
   return (
-    <div className="bg-gray-50 py-4 min-h-screen pb-20">
+    <div className="bg-gray-50 py-4 min-h-screen pb-28 md:pb-6">
       {/* Promotions Slider */}
       <PromotionSlider promotions={promotions} />
 
       {/* Categories Section */}
       <CategoriesSection />
 
-      {/* Popular Items Section */}
-      <PopularItemsSection products={products} isLoading={isLoading} />
+      {/* Popular Items Section with added bottom margin */}
+      <div className="mb-16 md:mb-6">
+        <PopularItemsSection products={products} isLoading={isLoading} />
+      </div>
     </div>
   );
 };
