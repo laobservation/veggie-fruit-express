@@ -1,6 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { FormValues } from './DeliveryFormContainer';
+import { convertOrderItemsToJson } from '@/services/order';
 
 interface OrderItem {
   productId: number | string;
@@ -21,7 +22,7 @@ export const submitOrderToSupabase = async (
         'Client Name': formData.name,
         'Adresse': formData.address,
         'Phone': parseInt(formData.phone, 10) || null, // Convert to number or null if invalid
-        'order_items': orderItems, // Store order items as JSON
+        'order_items': convertOrderItemsToJson(orderItems), // Use the converter function
         'total_amount': totalAmount,
         'preferred_time': formData.preferDeliveryTime ? formData.deliveryTime : null,
         'status': 'new',

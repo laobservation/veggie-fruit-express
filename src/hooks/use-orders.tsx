@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Order, OrderStatus, RawOrder } from '@/types/order';
 import { useToast } from '@/hooks/use-toast';
@@ -7,7 +8,7 @@ import {
   deleteOrder as deleteOrderService,
   updateOrderStatus as updateOrderStatusService,
   transformRawOrder
-} from '@/services/orderService';
+} from '@/services/order';
 import { generateOrderPDF } from '@/utils/pdf';
 
 export const useOrders = () => {
