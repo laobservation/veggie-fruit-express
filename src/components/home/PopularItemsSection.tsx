@@ -3,8 +3,9 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Product } from '@/types/product';
 import { formatPrice } from '@/lib/formatPrice';
-import { Plus } from 'lucide-react';
+import { Plus, Heart } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
+import { useFavorites } from '@/hooks/use-favorites';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface PopularItemsSectionProps {
@@ -14,11 +15,18 @@ interface PopularItemsSectionProps {
 
 const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({ products, isLoading }) => {
   const { addItem } = useCart();
+  const { isFavorite, toggleFavorite } = useFavorites();
 
   const handleAddToCart = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
     addItem(product);
+  };
+
+  const handleFavoriteClick = (e: React.MouseEvent, product: Product) => {
+    e.preventDefault();
+    e.stopPropagation();
+    toggleFavorite(product);
   };
 
   return (
@@ -47,6 +55,14 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({ products, isL
         ) : (
           products.slice(0, 6).map((product) => (
             <Link key={product.id} to={`/product/${product.id}`} className="bg-white p-4 rounded-lg shadow-sm relative">
+              <button 
+                onClick={(e) => handleFavoriteClick(e, product)}
+                className="absolute top-2 right-2 p-1 rounded-full bg-white/80 hover:bg-white z-10"
+              >
+                <Heart 
+                  className={`h-4 w-4 ${isFavorite(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 
+                />
+              </button>
               <div className="flex justify-center mb-3">
                 <img src={product.image} alt={product.name} className="h-28 object-cover" />
               </div>

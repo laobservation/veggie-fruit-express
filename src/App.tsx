@@ -1,40 +1,36 @@
+import React from 'react';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import Index from '@/pages/Index';
+import ProductPage from '@/pages/ProductPage';
+import FruitsPage from '@/pages/FruitsPage';
+import VegetablesPage from '@/pages/VegetablesPage';
+import CheckoutPage from '@/pages/CheckoutPage';
+import ThankYouPage from '@/pages/ThankYouPage';
+import NotFound from '@/pages/NotFound';
+import AdminPage from '@/pages/AdminPage';
+import { CartNotificationProvider } from '@/hooks/use-cart';
+import { Toaster } from "@/components/ui/toaster"
+import FavoritesPage from '@/pages/FavoritesPage';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import FruitsPage from "./pages/FruitsPage";
-import VegetablesPage from "./pages/VegetablesPage";
-import ProductPage from "./pages/ProductPage";
-import ThankYouPage from "./pages/ThankYouPage";
-import NotFound from "./pages/NotFound";
-import AdminPage from "./pages/AdminPage";
-import { CartNotificationProvider } from "@/hooks/use-cart";
-
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
+function App() {
+  return (
+    <CartNotificationProvider>
       <BrowserRouter>
-        <CartNotificationProvider>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/fruits" element={<FruitsPage />} />
-            <Route path="/vegetables" element={<VegetablesPage />} />
-            <Route path="/product/:productId" element={<ProductPage />} />
-            <Route path="/thank-you" element={<ThankYouPage />} />
-            <Route path="/admin" element={<AdminPage />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </CartNotificationProvider>
+        <Toaster />
+        <Routes>
+          <Route path="/" element={<Index />} />
+          <Route path="/product/:productId" element={<ProductPage />} />
+          <Route path="/fruits" element={<FruitsPage />} />
+          <Route path="/vegetables" element={<VegetablesPage />} />
+          <Route path="/checkout" element={<CheckoutPage />} />
+          <Route path="/favorites" element={<FavoritesPage />} />
+          <Route path="/thank-you" element={<ThankYouPage />} />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
       </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+    </CartNotificationProvider>
+  );
+}
 
 export default App;

@@ -3,6 +3,7 @@ import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Heart, ShoppingBag } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
+import { useFavorites } from '@/hooks/use-favorites';
 import { useProductDetails } from '@/hooks/use-product-details';
 import { formatPrice } from '@/lib/formatPrice';
 import { Product } from '@/types/product';
@@ -11,14 +12,19 @@ import Footer from '@/components/Footer';
 import MediaDisplay from '@/components/MediaDisplay';
 import ProductGrid from '@/components/ProductGrid';
 import { Button } from '@/components/ui/button';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 const ProductPage = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
   const { addItem } = useCart();
   const { product, relatedProducts, loading } = useProductDetails(productId);
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { isFavorite, toggleFavorite } = useFavorites();
+  
+  useEffect(() => {
+    // Reset scroll position when product changes
+    window.scrollTo(0, 0);
+  }, [productId]);
   
   if (loading) {
     return (
@@ -52,10 +58,11 @@ const ProductPage = () => {
   };
 
   const handleFavoriteClick = () => {
-    setIsFavorite(!isFavorite);
+    toggleFavorite(product as Product);
   };
 
   const categoryText = product.category === 'fruit' ? 'Fruits' : 'Légumes';
+  const favoriteStatus = isFavorite(product.id);
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -74,10 +81,10 @@ const ProductPage = () => {
             <button 
               onClick={handleFavoriteClick} 
               className="p-2"
-              aria-label="Add to favorites"
+              aria-label={favoriteStatus ? "Remove from favorites" : "Add to favorites"}
             >
               <Heart 
-                className={`h-6 w-6 transition-colors ${isFavorite ? 'fill-red-500 text-red-500' : ''}`}
+                className={`h-6 w-6 transition-colors ${favoriteStatus ? 'fill-red-500 text-red-500' : ''}`}
               />
             </button>
           </div>

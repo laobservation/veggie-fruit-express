@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { formatPrice } from '@/lib/formatPrice';
 import { useCart } from '@/hooks/use-cart';
 import { useState } from 'react';
+import { useFavorites } from '@/hooks/use-favorites';
 import '@/components/ui/heart-animation.css';
 
 interface ProductCardProps {
@@ -14,12 +15,13 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage = 0 }) => {
   const { addItem } = useCart();
-  const [isFavorite, setIsFavorite] = useState(false);
+  const { isFavorite, toggleFavorite } = useFavorites();
   const [animating, setAnimating] = useState(false);
   
   // Check if product has stock information
   const hasStock = typeof product.stock !== 'undefined';
   const isInStock = hasStock && (product.stock || 0) > 0;
+  const favoriteStatus = isFavorite(product.id);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -31,7 +33,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
     e.preventDefault();
     e.stopPropagation();
     setAnimating(true);
-    setIsFavorite(!isFavorite);
+    toggleFavorite(product);
     setTimeout(() => setAnimating(false), 300);
   };
 
@@ -48,10 +50,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
           <button 
             onClick={handleFavoriteClick}
             className="absolute top-2 right-2 p-1 rounded-full bg-white/80 hover:bg-white z-10"
-            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+            aria-label={favoriteStatus ? "Remove from favorites" : "Add to favorites"}
           >
             <Heart 
-              className={`h-4 w-4 heart-animation ${isFavorite ? 'fill-red-500 text-red-500' : 'text-gray-400'} ${animating ? 'active' : ''}`} 
+              className={`h-4 w-4 heart-animation ${favoriteStatus ? 'fill-red-500 text-red-500' : 'text-gray-400'} ${animating ? 'active' : ''}`} 
             />
           </button>
           
