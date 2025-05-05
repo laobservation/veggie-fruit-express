@@ -3,12 +3,14 @@ import { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from '@/components/ui/sonner';
-import HomePage from '@/pages/HomePage';
+import Index from '@/pages/Index';
 import ProductPage from '@/pages/ProductPage';
 import NotFound from '@/pages/NotFound';
 import FavoritesPage from '@/pages/FavoritesPage';
 import ThankYouPage from '@/pages/ThankYouPage';
 import AdminPage from '@/pages/AdminPage';
+import { CartNotificationProvider } from '@/hooks/use-cart';
+import Cart from '@/components/Cart';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -31,17 +33,20 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className="app min-h-screen bg-background font-sans antialiased">
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/product/:id" element={<ProductPage />} />
-          <Route path="/favorites" element={<FavoritesPage />} />
-          <Route path="/thank-you" element={<ThankYouPage />} />
-          <Route path="/admin" element={<AdminPage />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </div>
-      <Toaster />
+      <CartNotificationProvider>
+        <div className="app min-h-screen bg-background font-sans antialiased">
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/product/:id" element={<ProductPage />} />
+            <Route path="/favorites" element={<FavoritesPage />} />
+            <Route path="/thank-you" element={<ThankYouPage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Cart />
+        </div>
+        <Toaster />
+      </CartNotificationProvider>
     </QueryClientProvider>
   );
 }
