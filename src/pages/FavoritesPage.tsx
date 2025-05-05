@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useFavorites } from '@/hooks/use-favorites';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -7,10 +7,26 @@ import ProductCard from '@/components/ProductCard';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { Loader } from 'lucide-react';
+import { useToast } from '@/components/ui/use-toast';
 
 const FavoritesPage: React.FC = () => {
-  const { favorites, isLoading, clearFavorites } = useFavorites();
+  const { favorites, isLoading, clearFavorites, fetchFavorites } = useFavorites();
   const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  // Ensure favorites are loaded when the page mounts
+  useEffect(() => {
+    fetchFavorites();
+  }, [fetchFavorites]);
+  
+  const handleClearAll = async () => {
+    await clearFavorites();
+    toast({
+      title: "Favorites cleared",
+      description: "All items have been removed from your favorites",
+      duration: 3000,
+    });
+  };
   
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -21,7 +37,7 @@ const FavoritesPage: React.FC = () => {
           {favorites.length > 0 && (
             <Button 
               variant="outline" 
-              onClick={clearFavorites}
+              onClick={handleClearAll}
               className="text-red-500 border-red-500 hover:bg-red-50"
             >
               Clear All

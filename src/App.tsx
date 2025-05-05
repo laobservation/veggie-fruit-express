@@ -15,10 +15,12 @@ import { Home, Heart, ShoppingCart } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '@/hooks/use-cart';
 import Cart from '@/components/Cart';
+import { useFavorites } from '@/hooks/use-favorites';
 
 // Mobile Bottom Navigation component
 const MobileBottomNav = () => {
   const { getTotalItems, openCart } = useCart();
+  const { favorites } = useFavorites();
   const location = useLocation();
   
   // Hide on thank you page
@@ -32,8 +34,13 @@ const MobileBottomNav = () => {
         <Home className="h-5 w-5 text-green-500" />
         <span className="text-xs text-gray-600 mt-1">Home</span>
       </Link>
-      <Link to="/favorites" className="flex flex-col items-center p-2">
+      <Link to="/favorites" className="flex flex-col items-center p-2 relative">
         <Heart className="h-5 w-5 text-gray-500" />
+        {favorites.length > 0 && (
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
+            {favorites.length}
+          </span>
+        )}
         <span className="text-xs text-gray-600 mt-1">Favorites</span>
       </Link>
       <button 

@@ -4,7 +4,7 @@ import { Product } from '@/types/product';
 import { Link } from 'react-router-dom';
 import { formatPrice } from '@/lib/formatPrice';
 import { useCart } from '@/hooks/use-cart';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useFavorites } from '@/hooks/use-favorites';
 import '@/components/ui/heart-animation.css';
 
@@ -17,11 +17,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
   const { addItem } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
   const [animating, setAnimating] = useState(false);
+  const [favoriteStatus, setFavoriteStatus] = useState(false);
   
   // Check if product has stock information
   const hasStock = typeof product.stock !== 'undefined';
   const isInStock = hasStock && (product.stock || 0) > 0;
-  const favoriteStatus = isFavorite(product.id);
+  
+  // Update favorite status when product changes or when favorites are updated
+  useEffect(() => {
+    setFavoriteStatus(isFavorite(product.id));
+  }, [product.id, isFavorite]);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -34,6 +39,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
     e.stopPropagation();
     setAnimating(true);
     await toggleFavorite(product);
+    // Update the local state immediately for a responsive UI
+    setFavoriteStatus(!favoriteStatus);
     setTimeout(() => setAnimating(false), 300);
   };
 
