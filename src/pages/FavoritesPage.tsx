@@ -1,12 +1,15 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useFavorites } from '@/hooks/use-favorites';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 const FavoritesPage: React.FC = () => {
   const { favorites } = useFavorites();
+  const navigate = useNavigate();
   
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -16,7 +19,10 @@ const FavoritesPage: React.FC = () => {
         
         {favorites.length === 0 ? (
           <div className="text-center py-10">
-            <p className="text-gray-500">You haven't added any favorites yet</p>
+            <p className="text-gray-500 mb-6">You haven't added any favorites yet</p>
+            <Button onClick={() => navigate('/')} className="bg-green-500 hover:bg-green-600">
+              Browse Products
+            </Button>
           </div>
         ) : (
           <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
