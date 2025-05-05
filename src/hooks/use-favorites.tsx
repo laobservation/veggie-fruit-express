@@ -1,66 +1,146 @@
 
 import { create } from 'zustand';
-import { persist, createJSONStorage } from 'zustand/middleware';
 import { Product } from '@/types/product';
+import { supabase } from '@/integrations/supabase/client';
+import { useEffect } from 'react';
+import { useToast } from "@/components/ui/use-toast";
 
 interface FavoritesState {
   favorites: Product[];
+  isLoading: boolean;
   isFavorite: (productId: string) => boolean;
-  toggleFavorite: (product: Product) => void;
-  addFavorite: (product: Product) => void;
-  removeFavorite: (productId: string) => void;
-  clearFavorites: () => void;
+  toggleFavorite: (product: Product) => Promise<void>;
+  addFavorite: (product: Product) => Promise<void>;
+  removeFavorite: (productId: string) => Promise<void>;
+  clearFavorites: () => Promise<void>;
+  fetchFavorites: () => Promise<void>;
 }
 
-export const useFavorites = create<FavoritesState>()(
-  persist(
-    (set, get) => ({
-      favorites: [],
-      
-      isFavorite: (productId: string) => {
-        return get().favorites.some(item => item.id === productId);
-      },
-      
-      toggleFavorite: (product: Product) => {
-        const { favorites } = get();
-        const isAlreadyFavorite = favorites.some(item => item.id === product.id);
-        
-        if (isAlreadyFavorite) {
-          set({ 
-            favorites: favorites.filter(item => item.id !== product.id) 
-          });
-        } else {
-          set({ 
-            favorites: [...favorites, product] 
-          });
-        }
-      },
-      
-      addFavorite: (product: Product) => {
-        const { favorites } = get();
-        const isAlreadyFavorite = favorites.some(item => item.id === product.id);
-        
-        if (!isAlreadyFavorite) {
-          set({ 
-            favorites: [...favorites, product] 
-          });
-        }
-      },
-      
-      removeFavorite: (productId: string) => {
-        const { favorites } = get();
-        set({ 
-          favorites: favorites.filter(item => item.id !== productId) 
-        });
-      },
-      
-      clearFavorites: () => set({ favorites: [] }),
-    }),
-    {
-      name: 'favorites-storage',
-      storage: createJSONStorage(() => localStorage),
-      // Make sure the data is hydrated as soon as possible
-      skipHydration: false,
+export const useFavoritesStore = create<FavoritesState>((set, get) => ({
+  favorites: [],
+  isLoading: true,
+  
+  isFavorite: (productId: string) => {
+    return get().favorites.some(item => item.id === productId);
+  },
+  
+  toggleFavorite: async (product: Product) => {
+    const { favorites } = get();
+    const isAlreadyFavorite = favorites.some(item => item.id === product.id);
+    
+    if (isAlreadyFavorite) {
+      await get().removeFavorite(product.id);
+    } else {
+      await get().addFavorite(product);
     }
-  )
-);
+  },
+  
+  addFavorite: async (product: Product) => {
+    try {
+      const { favorites } = get();
+      const isAlreadyFavorite = favorites.some(item => item.id === product.id);
+      
+      if (!isAlreadyFavorite) {
+        // Save to Supabase
+        const { error } = await supabase
+          .from('favorites')
+          .insert({
+            product_id: product.id,
+            product_data: product
+          });
+          
+        if (error) throw error;
+        
+        // Update local state
+        set({ favorites: [...favorites, product] });
+      }
+    } catch (error) {
+      console.error('Error adding favorite:', error);
+    }
+  },
+  
+  removeFavorite: async (productId: string) => {
+    try {
+      const { favorites } = get();
+      
+      // Remove from Supabase
+      const { error } = await supabase
+        .from('favorites')
+        .delete()
+        .eq('product_id', productId);
+        
+      if (error) throw error;
+      
+      // Update local state
+      set({ favorites: favorites.filter(item => item.id !== productId) });
+    } catch (error) {
+      console.error('Error removing favorite:', error);
+    }
+  },
+  
+  clearFavorites: async () => {
+    try {
+      // Clear from Supabase
+      const { error } = await supabase
+        .from('favorites')
+        .delete()
+        .neq('product_id', '');  // Delete all entries
+        
+      if (error) throw error;
+      
+      // Update local state
+      set({ favorites: [] });
+    } catch (error) {
+      console.error('Error clearing favorites:', error);
+    }
+  },
+  
+  fetchFavorites: async () => {
+    try {
+      set({ isLoading: true });
+      
+      const { data, error } = await supabase
+        .from('favorites')
+        .select('*');
+        
+      if (error) throw error;
+      
+      if (data) {
+        // Transform data from Supabase format to our Product format
+        const favorites = data.map(item => item.product_data as Product);
+        set({ favorites, isLoading: false });
+      }
+    } catch (error) {
+      console.error('Error fetching favorites:', error);
+      set({ isLoading: false });
+    }
+  }
+}));
+
+// Create a React hook wrapper for the Zustand store
+export const useFavorites = () => {
+  const store = useFavoritesStore();
+  const { toast } = useToast();
+  
+  // Fetch favorites when the hook is first used
+  useEffect(() => {
+    store.fetchFavorites();
+  }, []);
+  
+  // Enhanced toggleFavorite with toast notification
+  const toggleFavoriteWithToast = async (product: Product) => {
+    const isFav = store.isFavorite(product.id);
+    await store.toggleFavorite(product);
+    
+    toast({
+      title: isFav ? "Removed from favorites" : "Added to favorites",
+      description: isFav ? `${product.name} has been removed from your favorites` : `${product.name} has been added to your favorites`,
+      duration: 3000,
+    });
+  };
+  
+  return {
+    ...store,
+    toggleFavorite: toggleFavoriteWithToast
+  };
+};

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route } from 'react-router-dom';
 import Index from '@/pages/Index';
 import ProductPage from '@/pages/ProductPage';
 import FruitsPage from '@/pages/FruitsPage';

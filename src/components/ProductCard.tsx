@@ -29,11 +29,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
     addItem(product);
   };
 
-  const handleFavoriteClick = (e: React.MouseEvent) => {
+  const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setAnimating(true);
-    toggleFavorite(product);
+    await toggleFavorite(product);
     setTimeout(() => setAnimating(false), 300);
   };
 
