@@ -27,7 +27,7 @@ const Header = () => {
 
   return (
     <header className="bg-gray-50 py-4">
-      <div className="container mx-auto px-4 flex justify-between items-center">
+      <div className="container mx-auto px-4 flex items-center justify-between relative">
         <div className="flex items-center gap-6">
           {isMobile && (
             <Button 
@@ -45,15 +45,6 @@ const Header = () => {
             </Button>
           )}
           
-          <Link to="/" className="flex items-center">
-            <div className="bg-green-500 text-white p-2 rounded">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 22C17.5228 22 22 17.5228 22 12C22 6.47715 17.5228 2 12 2C6.47715 2 2 6.47715 2 12C2 17.5228 6.47715 22 12 22Z" fill="currentColor" />
-                <path d="M8 12L11 15L16 9" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
-          </Link>
-          
           <div className="hidden md:block">
             <div className="flex flex-col">
               <h3 className="font-semibold text-gray-800">2464 Royal Ln. Mesa</h3>
@@ -62,20 +53,31 @@ const Header = () => {
           </div>
         </div>
         
-        <div className="flex-1 max-w-md mx-4">
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Search"
-              className="w-full bg-gray-100 border-0 rounded-full py-2 pl-10 pr-4 focus:outline-none focus:ring-1 focus:ring-green-500"
+        {/* Center Logo */}
+        <div className="absolute left-1/2 transform -translate-x-1/2">
+          <Link to="/" className="flex items-center">
+            <img 
+              src="/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png" 
+              alt="Logo" 
+              className="h-10 w-auto object-contain"
             />
-            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-              <Search className="h-5 w-5 text-gray-400" />
-            </div>
-          </div>
+          </Link>
         </div>
         
-        <div>
+        <div className="flex items-center gap-4">
+          <div className="hidden md:block max-w-md">
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Search"
+                className="w-full bg-gray-100 border-0 rounded-full py-2 pl-10 pr-4 focus:outline-none focus:ring-1 focus:ring-green-500"
+              />
+              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 text-gray-400" />
+              </div>
+            </div>
+          </div>
+          
           <button 
             onClick={handleCartClick} 
             className="relative bg-green-50 rounded-full p-2 flex items-center"

@@ -29,31 +29,37 @@ const MobileBottomNav = () => {
   }
   
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-top flex justify-around py-2 border-t z-50">
-      <Link to="/" className="flex flex-col items-center p-2">
-        <Home className="h-5 w-5 text-green-500" />
-        <span className="text-xs text-gray-600 mt-1">Home</span>
+    <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-top flex justify-around py-3 border-t z-50">
+      <Link to="/" className="flex flex-col items-center">
+        <div className="bg-green-50 rounded-full p-2">
+          <Home className="h-5 w-5 text-green-600 stroke-[2.5px]" />
+        </div>
+        <span className="text-xs font-medium text-gray-800 mt-1">Home</span>
       </Link>
-      <Link to="/favorites" className="flex flex-col items-center p-2 relative">
-        <Heart className="h-5 w-5 text-gray-500" />
-        {favorites.length > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-            {favorites.length}
-          </span>
-        )}
-        <span className="text-xs text-gray-600 mt-1">Favorites</span>
+      <Link to="/favorites" className="flex flex-col items-center relative">
+        <div className="bg-red-50 rounded-full p-2">
+          <Heart className="h-5 w-5 text-red-500 stroke-[2.5px]" />
+          {favorites.length > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-bold">
+              {favorites.length}
+            </span>
+          )}
+        </div>
+        <span className="text-xs font-medium text-gray-800 mt-1">Favorites</span>
       </Link>
       <button 
         onClick={openCart}
-        className="flex flex-col items-center p-2 relative"
+        className="flex flex-col items-center relative"
       >
-        <ShoppingCart className="h-5 w-5 text-gray-500" />
-        {getTotalItems() > 0 && (
-          <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
-            {getTotalItems()}
-          </span>
-        )}
-        <span className="text-xs text-gray-600 mt-1">Cart</span>
+        <div className="bg-green-50 rounded-full p-2">
+          <ShoppingCart className="h-5 w-5 text-green-600 stroke-[2.5px]" />
+          {getTotalItems() > 0 && (
+            <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-bold">
+              {getTotalItems()}
+            </span>
+          )}
+        </div>
+        <span className="text-xs font-medium text-gray-800 mt-1">Cart</span>
       </button>
     </div>
   );
