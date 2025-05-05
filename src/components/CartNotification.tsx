@@ -5,7 +5,6 @@ import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/formatPrice';
 import { Product } from '@/data/products';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/hooks/use-cart';
 
 interface CartNotificationProps {
@@ -27,7 +26,6 @@ const CartNotification: React.FC<CartNotificationProps> = ({
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const isMobile = useIsMobile();
-  const navigate = useNavigate();
   const { openCart } = useCart();
   
   useEffect(() => {
