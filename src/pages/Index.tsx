@@ -8,7 +8,7 @@ import { Link } from 'react-router-dom';
 import { useCart } from '@/hooks/use-cart';
 
 const Index = () => {
-  const { getTotalItems } = useCart();
+  const { getTotalItems, openCart } = useCart();
   
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -70,7 +70,10 @@ const Index = () => {
           <Heart className="h-5 w-5 text-gray-500" />
           <span className="text-xs text-gray-600 mt-1">Favorites</span>
         </Link>
-        <Link to="/cart" className="flex flex-col items-center p-2 relative">
+        <button 
+          onClick={openCart}
+          className="flex flex-col items-center p-2 relative"
+        >
           <ShoppingCart className="h-5 w-5 text-gray-500" />
           {getTotalItems() > 0 && (
             <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
@@ -78,7 +81,7 @@ const Index = () => {
             </span>
           )}
           <span className="text-xs text-gray-600 mt-1">Cart</span>
-        </Link>
+        </button>
       </div>
       
       {/* Desktop Footer - Only shown on desktop */}
