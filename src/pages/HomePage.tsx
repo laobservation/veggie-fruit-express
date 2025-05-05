@@ -73,7 +73,7 @@ const HomePage: React.FC = () => {
       {/* Popular Items Section */}
       <PopularItemsSection products={products} isLoading={isLoading} />
       
-      {/* New Arrival Section */}
+      {/* New Arrival Section - now using the featured flag to determine new arrivals */}
       <NewArrivalSection products={products} isLoading={isLoading} />
     </div>
   );

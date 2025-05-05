@@ -61,23 +61,23 @@ const Index = () => {
       </div>
       
       {/* Mobile Bottom Navigation - Only shown on mobile */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-white shadow-top flex justify-around py-2 border-t">
+      <div className="md:hidden fixed bottom-0 left-0 right-0 bg-gray-800 text-white shadow-top flex justify-around py-2 border-t border-gray-700">
         <Link to="/" className="flex flex-col items-center p-2">
           <Home className="h-5 w-5 text-green-500" />
-          <span className="text-xs text-gray-600 mt-1">Home</span>
+          <span className="text-xs text-gray-300 mt-1">Home</span>
         </Link>
         <Link to="/favorites" className="flex flex-col items-center p-2">
-          <Heart className="h-5 w-5 text-gray-500" />
-          <span className="text-xs text-gray-600 mt-1">Favorites</span>
+          <Heart className="h-5 w-5 text-gray-300" />
+          <span className="text-xs text-gray-300 mt-1">Favorites</span>
         </Link>
         <Link to="/cart" className="flex flex-col items-center p-2 relative">
-          <ShoppingCart className="h-5 w-5 text-gray-500" />
+          <ShoppingCart className="h-5 w-5 text-gray-300" />
           {getTotalItems() > 0 && (
             <span className="absolute -top-1 -right-1 bg-green-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center">
               {getTotalItems()}
             </span>
           )}
-          <span className="text-xs text-gray-600 mt-1">Cart</span>
+          <span className="text-xs text-gray-300 mt-1">Cart</span>
         </Link>
       </div>
       

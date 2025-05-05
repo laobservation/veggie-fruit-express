@@ -1,6 +1,13 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { 
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselPrevious,
+  CarouselNext
+} from "@/components/ui/carousel";
 
 interface Promotion {
   id: number;
@@ -14,16 +21,36 @@ interface PromotionSliderProps {
 }
 
 const PromotionSlider: React.FC<PromotionSliderProps> = ({ promotions }) => {
+  const [api, setApi] = useState<any>();
+  
+  // Auto-advance slides
+  useEffect(() => {
+    if (!api) return;
+
+    const interval = setInterval(() => {
+      api.scrollNext();
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [api]);
+
   return (
-    <div className="flex gap-4 overflow-x-auto scrollbar-none pb-2 mb-8 px-4 md:px-0">
-      {promotions.map((promo) => (
-        <div 
-          key={promo.id} 
-          className={`${promo.color} rounded-xl flex-shrink-0 w-full md:w-1/3 h-48 flex items-center p-6 text-white`}
-        >
-          <h3 className="text-2xl font-bold max-w-[50%] leading-tight">{promo.title}</h3>
-        </div>
-      ))}
+    <div className="mb-8 px-0">
+      <Carousel setApi={setApi} className="w-full">
+        <CarouselContent>
+          {promotions.map((promo) => (
+            <CarouselItem key={promo.id}>
+              <div 
+                className={`${promo.color} rounded-xl h-48 w-full flex items-center p-6 text-white`}
+              >
+                <h3 className="text-2xl font-bold max-w-[50%] leading-tight">{promo.title}</h3>
+              </div>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious className="left-2 md:left-4 bg-white/80" />
+        <CarouselNext className="right-2 md:right-4 bg-white/80" />
+      </Carousel>
     </div>
   );
 };
