@@ -14,6 +14,7 @@ import FavoritesPage from '@/pages/FavoritesPage';
 import { Home, Heart, ShoppingCart } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '@/hooks/use-cart';
+import Cart from '@/components/Cart';
 
 // Mobile Bottom Navigation component
 const MobileBottomNav = () => {
@@ -66,6 +67,7 @@ function App() {
         <Route path="*" element={<NotFound />} />
       </Routes>
       <MobileBottomNav />
+      <Cart />
     </CartNotificationProvider>
   );
 }

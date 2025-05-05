@@ -11,7 +11,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 const Header = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { getTotalItems } = useCart();
+  const { getTotalItems, openCart } = useCart();
   const isMobile = useIsMobile();
   
   // Close mobile menu when resizing to desktop
@@ -20,6 +20,10 @@ const Header = () => {
       setIsMobileMenuOpen(false);
     }
   }, [isMobile, isMobileMenuOpen]);
+
+  const handleCartClick = () => {
+    openCart();
+  };
 
   return (
     <header className="bg-gray-50 py-4">
@@ -73,7 +77,7 @@ const Header = () => {
         
         <div>
           <button 
-            onClick={() => setIsCartOpen(true)} 
+            onClick={handleCartClick} 
             className="relative bg-green-50 rounded-full p-2 flex items-center"
           >
             <ShoppingCart className="h-5 w-5 text-green-600" />
@@ -84,7 +88,6 @@ const Header = () => {
         </div>
       </div>
       
-      <Cart isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
       <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
     </header>
   );
