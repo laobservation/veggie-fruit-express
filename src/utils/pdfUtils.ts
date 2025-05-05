@@ -9,7 +9,7 @@ export const generateOrderPDF = (order: Order) => {
   const doc = new jsPDF();
   
   // Add company logo
-  const logoPath = "/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png";
+  const logoPath = "/lovable-uploads/4c234092-7248-4896-9d9b-9da5909ffbfb.png";
   
   // Create a new Image to load the logo
   const img = new Image();
@@ -109,7 +109,7 @@ export const generateThankYouPDF = (orderDetails: any) => {
   const doc = new jsPDF();
   
   // Add company logo
-  const logoPath = "/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png";
+  const logoPath = "/lovable-uploads/4c234092-7248-4896-9d9b-9da5909ffbfb.png";
   
   // Create a new Image to load the logo
   const img = new Image();

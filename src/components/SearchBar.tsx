@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, X } from 'lucide-react';
@@ -17,6 +17,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ expanded = false, onClose }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [searchResults, setSearchResults] = useState<typeof products>([]);
   const [showResults, setShowResults] = useState(false);
+  const resultsRef = useRef<HTMLDivElement>(null);
   
   // Focus input when expanded
   useEffect(() => {
@@ -28,8 +29,23 @@ const SearchBar: React.FC<SearchBarProps> = ({ expanded = false, onClose }) => {
     }
   }, [isExpanded]);
   
+  // Close results when clicking outside
   useEffect(() => {
-    if (searchTerm.length >= 2) {
+    function handleClickOutside(event: MouseEvent) {
+      if (resultsRef.current && !resultsRef.current.contains(event.target as Node)) {
+        setShowResults(false);
+      }
+    }
+    
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+  
+  // Update search results as user types
+  useEffect(() => {
+    if (searchTerm.length >= 1) {
       const results = products.filter(product => 
         product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
         product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -52,7 +68,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ expanded = false, onClose }) => {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     console.log('Searching for:', searchTerm);
-    if (searchTerm.length >= 2) {
+    if (searchTerm.length >= 1) {
       setShowResults(true);
     }
   };
@@ -63,8 +79,14 @@ const SearchBar: React.FC<SearchBarProps> = ({ expanded = false, onClose }) => {
     if (onClose) onClose();
   };
   
+  const handleInputFocus = () => {
+    if (searchTerm.length >= 1) {
+      setShowResults(true);
+    }
+  };
+  
   return (
-    <div className={cn("relative", expanded ? "w-full" : "")}>
+    <div ref={resultsRef} className={cn("relative", expanded ? "w-full" : "")}>
       {!isExpanded ? (
         <Button 
           variant="ghost" 
@@ -84,6 +106,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ expanded = false, onClose }) => {
               className="pr-8 w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={handleInputFocus}
             />
             {searchTerm && (
               <Button
@@ -118,6 +141,9 @@ const SearchBar: React.FC<SearchBarProps> = ({ expanded = false, onClose }) => {
                           <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
                           <p className="text-xs text-gray-500 truncate">{product.category === 'fruit' ? 'Fruit' : 'Légume'}</p>
                         </div>
+                        <div className="ml-2">
+                          <p className="text-sm font-medium text-green-600">{product.price.toFixed(2)} €</p>
+                        </div>
                       </Link>
                     </li>
                   ))}
@@ -125,7 +151,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ expanded = false, onClose }) => {
               </div>
             )}
             
-            {showResults && searchResults.length === 0 && searchTerm.length >= 2 && (
+            {showResults && searchResults.length === 0 && searchTerm.length >= 1 && (
               <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-md shadow-lg z-50">
                 <div className="px-4 py-3 text-sm text-gray-500">
                   Aucun résultat trouvé pour "{searchTerm}"

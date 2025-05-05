@@ -2,11 +2,12 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
-import { Menu, Search, ShoppingCart } from 'lucide-react';
+import { ShoppingCart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Cart from './Cart';
 import MobileMenu from './MobileMenu';
 import { useIsMobile } from '@/hooks/use-mobile';
+import SearchBar from './SearchBar';
 
 const Header = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -57,7 +58,7 @@ const Header = () => {
         <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center">
           <Link to="/" className="flex items-center">
             <img 
-              src="/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png" 
+              src="/lovable-uploads/4c234092-7248-4896-9d9b-9da5909ffbfb.png" 
               alt="Marché Bio Logo" 
               className="h-14 w-auto object-contain" 
             />
@@ -66,16 +67,7 @@ const Header = () => {
         
         <div className="flex items-center gap-4">
           <div className="hidden md:block max-w-md">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search"
-                className="w-full bg-gray-100 border-0 rounded-full py-2 pl-10 pr-4 focus:outline-none focus:ring-1 focus:ring-green-500"
-              />
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
-              </div>
-            </div>
+            <SearchBar />
           </div>
           
           <button 
