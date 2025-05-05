@@ -19,7 +19,7 @@ interface FavoritesState {
 
 export const useFavoritesStore = create<FavoritesState>((set, get) => ({
   favorites: [],
-  isLoading: true,
+  isLoading: false, // Changed to false by default
   
   isFavorite: (productId: string) => {
     return get().favorites.some(item => item.id === productId);
@@ -42,6 +42,9 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
       const isAlreadyFavorite = favorites.some(item => item.id === product.id);
       
       if (!isAlreadyFavorite) {
+        // Update local state immediately
+        set({ favorites: [...favorites, product] });
+        
         // Save to Supabase - here we need to ensure the product is JSON-compatible
         const { error } = await supabase
           .from('favorites')
@@ -51,9 +54,6 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
           });
           
         if (error) throw error;
-        
-        // Update local state
-        set({ favorites: [...favorites, product] });
       }
     } catch (error) {
       console.error('Error adding favorite:', error);
@@ -64,6 +64,9 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
     try {
       const { favorites } = get();
       
+      // Update local state immediately
+      set({ favorites: favorites.filter(item => item.id !== productId) });
+      
       // Remove from Supabase
       const { error } = await supabase
         .from('favorites')
@@ -71,9 +74,6 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
         .eq('product_id', productId);
         
       if (error) throw error;
-      
-      // Update local state
-      set({ favorites: favorites.filter(item => item.id !== productId) });
     } catch (error) {
       console.error('Error removing favorite:', error);
     }
@@ -81,6 +81,9 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
   
   clearFavorites: async () => {
     try {
+      // Update local state immediately
+      set({ favorites: [] });
+      
       // Clear from Supabase
       const { error } = await supabase
         .from('favorites')
@@ -88,9 +91,6 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
         .neq('product_id', '');  // Delete all entries
         
       if (error) throw error;
-      
-      // Update local state
-      set({ favorites: [] });
     } catch (error) {
       console.error('Error clearing favorites:', error);
     }

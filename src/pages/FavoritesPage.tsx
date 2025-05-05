@@ -6,7 +6,6 @@ import Footer from '@/components/Footer';
 import ProductCard from '@/components/ProductCard';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
-import { Loader } from 'lucide-react';
 import { useToast } from '@/components/ui/use-toast';
 
 const FavoritesPage: React.FC = () => {
@@ -16,6 +15,7 @@ const FavoritesPage: React.FC = () => {
   
   // Ensure favorites are loaded when the page mounts
   useEffect(() => {
+    // Fetch in the background without showing loading state
     fetchFavorites();
   }, [fetchFavorites]);
   
@@ -45,14 +45,7 @@ const FavoritesPage: React.FC = () => {
           )}
         </div>
         
-        {isLoading ? (
-          <div className="flex items-center justify-center py-10">
-            <div className="flex flex-col items-center">
-              <Loader className="h-10 w-10 text-green-500 animate-spin mb-4" />
-              <p className="text-gray-500">Loading your favorites...</p>
-            </div>
-          </div>
-        ) : favorites.length === 0 ? (
+        {favorites.length === 0 ? (
           <div className="text-center py-10">
             <p className="text-gray-500 mb-6">You haven't added any favorites yet</p>
             <Button onClick={() => navigate('/')} className="bg-green-500 hover:bg-green-600">
@@ -60,7 +53,7 @@ const FavoritesPage: React.FC = () => {
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
             {favorites.map(product => (
               <ProductCard key={product.id} product={product} />
             ))}

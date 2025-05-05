@@ -15,7 +15,7 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage = 0 }) => {
   const { addItem } = useCart();
-  const { isFavorite, toggleFavorite } = useFavorites();
+  const { isFavorite, toggleFavorite, favorites } = useFavorites();
   const [animating, setAnimating] = useState(false);
   const [favoriteStatus, setFavoriteStatus] = useState(false);
   
@@ -26,7 +26,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
   // Update favorite status when product changes or when favorites are updated
   useEffect(() => {
     setFavoriteStatus(isFavorite(product.id));
-  }, [product.id, isFavorite]);
+  }, [product.id, isFavorite, favorites]);
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -37,10 +37,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setAnimating(true);
-    await toggleFavorite(product);
-    // Update the local state immediately for a responsive UI
+    
+    // Update UI immediately for faster feedback
     setFavoriteStatus(!favoriteStatus);
+    setAnimating(true);
+    
+    // Process in background
+    await toggleFavorite(product);
     setTimeout(() => setAnimating(false), 300);
   };
 
