@@ -5,7 +5,7 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { generateThankYouPDF } from '@/utils/pdfUtils';
+import { generateThankYouPDF } from '@/utils/pdf';
 import OrderConfirmation from '@/components/thankyou/OrderConfirmation';
 
 const ThankYouPage = () => {

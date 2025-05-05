@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Order, OrderStatus, RawOrder } from '@/types/order';
 import { useToast } from '@/hooks/use-toast';
@@ -9,7 +8,7 @@ import {
   updateOrderStatus as updateOrderStatusService,
   transformRawOrder
 } from '@/services/orderService';
-import { generateOrderPDF } from '@/utils/pdfUtils';
+import { generateOrderPDF } from '@/utils/pdf';
 
 export const useOrders = () => {
   const [orders, setOrders] = useState<Order[]>([]);
