@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { 
@@ -91,7 +92,14 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
 
       clearCart();
       toast.success("Commande enregistrée avec succès!");
-      navigate('/thank-you', { state: { orderDetails } });
+      
+      // Redirect to thank you page with order details and auto-download flag
+      navigate('/thank-you', { 
+        state: { 
+          orderDetails,
+          autoDownload: true
+        } 
+      });
     } catch (err) {
       console.error('Error processing order:', err);
       toast.error("Une erreur s'est produite. Veuillez réessayer.");

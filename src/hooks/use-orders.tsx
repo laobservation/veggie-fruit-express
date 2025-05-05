@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Order, OrderStatus, RawOrder } from '@/types/order';
 import { useToast } from '@/hooks/use-toast';
@@ -70,8 +71,19 @@ export const useOrders = () => {
               setViewDialogOpen(false);
               setSelectedOrder(null);
             }
-          } else {
-            // For other events, refresh the order list to keep UI in sync
+          } else if (payload.eventType === 'UPDATE' && payload.new) {
+            // For update events, update the specific order in the UI
+            const updatedOrder = transformRawOrder(payload.new as RawOrder);
+            setOrders(prevOrders => prevOrders.map(order => 
+              order.id === updatedOrder.id ? updatedOrder : order
+            ));
+            
+            // Also update the selected order if it's being viewed
+            if (selectedOrder && selectedOrder.id === updatedOrder.id) {
+              setSelectedOrder(updatedOrder);
+            }
+          } else if (payload.eventType === 'INSERT') {
+            // For insert events, refresh the order list
             fetchOrders();
           }
         }

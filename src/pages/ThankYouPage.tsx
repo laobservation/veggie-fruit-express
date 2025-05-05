@@ -13,7 +13,7 @@ const ThankYouPage = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   
-  const { orderDetails } = location.state || { 
+  const { orderDetails, autoDownload } = location.state || { 
     orderDetails: {
       name: '',
       address: '',
@@ -21,20 +21,19 @@ const ThankYouPage = () => {
       preferredTime: '',
       totalAmount: 0,
       items: []
-    } 
+    },
+    autoDownload: false
   };
 
   // Redirect to homepage if no order details
   useEffect(() => {
     if (!orderDetails.name) {
       navigate('/');
-    } else {
-      // Auto-generate and download PDF for the user
-      setTimeout(() => {
-        generatePDF();
-      }, 1000);
+    } else if (autoDownload) {
+      // Auto-generate and download PDF if flag is set
+      generatePDF();
     }
-  }, [orderDetails, navigate]);
+  }, [orderDetails, navigate, autoDownload]);
 
   // Send notification to store owner
   useEffect(() => {
