@@ -11,7 +11,7 @@ import AdminPage from '@/pages/AdminPage';
 import { CartNotificationProvider } from '@/hooks/use-cart';
 import { Toaster } from "@/components/ui/toaster"
 import FavoritesPage from '@/pages/FavoritesPage';
-import { Home, Heart, ShoppingCart } from 'lucide-react';
+import { Home, Heart, ShoppingCart, Phone } from 'lucide-react';
 import { Link, useLocation } from 'react-router-dom';
 import { useCart } from '@/hooks/use-cart';
 import Cart from '@/components/Cart';
@@ -47,6 +47,17 @@ const MobileBottomNav = () => {
         </div>
         <span className="text-xs font-medium text-gray-800 mt-1">Favorites</span>
       </Link>
+      <a 
+        href="https://wa.me/+212600000000?text=Je souhaite commander des produits" 
+        target="_blank"
+        rel="noopener noreferrer"
+        className="flex flex-col items-center"
+      >
+        <div className="bg-green-400 rounded-full p-2">
+          <Phone className="h-5 w-5 text-white stroke-[2.5px]" />
+        </div>
+        <span className="text-xs font-medium text-gray-800 mt-1">WhatsApp</span>
+      </a>
       <button 
         onClick={openCart}
         className="flex flex-col items-center relative"

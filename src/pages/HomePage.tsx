@@ -62,7 +62,7 @@ const HomePage: React.FC = () => {
   ];
 
   return (
-    <div className="bg-gray-50 py-4 min-h-screen">
+    <div className="bg-gray-50 py-4 min-h-screen pb-20">
       {/* Promotions Slider */}
       <PromotionSlider promotions={promotions} />
 
