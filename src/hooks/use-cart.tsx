@@ -15,6 +15,7 @@ interface CartState {
   showNotification: boolean;
   notificationItem: CartItem | null;
   isCartOpen: boolean;
+  cartReminder: boolean;
   addItem: (product: Product, quantity?: number) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
@@ -24,6 +25,7 @@ interface CartState {
   hideNotification: () => void;
   openCart: () => void;
   closeCart: () => void;
+  toggleCartReminder: (state: boolean) => void;
 }
 
 export const useCart = create<CartState>()(
@@ -33,6 +35,7 @@ export const useCart = create<CartState>()(
       showNotification: false,
       notificationItem: null,
       isCartOpen: false,
+      cartReminder: false,
       addItem: (product: Product, quantity = 1) => {
         const currentItems = get().items;
         const existingItem = currentItems.find(item => item.product.id === product.id);
@@ -95,7 +98,8 @@ export const useCart = create<CartState>()(
         notificationItem: null
       }),
       openCart: () => set({ isCartOpen: true }),
-      closeCart: () => set({ isCartOpen: false })
+      closeCart: () => set({ isCartOpen: false }),
+      toggleCartReminder: (state: boolean) => set({ cartReminder: state })
     }),
     {
       name: 'cart-storage',
