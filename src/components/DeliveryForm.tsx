@@ -1,45 +1,18 @@
 
 import React from 'react';
-import { useForm } from 'react-hook-form';
-import { 
-  Form, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormControl, 
-  FormMessage 
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { useForm, FormProvider } from 'react-hook-form';
+import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/hooks/use-cart';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { FormValues } from '@/types/delivery';
+import { processOrder } from '@/utils/orderUtils';
+import CustomerInfoFields from './delivery/CustomerInfoFields';
+import DeliveryTimeSelector from './delivery/DeliveryTimeSelector';
 
 interface DeliveryFormProps {
   onClose: () => void;
-}
-
-type FormValues = {
-  name: string;
-  address: string;
-  phone: string;
-  preferDeliveryTime: boolean;
-  deliveryTime?: string;
-};
-
-// Define a type for the order details that includes the optional orderId
-interface OrderDetails {
-  name: string;
-  address: string;
-  phone: string;
-  preferredTime: string;
-  totalAmount: number;
-  items: any[];
-  date: string;
-  orderId?: number;
 }
 
 const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
@@ -56,62 +29,17 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
     },
   });
 
-  const preferDeliveryTime = form.watch('preferDeliveryTime');
-
   const onSubmit = async (data: FormValues) => {
     try {
-      // Get order data before closing/redirecting
-      const itemsData = items.map(item => ({
-        productId: item.product.id,
-        productName: item.product.name,
-        quantity: item.quantity,
-        price: item.product.price
-      }));
-      
       // Close the form/cart panel immediately to ensure it's not visible
       onClose();
       
-      // Create order details object for thank you page with proper typing
-      const orderDetails: OrderDetails = {
-        name: data.name,
-        address: data.address,
-        phone: data.phone,
-        preferredTime: data.preferDeliveryTime ? data.deliveryTime : '',
-        totalAmount: getTotalPrice(),
-        items: items,
-        date: new Date().toISOString()
-      };
+      // Process the order and get order details for thank you page
+      const orderDetails = await processOrder(data, items, getTotalPrice);
       
       // First redirect to thank you page for immediate visual feedback
       navigate('/thank-you', { state: { orderDetails } });
       
-      // After redirect, store order in Supabase asynchronously
-      const { data: orderData, error } = await supabase
-        .from('Orders')
-        .insert({
-          'Client Name': data.name,
-          'Adresse': data.address,
-          'Phone': parseInt(data.phone, 10) || null,
-          'order_items': itemsData,
-          'total_amount': getTotalPrice(),
-          'preferred_time': data.preferDeliveryTime ? data.deliveryTime : null,
-          'status': 'new',
-          'notified': false
-        })
-        .select('id')
-        .single();
-
-      if (error) {
-        console.error('Error storing order:', error);
-        toast.error("Une erreur s'est produite lors de l'enregistrement de la commande.");
-        return;
-      }
-
-      // Update orderDetails with the order ID if available
-      if (orderData?.id) {
-        orderDetails.orderId = orderData.id;
-      }
-
       // Clear the cart after the order is processed
       clearCart();
     } catch (err) {
@@ -121,125 +49,24 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
   };
 
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-        <FormField
-          control={form.control}
-          name="name"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Nom complet</FormLabel>
-              <FormControl>
-                <Input placeholder="Votre nom" required {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="address"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Adresse</FormLabel>
-              <FormControl>
-                <Input placeholder="Votre adresse complète" required {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="phone"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Téléphone</FormLabel>
-              <FormControl>
-                <Input placeholder="Votre numéro de téléphone" required {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        
-        <FormField
-          control={form.control}
-          name="preferDeliveryTime"
-          render={({ field }) => (
-            <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-              <FormControl>
-                <Checkbox
-                  checked={field.value}
-                  onCheckedChange={field.onChange}
-                />
-              </FormControl>
-              <div className="space-y-1 leading-none">
-                <FormLabel>
-                  Je préfère choisir une heure de livraison
-                </FormLabel>
-              </div>
-            </FormItem>
-          )}
-        />
-        
-        {preferDeliveryTime && (
-          <FormField
-            control={form.control}
-            name="deliveryTime"
-            render={({ field }) => (
-              <FormItem className="space-y-3">
-                <FormLabel>Heure de livraison préférée</FormLabel>
-                <FormControl>
-                  <RadioGroup
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    className="flex flex-col space-y-1"
-                  >
-                    <FormItem className="flex items-center space-x-3 space-y-0">
-                      <FormControl>
-                        <RadioGroupItem value="matin" />
-                      </FormControl>
-                      <FormLabel className="font-normal">
-                        Matin (8h - 12h)
-                      </FormLabel>
-                    </FormItem>
-                    <FormItem className="flex items-center space-x-3 space-y-0">
-                      <FormControl>
-                        <RadioGroupItem value="apres-midi" />
-                      </FormControl>
-                      <FormLabel className="font-normal">
-                        Après-midi (13h - 17h)
-                      </FormLabel>
-                    </FormItem>
-                    <FormItem className="flex items-center space-x-3 space-y-0">
-                      <FormControl>
-                        <RadioGroupItem value="soir" />
-                      </FormControl>
-                      <FormLabel className="font-normal">
-                        Soir (17h - 20h)
-                      </FormLabel>
-                    </FormItem>
-                  </RadioGroup>
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        )}
-        
-        <div className="pt-4">
-          <Button 
-            type="submit" 
-            className="w-full bg-veggie-primary hover:bg-veggie-dark text-white"
-          >
-            Finaliser la commande
-          </Button>
-        </div>
-      </form>
-    </Form>
+    <FormProvider {...form}>
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <CustomerInfoFields />
+          
+          <DeliveryTimeSelector />
+          
+          <div className="pt-4">
+            <Button 
+              type="submit" 
+              className="w-full bg-veggie-primary hover:bg-veggie-dark text-white"
+            >
+              Finaliser la commande
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </FormProvider>
   );
 };
 
