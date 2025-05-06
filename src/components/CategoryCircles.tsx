@@ -3,12 +3,13 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Apple, Carrot } from 'lucide-react';
+import { Apple, Carrot, Package } from 'lucide-react';
 
 // These would ideally be dynamically generated from your categories
 const categories = [
   { id: 'fruits', name: 'Fruits', icon: Apple, color: 'bg-red-500', path: '/fruits' },
   { id: 'vegetables', name: 'Légumes', icon: Carrot, color: 'bg-green-500', path: '/vegetables' },
+  { id: 'packs', name: 'Packs', icon: Package, color: 'bg-amber-500', path: '/' },
   // Add more categories as needed
 ];
 

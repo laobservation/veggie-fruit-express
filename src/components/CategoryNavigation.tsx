@@ -6,7 +6,7 @@ export const CategoryNavigation: React.FC = () => {
   const categories = [
     { id: 'fruits', name: 'Fruits', icon: '🍎', bg: 'bg-red-100', path: '/fruits' },
     { id: 'vegetables', name: 'Vegetables', icon: '🥦', bg: 'bg-green-100', path: '/vegetables' },
-    { id: 'breakfast', name: 'Breakfast', icon: '🍳', bg: 'bg-yellow-100', path: '/' },
+    { id: 'packs', name: 'Packs', icon: '📦', bg: 'bg-amber-100', path: '/' },
     { id: 'drinks', name: 'Drinks', icon: '🥤', bg: 'bg-blue-100', path: '/' },
   ];
   
