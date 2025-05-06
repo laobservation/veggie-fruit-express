@@ -30,6 +30,18 @@ type FormValues = {
   deliveryTime?: string;
 };
 
+// Define a type for the order details that includes the optional orderId
+interface OrderDetails {
+  name: string;
+  address: string;
+  phone: string;
+  preferredTime: string;
+  totalAmount: number;
+  items: any[];
+  date: string;
+  orderId?: number;
+}
+
 const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
   const navigate = useNavigate();
   const { items, getTotalPrice, clearCart } = useCart();
@@ -59,8 +71,8 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
       // Close the form/cart panel immediately to ensure it's not visible
       onClose();
       
-      // Create order details object for thank you page
-      const orderDetails = {
+      // Create order details object for thank you page with proper typing
+      const orderDetails: OrderDetails = {
         name: data.name,
         address: data.address,
         phone: data.phone,
