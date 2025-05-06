@@ -26,7 +26,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, title, isLoading = 
           ))}
         </div>
       ) : products.length === 0 ? (
-        <p className="text-center text-gray-500 py-8">No products found.</p>
+        <p className="text-center text-gray-500 py-8">Aucun produit trouvé.</p>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
           {products.map((product) => (

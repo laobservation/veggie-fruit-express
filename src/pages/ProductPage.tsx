@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Heart, ShoppingBag } from 'lucide-react';
@@ -16,7 +17,7 @@ import { useState, useEffect } from 'react';
 const ProductPage = () => {
   const { productId } = useParams();
   const navigate = useNavigate();
-  const { addItem } = useCart();
+  const { addItem, openCart } = useCart();
   const { product, relatedProducts, loading } = useProductDetails(productId);
   const { isFavorite, toggleFavorite } = useFavorites();
   
@@ -34,6 +35,13 @@ const ProductPage = () => {
   const handleFavoriteClick = () => {
     if (product) {
       toggleFavorite(product);
+    }
+  };
+
+  const handleBuyNow = () => {
+    if (product) {
+      addItem(product);
+      openCart(); // Ouvre directement le formulaire de commande/panier
     }
   };
 
@@ -95,7 +103,7 @@ const ProductPage = () => {
             <button 
               onClick={handleFavoriteClick} 
               className="p-2"
-              aria-label={favoriteStatus ? "Remove from favorites" : "Add to favorites"}
+              aria-label={favoriteStatus ? "Retirer des favoris" : "Ajouter aux favoris"}
             >
               <Heart 
                 className={`h-6 w-6 transition-colors ${favoriteStatus ? 'fill-red-500 text-red-500' : ''}`}
@@ -130,7 +138,7 @@ const ProductPage = () => {
           {/* Related Products */}
           {relatedProducts.length > 0 && (
             <div className="bg-white rounded-lg p-5 mb-4 shadow-sm">
-              <h2 className="font-semibold text-lg mb-4">More {categoryText}</h2>
+              <h2 className="font-semibold text-lg mb-4">Autres {categoryText}</h2>
               <div className="grid grid-cols-4 gap-2">
                 {relatedProducts.slice(0, 4).map((relatedProduct) => (
                   <div 
@@ -161,17 +169,14 @@ const ProductPage = () => {
           onClick={handleAddToCart}
         >
           <ShoppingBag className="h-5 w-5" />
-          Add to cart
+          Ajouter au panier
         </Button>
         
         <Button
           className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8"
-          onClick={() => {
-            handleAddToCart();
-            navigate('/checkout');
-          }}
+          onClick={handleBuyNow}
         >
-          Buy now
+          Acheter maintenant
         </Button>
       </div>
       

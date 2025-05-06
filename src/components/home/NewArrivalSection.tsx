@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Product } from '@/types/product';
 import { formatPrice } from '@/lib/formatPrice';
-import { Plus, Heart, Command } from 'lucide-react';
+import { Heart, Command } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
 import { useFavorites } from '@/hooks/use-favorites';
 import '@/components/ui/plus-animation.css';
@@ -52,7 +52,7 @@ const NewArrivalSection: React.FC<NewArrivalSectionProps> = ({ products, isLoadi
   return (
     <div className="px-4 md:px-0 pb-16">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-gray-800">New Arrival</h2>
+        <h2 className="text-xl font-bold text-gray-800">Nouveautés</h2>
       </div>
       
       <div className="grid grid-cols-2 md:grid-cols-6 gap-3">
@@ -90,12 +90,12 @@ const NewArrivalSection: React.FC<NewArrivalSectionProps> = ({ products, isLoadi
                 <span className="text-lg font-bold">{formatPrice(product.price)}</span>
               </div>
               <button 
-                className={`absolute bottom-3 right-3 bg-yellow-400 hover:bg-yellow-500 rounded-full p-2 transition-colors plus-button ${touchedProductId === product.id ? 'touched' : ''}`}
+                className={`absolute bottom-3 right-3 bg-yellow-400 hover:bg-yellow-500 rounded-full py-1 px-3 transition-colors plus-button flex items-center ${touchedProductId === product.id ? 'touched' : ''}`}
                 onClick={(e) => handleAddToCart(e, product)}
-                aria-label="Add to cart"
+                aria-label="Ajouter au panier"
               >
-                <Plus className="h-4 w-4 text-white plus-icon" />
-                <Command className="h-4 w-4 text-white command-icon" />
+                <span className="text-white text-sm plus-icon">Ajouter</span>
+                <Command className="h-4 w-4 ml-1 text-white command-icon" />
               </button>
             </Link>
           ))

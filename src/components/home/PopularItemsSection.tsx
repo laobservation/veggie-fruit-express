@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Product } from '@/types/product';
 import { formatPrice } from '@/lib/formatPrice';
-import { Plus, Heart, ShoppingCart, Command } from 'lucide-react';
+import { Heart, Command } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
 import { useFavorites } from '@/hooks/use-favorites';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -53,7 +53,7 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({ products, isL
   return (
     <div className="mb-8 px-4 md:px-0">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-gray-800">Popular Items</h2>
+        <h2 className="text-xl font-bold text-gray-800">Produits Populaires</h2>
         <div className="flex gap-2">
           <button className="p-1 rounded-full border border-gray-300 text-gray-600">
             <ChevronLeft size={18} />
@@ -100,12 +100,12 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({ products, isL
                   <span className="text-lg font-bold">{formatPrice(product.price)}</span>
                 </div>
                 <button 
-                  className={`mt-2 bg-yellow-400 hover:bg-yellow-500 rounded-full p-2 transition-colors plus-button ${touchedProductId === product.id ? 'touched' : ''}`}
+                  className={`mt-2 bg-yellow-400 hover:bg-yellow-500 rounded-full py-1 px-3 transition-colors plus-button flex items-center ${touchedProductId === product.id ? 'touched' : ''}`}
                   onClick={(e) => handleAddToCart(e, product)}
-                  aria-label="Add to cart"
+                  aria-label="Ajouter au panier"
                 >
-                  <Plus className="h-4 w-4 text-white plus-icon" />
-                  <Command className="h-4 w-4 text-white command-icon" />
+                  <span className="text-white text-sm plus-icon">Ajouter</span>
+                  <Command className="h-4 w-4 ml-1 text-white command-icon" />
                 </button>
               </div>
             </Link>
