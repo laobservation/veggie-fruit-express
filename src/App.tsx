@@ -7,7 +7,6 @@ import CategoryPage from '@/pages/CategoryPage';
 import ThankYouPage from '@/pages/ThankYouPage';
 import NotFound from '@/pages/NotFound';
 import AdminPage from '@/pages/AdminPage';
-import AdminSettingsPage from '@/pages/AdminSettingsPage';
 import { CartNotificationProvider } from '@/hooks/use-cart';
 import { Toaster } from "@/components/ui/toaster";
 import FavoritesPage from '@/pages/FavoritesPage';
@@ -26,7 +25,6 @@ function App() {
             <Route path="/favorites" element={<FavoritesPage />} />
             <Route path="/thank-you" element={<ThankYouPage />} />
             <Route path="/admin" element={<AdminPage />} />
-            <Route path="/admin/settings" element={<AdminSettingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
