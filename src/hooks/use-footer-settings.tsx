@@ -85,9 +85,9 @@ export function useFooterSettings() {
         company_name: defaultFooterSettings.companyName,
         description: defaultFooterSettings.description,
         copyright_text: defaultFooterSettings.copyrightText,
-        contact_info: defaultFooterSettings.contactInfo as Json,
-        social_links: defaultFooterSettings.socialLinks as Json,
-        quick_links: defaultFooterSettings.quickLinks as Json,
+        contact_info: defaultFooterSettings.contactInfo as unknown as Json,
+        social_links: defaultFooterSettings.socialLinks as unknown as Json,
+        quick_links: defaultFooterSettings.quickLinks as unknown as Json,
       };
       
       const { error } = await supabase
@@ -122,9 +122,9 @@ export function useFooterSettings() {
         company_name: footerSettings.companyName,
         description: footerSettings.description,
         copyright_text: footerSettings.copyrightText,
-        contact_info: footerSettings.contactInfo as Json,
-        social_links: footerSettings.socialLinks as Json,
-        quick_links: footerSettings.quickLinks as Json,
+        contact_info: footerSettings.contactInfo as unknown as Json,
+        social_links: footerSettings.socialLinks as unknown as Json,
+        quick_links: footerSettings.quickLinks as unknown as Json,
         updated_at: new Date().toISOString(),
       };
       
