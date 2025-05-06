@@ -23,10 +23,11 @@ const SlideCard: React.FC<SlideCardProps> = ({ slide, onEdit, onDelete, disableD
         className="h-[120px] bg-cover bg-center relative" 
         style={{ 
           backgroundImage: slide.image ? `url(${slide.image})` : undefined,
-          backgroundColor: !slide.image ? slide.color.replace('bg-', '') : undefined 
+          backgroundColor: !slide.image ? 'gray' : undefined 
         }}
       >
-        <div className="absolute inset-0 flex items-center justify-center">
+        {/* Preview of slide with call to action at the bottom */}
+        <div className="absolute inset-0 flex flex-col justify-end items-center pb-4">
           <span className={`${slide.color} text-white font-bold px-3 py-1 rounded border border-white`}>
             {slide.callToAction || 'Shop Now'}
           </span>

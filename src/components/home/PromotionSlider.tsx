@@ -73,8 +73,8 @@ const PromotionSlider: React.FC<PromotionSliderProps> = ({ customSlides }) => {
                 className="w-full h-full object-cover"
               />
               
-              {/* Call to action button */}
-              <div className={`absolute inset-0 flex items-center justify-center`}>
+              {/* Call to action button - Moved to bottom */}
+              <div className={`absolute inset-x-0 bottom-4 flex items-center justify-center`}>
                 <Button 
                   variant="default" 
                   className={`${slide.color} border-2 border-white hover:opacity-90 text-white font-bold px-6 py-2 shadow-md`}

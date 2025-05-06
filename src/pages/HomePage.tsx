@@ -9,7 +9,6 @@ import PromotionSlider from '@/components/home/PromotionSlider';
 import CategoriesSection from '@/components/home/CategoriesSection';
 import PopularItemsSection from '@/components/home/PopularItemsSection';
 import NewArrivalSection from '@/components/home/NewArrivalSection';
-import { Slide } from '@/types/slider';
 
 const HomePage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -41,38 +40,10 @@ const HomePage: React.FC = () => {
     loadProducts();
   }, []);
 
-  // Featured promotions for the slider
-  const customSlides: Slide[] = [
-    {
-      id: '1',
-      title: "MEAL PLAN WITH GROCERY STORE",
-      color: "bg-emerald-800",
-      image: "/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png",
-      position: "left",
-      callToAction: "Shop Meal Plans"
-    },
-    {
-      id: '2',
-      title: "MAKING THE MOST OF YOUR GROCERY",
-      color: "bg-purple-700",
-      image: "/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png",
-      position: "center",
-      callToAction: "Learn More"
-    },
-    {
-      id: '3',
-      title: "SHOPPING WITH GROCERY STORE",
-      color: "bg-teal-700",
-      image: "/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png",
-      position: "right",
-      callToAction: "Shop Now"
-    }
-  ];
-
   return (
     <div className="bg-gray-50 py-4 min-h-screen pb-28 md:pb-6">
-      {/* Promotions Slider */}
-      <PromotionSlider customSlides={customSlides} />
+      {/* Promotions Slider - No custom slides, it will fetch from database */}
+      <PromotionSlider />
 
       {/* Categories Section */}
       <CategoriesSection />

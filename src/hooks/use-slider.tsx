@@ -17,7 +17,6 @@ export const useSlider = () => {
     setLoading(true);
     
     try {
-      // Using raw query to work around TypeScript not recognizing the slides table yet
       const { data, error } = await supabase
         .from('slides')
         .select('*')
@@ -28,8 +27,16 @@ export const useSlider = () => {
       }
       
       if (data && data.length > 0) {
-        // Cast the data to Slide[] to satisfy TypeScript
-        setSlides(data as unknown as Slide[]);
+        // Map the database columns to our frontend model
+        const mappedSlides = data.map(slide => ({
+          id: slide.id,
+          title: slide.title,
+          color: slide.color,
+          image: slide.image,
+          position: slide.position as 'left' | 'right' | 'center',
+          callToAction: slide.call_to_action || 'Shop Now'
+        }));
+        setSlides(mappedSlides);
       } else {
         // If no slides exist, use default slides
         setSlides([
@@ -73,16 +80,34 @@ export const useSlider = () => {
 
   const addSlide = async (slide: Omit<Slide, 'id'>) => {
     try {
-      // Using raw query to work around TypeScript not recognizing the slides table yet
+      // Convert frontend model to database model
+      const dbSlide = {
+        title: slide.title,
+        color: slide.color,
+        image: slide.image,
+        position: slide.position,
+        call_to_action: slide.callToAction
+      };
+      
       const { data, error } = await supabase
         .from('slides')
-        .insert([slide])
+        .insert([dbSlide])
         .select();
       
       if (error) throw error;
       
       if (data) {
-        setSlides([...slides, data[0] as unknown as Slide]);
+        // Map the returned data back to our frontend model
+        const newSlide: Slide = {
+          id: data[0].id,
+          title: data[0].title,
+          color: data[0].color,
+          image: data[0].image,
+          position: data[0].position as 'left' | 'right' | 'center',
+          callToAction: data[0].call_to_action
+        };
+        
+        setSlides([...slides, newSlide]);
         toast({
           title: 'Success',
           description: 'Slide added successfully',
@@ -103,17 +128,36 @@ export const useSlider = () => {
 
   const updateSlide = async (slide: Slide) => {
     try {
-      // Using raw query to work around TypeScript not recognizing the slides table yet
+      // Convert frontend model to database model
+      const dbSlide = {
+        id: slide.id,
+        title: slide.title,
+        color: slide.color,
+        image: slide.image,
+        position: slide.position,
+        call_to_action: slide.callToAction
+      };
+      
       const { data, error } = await supabase
         .from('slides')
-        .update(slide)
+        .update(dbSlide)
         .eq('id', slide.id)
         .select();
       
       if (error) throw error;
       
       if (data) {
-        setSlides(slides.map(s => s.id === slide.id ? (data[0] as unknown as Slide) : s));
+        // Map the returned data back to our frontend model
+        const updatedSlide: Slide = {
+          id: data[0].id,
+          title: data[0].title,
+          color: data[0].color,
+          image: data[0].image,
+          position: data[0].position as 'left' | 'right' | 'center',
+          callToAction: data[0].call_to_action
+        };
+        
+        setSlides(slides.map(s => s.id === slide.id ? updatedSlide : s));
         toast({
           title: 'Success',
           description: 'Slide updated successfully',
@@ -143,7 +187,6 @@ export const useSlider = () => {
     }
 
     try {
-      // Using raw query to work around TypeScript not recognizing the slides table yet
       const { error } = await supabase
         .from('slides')
         .delete()

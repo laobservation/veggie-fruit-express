@@ -161,6 +161,7 @@ export type Database = {
       }
       slides: {
         Row: {
+          call_to_action: string | null
           color: string
           created_at: string | null
           id: string
@@ -170,6 +171,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          call_to_action?: string | null
           color?: string
           created_at?: string | null
           id?: string
@@ -179,6 +181,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          call_to_action?: string | null
           color?: string
           created_at?: string | null
           id?: string
