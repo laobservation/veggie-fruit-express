@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { generateThankYouPDF } from '@/utils/pdfUtils';
 import OrderConfirmation from '@/components/thankyou/OrderConfirmation';
+import { Howl } from 'howler';
 
 const ThankYouPage = () => {
   const location = useLocation();
@@ -24,12 +25,24 @@ const ThankYouPage = () => {
     } 
   };
 
+  // Play success sound when the page loads
+  useEffect(() => {
+    if (orderDetails.name) {
+      const successSound = new Howl({
+        src: ['/success-sound.mp3'],
+        volume: 0.5,
+      });
+      successSound.play();
+    }
+  }, [orderDetails]);
+
   // Redirect to homepage if no order details
   useEffect(() => {
     if (!orderDetails.name) {
       navigate('/');
     } else {
-      // Auto-generate and download PDF for the user
+      // Auto-generate and download PDF for the user with a slight delay
+      // to ensure the page is fully loaded and success sound plays first
       setTimeout(() => {
         generatePDF();
       }, 1000);
