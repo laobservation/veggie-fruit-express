@@ -9,6 +9,7 @@ import PromotionSlider from '@/components/home/PromotionSlider';
 import CategoriesSection from '@/components/home/CategoriesSection';
 import PopularItemsSection from '@/components/home/PopularItemsSection';
 import NewArrivalSection from '@/components/home/NewArrivalSection';
+import { Slide } from '@/types/slider';
 
 const HomePage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -41,31 +42,34 @@ const HomePage: React.FC = () => {
   }, []);
 
   // Featured promotions for the slider
-  const promotions = [
+  const customSlides: Slide[] = [
     {
-      id: 1,
+      id: '1',
       title: "MEAL PLAN WITH GROCERY STORE",
       color: "bg-emerald-800",
-      image: "/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png"
+      image: "/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png",
+      position: "left"
     },
     {
-      id: 2,
+      id: '2',
       title: "MAKING THE MOST OF YOUR GROCERY",
       color: "bg-purple-700",
-      image: "/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png"
+      image: "/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png",
+      position: "center"
     },
     {
-      id: 3,
+      id: '3',
       title: "SHOPPING WITH GROCERY STORE",
       color: "bg-teal-700",
-      image: "/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png"
+      image: "/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png",
+      position: "right"
     }
   ];
 
   return (
     <div className="bg-gray-50 py-4 min-h-screen pb-28 md:pb-6">
       {/* Promotions Slider */}
-      <PromotionSlider promotions={promotions} />
+      <PromotionSlider customSlides={customSlides} />
 
       {/* Categories Section */}
       <CategoriesSection />
