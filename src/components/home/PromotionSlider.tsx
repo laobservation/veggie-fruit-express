@@ -6,6 +6,7 @@ import { Slide } from '@/types/slider';
 import { useSlider } from '@/hooks/use-slider';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
 interface PromotionSliderProps {
   customSlides?: Slide[];
@@ -53,7 +54,7 @@ const PromotionSlider: React.FC<PromotionSliderProps> = ({ customSlides }) => {
   
   return (
     <div className="relative mb-8">
-      <div className="overflow-hidden">
+      <div className="overflow-hidden rounded-xl">
         <div 
           className="flex transition-transform duration-500 ease-in-out"
           style={{ transform: `translateX(-${currentSlide * 100}%)` }}
@@ -73,48 +74,71 @@ const PromotionSlider: React.FC<PromotionSliderProps> = ({ customSlides }) => {
                 className="w-full h-full object-cover"
               />
               
-              {/* Call to action button - Moved to bottom */}
-              <div className={`absolute inset-x-0 bottom-4 flex items-center justify-center`}>
-                <Button 
-                  variant="default" 
-                  className={`${slide.color} border-2 border-white hover:opacity-90 text-white font-bold px-6 py-2 shadow-md`}
-                >
-                  {slide.callToAction || 'Shop Now'}
-                </Button>
+              {/* Title overlay */}
+              <div className="absolute inset-0 bg-black/20 flex flex-col justify-between p-4">
+                <div className={`text-white font-semibold text-sm md:text-base max-w-[80%] ${
+                  slide.position === 'center' ? 'mx-auto text-center' :
+                  slide.position === 'right' ? 'ml-auto text-right' : 'text-left'
+                }`}>
+                  {slide.title}
+                </div>
+                
+                {/* Call to action button - Always at the bottom */}
+                <div className={`w-full flex ${
+                  slide.position === 'center' ? 'justify-center' :
+                  slide.position === 'right' ? 'justify-end' : 'justify-start'
+                }`}>
+                  <Button 
+                    variant="default" 
+                    size="sm"
+                    className={`${slide.color} border border-white hover:opacity-90 text-white font-bold shadow-md transition-all`}
+                  >
+                    {slide.callToAction || 'Shop Now'}
+                  </Button>
+                </div>
               </div>
             </div>
           ))}
         </div>
       </div>
       
-      {/* Navigation arrows for desktop */}
+      {/* Navigation arrows */}
       {slides.length > 1 && (
         <div className="hidden md:block">
           <button 
             onClick={prevSlide}
-            className="absolute top-1/2 left-4 -translate-y-1/2 bg-white/70 p-2 rounded-full shadow-md"
+            className="absolute top-1/2 left-4 -translate-y-1/2 bg-white/70 p-2 rounded-full shadow-md hover:bg-white transition-colors"
+            aria-label="Previous slide"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
           <button 
             onClick={nextSlide}
-            className="absolute top-1/2 right-4 -translate-y-1/2 bg-white/70 p-2 rounded-full shadow-md"
+            className="absolute top-1/2 right-4 -translate-y-1/2 bg-white/70 p-2 rounded-full shadow-md hover:bg-white transition-colors"
+            aria-label="Next slide"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
         </div>
       )}
       
-      {/* Pagination dots - only for mobile */}
-      {isMobile && slides.length > 1 && (
-        <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
+      {/* Stylish pagination dots - positioned in the middle right for both mobile and desktop */}
+      {slides.length > 1 && (
+        <div className="absolute bottom-0 top-0 right-4 flex flex-col justify-center items-center gap-1.5">
           {slides.map((_, index) => (
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={`w-2 h-2 rounded-full transition-colors ${
-                currentSlide === index ? 'bg-white' : 'bg-white/40'
-              }`}
+              className={cn(
+                "w-2 h-2 rounded-full transition-all duration-300 relative",
+                currentSlide === index 
+                  ? "bg-white scale-125 shadow-glow" 
+                  : "bg-white/40 hover:bg-white/60"
+              )}
+              style={{ 
+                boxShadow: currentSlide === index ? '0 0 5px 1px rgba(255, 255, 255, 0.7)' : 'none',
+                transform: `scale(${currentSlide === index ? 1.25 : 1})` 
+              }}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}

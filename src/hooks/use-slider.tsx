@@ -20,7 +20,7 @@ export const useSlider = () => {
       const { data, error } = await supabase
         .from('slides')
         .select('*')
-        .order('id', { ascending: true });
+        .order('order', { ascending: true });
       
       if (error) {
         throw error;
@@ -34,7 +34,8 @@ export const useSlider = () => {
           color: slide.color,
           image: slide.image,
           position: slide.position as 'left' | 'right' | 'center',
-          callToAction: slide.call_to_action || 'Shop Now'
+          callToAction: slide.call_to_action || 'Shop Now',
+          order: slide.order || 0
         }));
         setSlides(mappedSlides);
       } else {
@@ -46,7 +47,8 @@ export const useSlider = () => {
             color: 'bg-emerald-800',
             image: '/images/fruit-banner.jpg',
             position: 'left',
-            callToAction: 'Shop Fruits'
+            callToAction: 'Shop Fruits',
+            order: 0
           },
           {
             id: '2',
@@ -54,7 +56,8 @@ export const useSlider = () => {
             color: 'bg-purple-700',
             image: '/images/vegetable-banner.jpg',
             position: 'center',
-            callToAction: 'Shop Vegetables'
+            callToAction: 'Shop Vegetables',
+            order: 1
           },
           {
             id: '3',
@@ -62,7 +65,8 @@ export const useSlider = () => {
             color: 'bg-teal-700',
             image: '/lovable-uploads/827a5a28-0db3-4c43-90d7-280863c75660.png',
             position: 'right',
-            callToAction: 'Shop Now'
+            callToAction: 'Shop Now',
+            order: 2
           }
         ]);
       }
@@ -80,13 +84,19 @@ export const useSlider = () => {
 
   const addSlide = async (slide: Omit<Slide, 'id'>) => {
     try {
+      // Get the highest order value
+      const maxOrder = slides.length > 0 
+        ? Math.max(...slides.map(s => s.order || 0)) 
+        : -1;
+      
       // Convert frontend model to database model
       const dbSlide = {
         title: slide.title,
         color: slide.color,
         image: slide.image,
         position: slide.position,
-        call_to_action: slide.callToAction
+        call_to_action: slide.callToAction,
+        order: maxOrder + 1
       };
       
       const { data, error } = await supabase
@@ -104,7 +114,8 @@ export const useSlider = () => {
           color: data[0].color,
           image: data[0].image,
           position: data[0].position as 'left' | 'right' | 'center',
-          callToAction: data[0].call_to_action
+          callToAction: data[0].call_to_action,
+          order: data[0].order || 0
         };
         
         setSlides([...slides, newSlide]);
@@ -135,7 +146,8 @@ export const useSlider = () => {
         color: slide.color,
         image: slide.image,
         position: slide.position,
-        call_to_action: slide.callToAction
+        call_to_action: slide.callToAction,
+        order: slide.order
       };
       
       const { data, error } = await supabase
@@ -154,7 +166,8 @@ export const useSlider = () => {
           color: data[0].color,
           image: data[0].image,
           position: data[0].position as 'left' | 'right' | 'center',
-          callToAction: data[0].call_to_action
+          callToAction: data[0].call_to_action,
+          order: data[0].order || 0
         };
         
         setSlides(slides.map(s => s.id === slide.id ? updatedSlide : s));
@@ -211,12 +224,41 @@ export const useSlider = () => {
     }
   };
 
+  const reorderSlides = async (newSlides: Slide[]) => {
+    try {
+      // Update the order property for each slide
+      const updatedSlides = newSlides.map((slide, index) => ({
+        ...slide,
+        order: index
+      }));
+      
+      // Update each slide in the database
+      const updatePromises = updatedSlides.map(slide => 
+        supabase
+          .from('slides')
+          .update({ order: slide.order })
+          .eq('id', slide.id)
+      );
+      
+      await Promise.all(updatePromises);
+      
+      // Update state with new ordered slides
+      setSlides(updatedSlides);
+      
+      return true;
+    } catch (error) {
+      console.error('Error reordering slides:', error);
+      return false;
+    }
+  };
+
   return {
     slides,
     loading,
     fetchSlides,
     addSlide,
     updateSlide,
-    deleteSlide
+    deleteSlide,
+    reorderSlides
   };
 };

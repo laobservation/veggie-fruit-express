@@ -42,7 +42,7 @@ const HomePage: React.FC = () => {
 
   return (
     <div className="bg-gray-50 py-4 min-h-screen pb-28 md:pb-6">
-      {/* Promotions Slider - No custom slides, it will fetch from database */}
+      {/* Promotions Slider - Uses the slider data from database */}
       <PromotionSlider />
 
       {/* Categories Section */}
