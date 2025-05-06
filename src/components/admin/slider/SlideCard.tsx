@@ -7,7 +7,7 @@ import {
   CardContent, 
   CardFooter 
 } from '@/components/ui/card';
-import { Edit, Trash, MoveHorizontal } from 'lucide-react';
+import { Edit, Trash, MoveHorizontal, Link as LinkIcon, EyeOff } from 'lucide-react';
 
 interface SlideCardProps {
   slide: Slide;
@@ -41,33 +41,50 @@ const SlideCard: React.FC<SlideCardProps> = ({
       >
         {/* Preview of slide with call to action at the bottom */}
         <div className="absolute inset-0 flex flex-col justify-end items-center pb-4">
-          <span className={`${slide.color} text-white font-bold px-3 py-1 rounded border border-white`}>
-            {slide.callToAction || 'Shop Now'}
-          </span>
+          {slide.showButton !== false && (
+            <span className={`${slide.color} text-white font-bold px-3 py-1 rounded border border-white`}>
+              {slide.callToAction || 'Acheter maintenant'}
+            </span>
+          )}
         </div>
         {!slide.image && (
           <div className="absolute bottom-2 right-2 bg-white/70 text-xs px-2 py-1 rounded">
-            No image set
+            Aucune image
+          </div>
+        )}
+        {slide.showButton === false && (
+          <div className="absolute top-2 right-2 bg-black/50 text-white text-xs px-2 py-1 rounded flex items-center">
+            <EyeOff className="w-3 h-3 mr-1" />
+            Bouton masqué
           </div>
         )}
       </div>
       <CardContent className="pt-4">
         <div className="flex gap-2 mb-2 flex-wrap">
           <span className="text-xs px-2 py-1 bg-gray-100 rounded-full">
-            Position: {slide.position || 'left'}
+            Position: {slide.position === 'left' ? 'gauche' : slide.position === 'right' ? 'droite' : 'centre'}
           </span>
-          <span 
-            className="text-xs px-2 py-1 rounded-full text-white"
-            style={{ backgroundColor: slide.color.includes('bg-') ? 
-              `var(--${slide.color.replace('bg-', '')})` : 
-              slide.color 
-            }}
-          >
-            {slide.color.replace('bg-', '')}
-          </span>
+          {slide.showButton !== false && (
+            <span 
+              className="text-xs px-2 py-1 rounded-full text-white"
+              style={{ backgroundColor: slide.color.includes('bg-') ? 
+                `var(--${slide.color.replace('bg-', '')})` : 
+                slide.color 
+              }}
+            >
+              {slide.color.replace('bg-', '')}
+            </span>
+          )}
         </div>
         <p className="text-sm font-medium mb-1 truncate">{slide.title}</p>
-        <p className="text-sm text-gray-500 truncate">{slide.image || 'No image URL'}</p>
+        <p className="text-sm text-gray-500 truncate">{slide.image || 'Aucune URL d\'image'}</p>
+        
+        {slide.showButton !== false && slide.actionUrl && (
+          <div className="flex items-center mt-1 text-xs text-gray-500">
+            <LinkIcon className="h-3 w-3 mr-1" />
+            <span className="truncate">{slide.actionUrl}</span>
+          </div>
+        )}
         
         {/* Reorder buttons */}
         {(onMoveLeft || onMoveRight) && (
@@ -78,10 +95,10 @@ const SlideCard: React.FC<SlideCardProps> = ({
               onClick={() => onMoveLeft && onMoveLeft(slide.id)} 
               disabled={isFirst}
               className="px-2"
-              title="Move left"
+              title="Déplacer à gauche"
             >
               <MoveHorizontal className="h-4 w-4 mr-1 rotate-180" />
-              <span className="sr-only">Move left</span>
+              <span className="sr-only">Déplacer à gauche</span>
             </Button>
             <Button
               variant="outline" 
@@ -89,10 +106,10 @@ const SlideCard: React.FC<SlideCardProps> = ({
               onClick={() => onMoveRight && onMoveRight(slide.id)} 
               disabled={isLast}
               className="px-2"
-              title="Move right"
+              title="Déplacer à droite"
             >
               <MoveHorizontal className="h-4 w-4 mr-1" />
-              <span className="sr-only">Move right</span>
+              <span className="sr-only">Déplacer à droite</span>
             </Button>
           </div>
         )}
@@ -100,7 +117,7 @@ const SlideCard: React.FC<SlideCardProps> = ({
       <CardFooter className="flex justify-end gap-2 pt-0">
         <Button variant="outline" size="sm" onClick={() => onEdit(slide)}>
           <Edit className="h-4 w-4 mr-1" />
-          Edit
+          Modifier
         </Button>
         <Button 
           variant="destructive" 
@@ -109,7 +126,7 @@ const SlideCard: React.FC<SlideCardProps> = ({
           disabled={disableDelete}
         >
           <Trash className="h-4 w-4 mr-1" />
-          Delete
+          Supprimer
         </Button>
       </CardFooter>
     </Card>

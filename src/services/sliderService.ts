@@ -22,7 +22,9 @@ export const mapDatabaseSlidesToFrontend = (dbSlides: any[]): Slide[] => {
     color: slide.color,
     image: slide.image,
     position: slide.position as 'left' | 'right' | 'center',
-    callToAction: slide.call_to_action || 'Shop Now',
+    callToAction: slide.call_to_action || 'Acheter maintenant',
+    actionUrl: slide.action_url || '/fruits',
+    showButton: slide.show_button === false ? false : true,
     order: slide.order || 0
   }));
 };
@@ -31,29 +33,35 @@ export const getDefaultSlides = (): Slide[] => {
   return [
     {
       id: '1',
-      title: 'FRESH FRUITS FROM LOCAL FARMS',
+      title: 'FRUITS FRAIS DE PRODUCTEURS LOCAUX',
       color: 'bg-emerald-800',
       image: '/images/fruit-banner.jpg',
       position: 'left',
-      callToAction: 'Shop Fruits',
+      callToAction: 'Voir les fruits',
+      actionUrl: '/fruits',
+      showButton: true,
       order: 0
     },
     {
       id: '2',
-      title: 'ORGANIC VEGETABLES DELIVERED TO YOUR DOOR',
+      title: 'LÉGUMES BIO LIVRÉS CHEZ VOUS',
       color: 'bg-purple-700',
       image: '/images/vegetable-banner.jpg',
       position: 'center',
-      callToAction: 'Shop Vegetables',
+      callToAction: 'Voir les légumes',
+      actionUrl: '/vegetables',
+      showButton: true,
       order: 1
     },
     {
       id: '3',
-      title: 'SHOPPING WITH GROCERY STORE',
+      title: 'FAITES VOS COURSES AVEC NOUS',
       color: 'bg-teal-700',
       image: '/lovable-uploads/827a5a28-0db3-4c43-90d7-280863c75660.png',
       position: 'right',
-      callToAction: 'Shop Now',
+      callToAction: 'Acheter maintenant',
+      actionUrl: '/fruits',
+      showButton: true,
       order: 2
     }
   ];
@@ -67,12 +75,14 @@ export const addSlideToSupabase = async (slide: Omit<Slide, 'id'>) => {
     image: slide.image,
     position: slide.position,
     call_to_action: slide.callToAction,
+    action_url: slide.actionUrl,
+    show_button: slide.showButton,
     order: slide.order
   };
   
   const { data, error } = await supabase
     .from('slides')
-    .insert([dbSlide])
+    .insert(dbSlide)
     .select();
   
   if (error) throw error;
@@ -89,6 +99,8 @@ export const updateSlideInSupabase = async (slide: Slide) => {
     image: slide.image,
     position: slide.position,
     call_to_action: slide.callToAction,
+    action_url: slide.actionUrl,
+    show_button: slide.showButton,
     order: slide.order
   };
   
