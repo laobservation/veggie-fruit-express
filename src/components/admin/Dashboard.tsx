@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from '@/components/ui/button';
@@ -15,6 +14,7 @@ type DashboardStats = {
   topClients: any[];
 }
 
+// Export both as named export and default export for better compatibility
 export const Dashboard = () => {
   const [stats, setStats] = useState<DashboardStats>({
     totalProducts: 0,
@@ -223,3 +223,6 @@ export const Dashboard = () => {
     </div>
   );
 };
+
+// Add a default export that references the named export
+export default Dashboard;
