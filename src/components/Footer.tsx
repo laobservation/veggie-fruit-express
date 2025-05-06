@@ -22,7 +22,18 @@ const Footer = () => {
         }
         
         if (data) {
-          setFooterData(data as FooterSettings);
+          // Map database columns (snake_case) to our FooterSettings type (camelCase)
+          const mappedData: FooterSettings = {
+            id: data.id,
+            companyName: data.company_name || defaultFooterSettings.companyName,
+            description: data.description || defaultFooterSettings.description,
+            copyrightText: data.copyright_text || defaultFooterSettings.copyrightText,
+            contactInfo: data.contact_info || defaultFooterSettings.contactInfo,
+            socialLinks: data.social_links || defaultFooterSettings.socialLinks,
+            quickLinks: data.quick_links || defaultFooterSettings.quickLinks,
+          };
+          
+          setFooterData(mappedData);
         }
       } catch (error) {
         console.error('Error loading footer settings:', error);
