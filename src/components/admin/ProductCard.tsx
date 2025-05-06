@@ -63,7 +63,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onEdit, onDelete }) 
       <p className="text-gray-700 mb-2 text-sm line-clamp-2">{product.description}</p>
       
       <div className="flex justify-between mt-auto">
-        <span className="text-veggie-dark font-bold">{formatPrice(product.price)}</span>
+        <span className="text-green-600 font-bold">{formatPrice(product.price)}</span>
         <span className="text-sm bg-gray-100 px-2 py-1 rounded">
           {getCategoryDisplay(product.category)}
         </span>
