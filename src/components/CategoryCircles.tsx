@@ -3,13 +3,19 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { Apple, Carrot, Package } from 'lucide-react';
+import { Apple, Carrot } from 'lucide-react';
 
 // These would ideally be dynamically generated from your categories
 const categories = [
   { id: 'fruits', name: 'Fruits', icon: Apple, color: 'bg-red-500', path: '/fruits' },
   { id: 'vegetables', name: 'Légumes', icon: Carrot, color: 'bg-green-500', path: '/vegetables' },
-  { id: 'packs', name: 'Packs', icon: Package, color: 'bg-amber-500', path: '/' },
+  { 
+    id: 'packs', 
+    name: 'Packs', 
+    imageIcon: '/lovable-uploads/3e6664d5-ad8b-4a42-8cd9-a740bb96dcd4.png',
+    color: 'bg-amber-500', 
+    path: '/' 
+  },
   // Add more categories as needed
 ];
 
@@ -31,7 +37,15 @@ const CategoryCircles: React.FC = () => {
                   "flex items-center justify-center rounded-full w-16 h-16 mb-2",
                   category.color
                 )}>
-                  <category.icon className="w-8 h-8 text-white" />
+                  {category.imageIcon ? (
+                    <img 
+                      src={category.imageIcon} 
+                      alt={category.name} 
+                      className="w-10 h-10 object-contain"
+                    />
+                  ) : (
+                    <category.icon className="w-8 h-8 text-white" />
+                  )}
                 </div>
                 <span className="text-sm font-medium text-gray-700">{category.name}</span>
               </Link>
