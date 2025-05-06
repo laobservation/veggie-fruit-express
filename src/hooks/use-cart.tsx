@@ -4,10 +4,12 @@ import { persist } from 'zustand/middleware';
 import { Product } from '@/data/products';
 import { ReactNode, useState, useEffect } from 'react';
 import CartNotification from '@/components/CartNotification';
+import { ServiceOption } from '@/types/product';
 
 export interface CartItem {
   product: Product;
   quantity: number;
+  selectedServices?: ServiceOption[];
 }
 
 interface CartState {
@@ -16,12 +18,13 @@ interface CartState {
   notificationItem: CartItem | null;
   isCartOpen: boolean;
   cartReminder: boolean;
-  addItem: (product: Product, quantity?: number) => void;
+  addItem: (product: Product, quantity?: number, selectedServices?: ServiceOption[]) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
+  getShippingCost: () => number;
   hideNotification: () => void;
   openCart: () => void;
   closeCart: () => void;
@@ -36,28 +39,48 @@ export const useCart = create<CartState>()(
       notificationItem: null,
       isCartOpen: false,
       cartReminder: false,
-      addItem: (product: Product, quantity = 1) => {
+      addItem: (product: Product, quantity = 1, selectedServices = []) => {
         const currentItems = get().items;
-        const existingItem = currentItems.find(item => item.product.id === product.id);
+        const existingItemIndex = currentItems.findIndex(item => item.product.id === product.id);
 
-        if (existingItem) {
-          set({
-            items: currentItems.map(item =>
-              item.product.id === product.id
+        if (existingItemIndex !== -1) {
+          // If the item exists, check if it has the same services
+          const existingItem = currentItems[existingItemIndex];
+          const hasSameServices = 
+            JSON.stringify(existingItem.selectedServices?.map(s => s.id).sort()) === 
+            JSON.stringify(selectedServices?.map(s => s.id).sort());
+          
+          if (hasSameServices) {
+            // Update quantity for the item with same services
+            const updatedItems = currentItems.map((item, index) => 
+              index === existingItemIndex
                 ? { ...item, quantity: item.quantity + quantity }
                 : item
-            ),
-            showNotification: true,
-            notificationItem: {
-              product,
-              quantity: existingItem.quantity + quantity
-            }
-          });
+            );
+            
+            set({
+              items: updatedItems,
+              showNotification: true,
+              notificationItem: {
+                product,
+                quantity: existingItem.quantity + quantity,
+                selectedServices
+              }
+            });
+          } else {
+            // Add as a new item because services are different
+            set({ 
+              items: [...currentItems, { product, quantity, selectedServices }],
+              showNotification: true,
+              notificationItem: { product, quantity, selectedServices }
+            });
+          }
         } else {
+          // If the item doesn't exist, add it
           set({ 
-            items: [...currentItems, { product, quantity }],
+            items: [...currentItems, { product, quantity, selectedServices }],
             showNotification: true,
-            notificationItem: { product, quantity }
+            notificationItem: { product, quantity, selectedServices }
           });
         }
       },
@@ -88,10 +111,23 @@ export const useCart = create<CartState>()(
         return get().items.reduce((total, item) => total + item.quantity, 0);
       },
       getTotalPrice: () => {
-        return get().items.reduce(
-          (total, item) => total + item.product.price * item.quantity,
-          0
-        );
+        const itemsTotal = get().items.reduce((total, item) => {
+          // Calculate product price
+          const productTotal = item.product.price * item.quantity;
+          
+          // Add service costs if any
+          const servicesCost = (item.selectedServices?.reduce((acc, service) => 
+            acc + service.price, 0) || 0) * item.quantity;
+            
+          return total + productTotal + servicesCost;
+        }, 0);
+        
+        // Add shipping cost
+        return itemsTotal;
+      },
+      getShippingCost: () => {
+        // Fixed shipping cost of 20 DH
+        return get().items.length > 0 ? 20 : 0;
       },
       hideNotification: () => set({ 
         showNotification: false, 

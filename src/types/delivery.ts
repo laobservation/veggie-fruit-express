@@ -7,6 +7,8 @@ export interface OrderDetails {
   phone: string;
   preferredTime: string;
   totalAmount: number;
+  subtotal: number;
+  shippingCost: number;
   items: CartItem[];
   date: string;
   orderId?: number;

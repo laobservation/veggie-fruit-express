@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Heart, ShoppingBag } from 'lucide-react';
@@ -13,6 +14,37 @@ import ProductGrid from '@/components/ProductGrid';
 import { Button } from '@/components/ui/button';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import { useState, useEffect } from 'react';
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+
+// Define additional service options
+interface ServiceOption {
+  id: string;
+  name: string;
+  nameAr: string;
+  price: number;
+}
+
+const serviceOptions: ServiceOption[] = [
+  {
+    id: "washed",
+    name: "Légumes lavés et prêts à l'emploi (+10,00 Dh)",
+    nameAr: "خضرة مغسولة و منظفة، وجاهزة للاستعمال",
+    price: 10
+  },
+  {
+    id: "cut",
+    name: "Légumes lavés et coupés (+20,00 Dh)",
+    nameAr: "خضرة مغسولة ومقطعة",
+    price: 20
+  },
+  {
+    id: "bags",
+    name: "Légumes lavés et coupés (Sachets de 500g) (+35,00 Dh)",
+    nameAr: "خضرة مغسولة ومقطعة (فأكياس ديال 500غ)",
+    price: 35
+  }
+];
 
 const ProductPage = () => {
   const { productId } = useParams();
@@ -20,15 +52,18 @@ const ProductPage = () => {
   const { addItem, openCart } = useCart();
   const { product, relatedProducts, loading } = useProductDetails(productId);
   const { isFavorite, toggleFavorite } = useFavorites();
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
   
   useEffect(() => {
     // Reset scroll position when product changes
     window.scrollTo(0, 0);
+    // Reset selected services when product changes
+    setSelectedServices([]);
   }, [productId]);
   
   const handleAddToCart = () => {
     if (product) {
-      addItem(product);
+      addItem(product, 1, getSelectedServices());
     }
   };
 
@@ -40,9 +75,21 @@ const ProductPage = () => {
 
   const handleBuyNow = () => {
     if (product) {
-      addItem(product);
-      openCart(); // Ouvre directement le formulaire de commande/panier
+      addItem(product, 1, getSelectedServices());
+      openCart(); // Opens the cart/checkout form
     }
+  };
+  
+  const handleServiceChange = (serviceId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedServices(prev => [...prev, serviceId]);
+    } else {
+      setSelectedServices(prev => prev.filter(id => id !== serviceId));
+    }
+  };
+  
+  const getSelectedServices = () => {
+    return serviceOptions.filter(service => selectedServices.includes(service.id));
   };
 
   // Helper function to get formatted category text
@@ -87,6 +134,7 @@ const ProductPage = () => {
 
   const categoryText = getCategoryText(product.category);
   const favoriteStatus = isFavorite(product.id);
+  const isPack = product.category === 'pack';
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -135,11 +183,42 @@ const ProductPage = () => {
             
             <h2 className="font-semibold text-lg mb-2">Description</h2>
             <p className="text-gray-600 mb-4">{product.description}</p>
+            
+            {/* Additional Services for Packs */}
+            {isPack && (
+              <div className="mt-6 mb-2">
+                <h2 className="font-semibold text-lg mb-3">Services additionnels</h2>
+                <div className="space-y-3 border-t border-b py-4">
+                  {serviceOptions.map((service) => (
+                    <div key={service.id} className="flex items-start space-x-3">
+                      <Checkbox 
+                        id={service.id} 
+                        checked={selectedServices.includes(service.id)}
+                        onCheckedChange={(checked) => 
+                          handleServiceChange(service.id, checked === true)
+                        }
+                      />
+                      <div className="grid gap-1.5 leading-none">
+                        <Label
+                          htmlFor={service.id}
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          {service.name}
+                        </Label>
+                        <p className="text-xs text-gray-500 rtl:text-right">
+                          {service.nameAr}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
           
           {/* Related Products */}
           {relatedProducts.length > 0 && (
-            <div className="bg-white rounded-lg p-5 mb-4 shadow-sm">
+            <div className="bg-white rounded-lg p-5 mb-20 shadow-sm">
               <h2 className="font-semibold text-lg mb-4">Autres {categoryText}</h2>
               <div className="grid grid-cols-4 gap-2">
                 {relatedProducts.slice(0, 4).map((relatedProduct) => (

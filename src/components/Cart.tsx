@@ -26,6 +26,7 @@ const Cart: React.FC<CartProps> = ({ isOpen: propIsOpen, onClose: propOnClose })
     updateQuantity, 
     removeItem, 
     getTotalPrice, 
+    getShippingCost,
     isCartOpen, 
     closeCart,
     toggleCartReminder
@@ -58,6 +59,9 @@ const Cart: React.FC<CartProps> = ({ isOpen: propIsOpen, onClose: propOnClose })
   
   // Use prop isOpen if provided, otherwise use from store
   const effectiveIsOpen = propIsOpen !== undefined ? propIsOpen : isCartOpen;
+  const shippingCost = getShippingCost();
+  const subtotal = getTotalPrice();
+  const total = subtotal + shippingCost;
 
   return (
     <Sheet open={effectiveIsOpen} onOpenChange={handleClose}>
@@ -88,8 +92,8 @@ const Cart: React.FC<CartProps> = ({ isOpen: propIsOpen, onClose: propOnClose })
         ) : (
           <>
             <div className="flex-1 overflow-auto py-4">
-              {items.map((item) => (
-                <div key={item.product.id} className="flex py-4 border-b">
+              {items.map((item, index) => (
+                <div key={`${item.product.id}-${index}`} className="flex py-4 border-b">
                   <div className="h-20 w-20 rounded overflow-hidden mr-4">
                     <img
                       src={item.product.image}
@@ -109,7 +113,23 @@ const Cart: React.FC<CartProps> = ({ isOpen: propIsOpen, onClose: propOnClose })
                       </button>
                     </div>
                     
-                    <p className="text-gray-500 text-sm">{formatPrice(item.product.price)} / {item.product.unit}</p>
+                    <p className="text-gray-500 text-sm">
+                      {formatPrice(item.product.price)} / {item.product.unit}
+                    </p>
+                    
+                    {/* Display selected services if any */}
+                    {item.selectedServices && item.selectedServices.length > 0 && (
+                      <div className="mt-1 mb-2">
+                        <ul className="text-xs text-gray-500">
+                          {item.selectedServices.map(service => (
+                            <li key={service.id} className="flex justify-between">
+                              <span>{service.name.split('(')[0]}</span>
+                              <span>{formatPrice(service.price)}</span>
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                     
                     <div className="flex items-center mt-2">
                       <Button 
@@ -130,7 +150,12 @@ const Cart: React.FC<CartProps> = ({ isOpen: propIsOpen, onClose: propOnClose })
                         <Plus className="h-3 w-3" />
                       </Button>
                       <div className="ml-auto font-medium">
-                        {formatPrice(item.product.price * item.quantity)}
+                        {formatPrice(
+                          (item.product.price + 
+                           (item.selectedServices?.reduce((acc, service) => 
+                             acc + service.price, 0) || 0)) * 
+                          item.quantity
+                        )}
                       </div>
                     </div>
                   </div>
@@ -141,16 +166,16 @@ const Cart: React.FC<CartProps> = ({ isOpen: propIsOpen, onClose: propOnClose })
             <div className="border-t pt-4">
               <div className="flex justify-between mb-2">
                 <span className="font-medium">Sous-total</span>
-                <span>{formatPrice(getTotalPrice())}</span>
+                <span>{formatPrice(subtotal)}</span>
               </div>
               <div className="flex justify-between mb-2">
                 <span className="font-medium">Livraison</span>
-                <span>Gratuit</span>
+                <span>{formatPrice(shippingCost)}</span>
               </div>
               <Separator className="my-4" />
               <div className="flex justify-between mb-4">
                 <span className="text-lg font-semibold">Total</span>
-                <span className="text-lg font-semibold">{formatPrice(getTotalPrice())}</span>
+                <span className="text-lg font-semibold">{formatPrice(total)}</span>
               </div>
               
               <Button 

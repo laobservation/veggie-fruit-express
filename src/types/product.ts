@@ -12,3 +12,10 @@ export interface Product {
   categoryLink?: boolean;
   stock?: number;
 }
+
+export interface ServiceOption {
+  id: string;
+  name: string;
+  nameAr: string;
+  price: number;
+}

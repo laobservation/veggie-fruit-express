@@ -17,7 +17,7 @@ interface DeliveryFormProps {
 
 const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
   const navigate = useNavigate();
-  const { items, getTotalPrice, clearCart } = useCart();
+  const { items, getTotalPrice, getShippingCost, clearCart } = useCart();
   
   const form = useForm<FormValues>({
     defaultValues: {
@@ -35,7 +35,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
       onClose();
       
       // Process the order and get order details for thank you page
-      const orderDetails = await processOrder(data, items, getTotalPrice);
+      const orderDetails = await processOrder(data, items, getTotalPrice, getShippingCost);
       
       // First redirect to thank you page for immediate visual feedback
       navigate('/thank-you', { state: { orderDetails } });

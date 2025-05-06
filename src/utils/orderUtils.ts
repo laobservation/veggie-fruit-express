@@ -7,15 +7,22 @@ import { toast } from 'sonner';
 export const processOrder = async (
   data: FormValues,
   items: CartItem[],
-  getTotalPrice: () => number
+  getTotalPrice: () => number,
+  getShippingCost: () => number
 ): Promise<OrderDetails> => {
+  const subtotal = getTotalPrice();
+  const shippingCost = getShippingCost();
+  const totalAmount = subtotal + shippingCost;
+
   // Create order details object for thank you page with proper typing
   const orderDetails: OrderDetails = {
     name: data.name,
     address: data.address,
     phone: data.phone,
     preferredTime: data.preferDeliveryTime ? data.deliveryTime : '',
-    totalAmount: getTotalPrice(),
+    totalAmount: totalAmount,
+    subtotal: subtotal,
+    shippingCost: shippingCost,
     items: items,
     date: new Date().toISOString()
   };
@@ -26,7 +33,12 @@ export const processOrder = async (
       productId: item.product.id,
       productName: item.product.name,
       quantity: item.quantity,
-      price: item.product.price
+      price: item.product.price,
+      services: item.selectedServices ? item.selectedServices.map(service => ({
+        id: service.id,
+        name: service.name,
+        price: service.price
+      })) : []
     }));
     
     // Store order in Supabase
@@ -37,7 +49,9 @@ export const processOrder = async (
         'Adresse': data.address,
         'Phone': parseInt(data.phone, 10) || null,
         'order_items': itemsData,
-        'total_amount': getTotalPrice(),
+        'total_amount': totalAmount,
+        'shipping_cost': shippingCost,
+        'subtotal': subtotal,
         'preferred_time': data.preferDeliveryTime ? data.deliveryTime : null,
         'status': 'new',
         'notified': false
