@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Heart } from 'lucide-react';
@@ -45,7 +44,7 @@ export default function ProductDetails({ product }: ProductDetailsProps) {
     <div className="grid gap-6 lg:grid-cols-2">
       <div className="flex items-center justify-center rounded-md bg-muted">
         <img 
-          src={product.image_url || "/placeholder.svg"}
+          src={product.image || "/placeholder.svg"}
           alt={product.name}
           className="object-cover w-full rounded-md aspect-square"
           width={500}

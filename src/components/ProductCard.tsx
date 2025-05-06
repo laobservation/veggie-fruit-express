@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Product } from '@/types/product';
@@ -69,7 +68,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
       <Link to={productLink} className="block">
         <div className="relative h-48 overflow-hidden">
           <img 
-            src={product.image_url || '/placeholder.svg'} 
+            src={product.image || '/placeholder.svg'} 
             alt={product.name || 'Product'}
             className="w-full h-full object-cover transition-transform group-hover:scale-105"
           />
