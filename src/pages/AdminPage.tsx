@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import ProductManager from '@/components/admin/ProductManager';
 import OrdersManager from '@/components/admin/OrdersManager';
 import { useEffect } from 'react';
-import { Dashboard } from '@/components/admin/Dashboard';
+import Dashboard from '@/components/admin/Dashboard';
 
 // Define the AdminPage component
 const AdminPage = () => {

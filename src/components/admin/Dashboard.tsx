@@ -70,3 +70,6 @@ const Dashboard: React.FC = () => {
 };
 
 export default Dashboard;
+
+// Also export as named export to support both import styles
+export { Dashboard };
