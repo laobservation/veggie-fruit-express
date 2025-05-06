@@ -22,12 +22,12 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ items, totalAmount }) => {
       {items && items.map((item, index) => (
         <div key={index} className="flex justify-between py-2 border-b">
           <span>{item.product.name} × {item.quantity}</span>
-          <span>€{(item.product.price * item.quantity).toFixed(2)}</span>
+          <span>{formatPrice(item.product.price * item.quantity)}</span>
         </div>
       ))}
       <div className="flex justify-between font-bold mt-2">
         <span>Total :</span>
-        <span>€{totalAmount.toFixed(2)}</span>
+        <span>{formatPrice(totalAmount)}</span>
       </div>
     </div>
   );
