@@ -30,6 +30,42 @@ export type Database = {
         }
         Relationships: []
       }
+      footer_settings: {
+        Row: {
+          company_name: string | null
+          contact_info: Json | null
+          copyright_text: string | null
+          created_at: string | null
+          description: string | null
+          id: number
+          quick_links: Json | null
+          social_links: Json | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_name?: string | null
+          contact_info?: Json | null
+          copyright_text?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          quick_links?: Json | null
+          social_links?: Json | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_name?: string | null
+          contact_info?: Json | null
+          copyright_text?: string | null
+          created_at?: string | null
+          description?: string | null
+          id?: number
+          quick_links?: Json | null
+          social_links?: Json | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       Orders: {
         Row: {
           Adresse: string | null

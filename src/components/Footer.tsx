@@ -22,7 +22,17 @@ const Footer = () => {
         }
         
         if (data) {
-          setFooterData(data as FooterSettings);
+          // Map database fields to our object structure
+          const mappedSettings: FooterSettings = {
+            id: data.id,
+            companyName: data.company_name || defaultFooterSettings.companyName,
+            description: data.description || defaultFooterSettings.description,
+            copyrightText: data.copyright_text || defaultFooterSettings.copyrightText,
+            contactInfo: data.contact_info || defaultFooterSettings.contactInfo,
+            socialLinks: data.social_links || defaultFooterSettings.socialLinks,
+            quickLinks: data.quick_links || defaultFooterSettings.quickLinks
+          };
+          setFooterData(mappedSettings);
         }
       } catch (error) {
         console.error('Error loading footer settings:', error);

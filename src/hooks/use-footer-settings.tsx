@@ -30,7 +30,17 @@ export function useFooterSettings() {
       }
       
       if (data) {
-        setFooterSettings(data as FooterSettings);
+        // Map database fields to our object structure
+        const mappedSettings: FooterSettings = {
+          id: data.id,
+          companyName: data.company_name || defaultFooterSettings.companyName,
+          description: data.description || defaultFooterSettings.description,
+          copyrightText: data.copyright_text || defaultFooterSettings.copyrightText,
+          contactInfo: data.contact_info || defaultFooterSettings.contactInfo,
+          socialLinks: data.social_links || defaultFooterSettings.socialLinks,
+          quickLinks: data.quick_links || defaultFooterSettings.quickLinks
+        };
+        setFooterSettings(mappedSettings);
       } else {
         // No settings found, initialize
         await initializeFooterSettings();
@@ -52,12 +62,12 @@ export function useFooterSettings() {
         .from('footer_settings')
         .insert({
           id: 1, // Always use ID 1 for the single settings record
-          companyName: defaultFooterSettings.companyName,
+          company_name: defaultFooterSettings.companyName,
           description: defaultFooterSettings.description,
-          copyrightText: defaultFooterSettings.copyrightText,
-          contactInfo: defaultFooterSettings.contactInfo,
-          socialLinks: defaultFooterSettings.socialLinks,
-          quickLinks: defaultFooterSettings.quickLinks,
+          copyright_text: defaultFooterSettings.copyrightText,
+          contact_info: defaultFooterSettings.contactInfo,
+          social_links: defaultFooterSettings.socialLinks,
+          quick_links: defaultFooterSettings.quickLinks,
         });
       
       if (error) {
@@ -86,7 +96,12 @@ export function useFooterSettings() {
         .from('footer_settings')
         .upsert({
           id: 1, // Always use ID 1 for the single settings record
-          ...footerSettings,
+          company_name: footerSettings.companyName,
+          description: footerSettings.description,
+          copyright_text: footerSettings.copyrightText,
+          contact_info: footerSettings.contactInfo,
+          social_links: footerSettings.socialLinks,
+          quick_links: footerSettings.quickLinks,
           updated_at: new Date().toISOString(),
         });
       
