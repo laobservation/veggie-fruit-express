@@ -67,23 +67,23 @@ const PromotionSlider: React.FC<PromotionSliderProps> = ({ customSlides }) => {
                 minWidth: isMobile ? '100%' : '33.333%',
               }}
             >
-              {/* Image background */}
+              {/* Image background - Removed black fade overlay */}
               <img 
                 src={slide.image} 
                 alt={slide.title} 
                 className="w-full h-full object-cover"
               />
               
-              {/* Title overlay */}
-              <div className="absolute inset-0 bg-black/20 flex flex-col justify-between p-4">
-                <div className={`text-white font-semibold text-sm md:text-base max-w-[80%] ${
+              {/* Title overlay - Now without dark background */}
+              <div className="absolute inset-0 flex flex-col justify-between p-4">
+                <div className={`text-white font-semibold text-sm md:text-base max-w-[80%] drop-shadow-md ${
                   slide.position === 'center' ? 'mx-auto text-center' :
                   slide.position === 'right' ? 'ml-auto text-right' : 'text-left'
                 }`}>
                   {slide.title}
                 </div>
                 
-                {/* Call to action button - Always at the bottom */}
+                {/* Enhanced stylish call to action button */}
                 <div className={`w-full flex ${
                   slide.position === 'center' ? 'justify-center' :
                   slide.position === 'right' ? 'justify-end' : 'justify-start'
@@ -91,7 +91,7 @@ const PromotionSlider: React.FC<PromotionSliderProps> = ({ customSlides }) => {
                   <Button 
                     variant="default" 
                     size="sm"
-                    className={`${slide.color} border border-white hover:opacity-90 text-white font-bold shadow-md transition-all`}
+                    className={`${slide.color} backdrop-blur-sm bg-opacity-80 border border-white/50 hover:bg-opacity-100 hover:scale-105 text-white font-bold shadow-lg transition-all duration-300 rounded-lg px-4`}
                   >
                     {slide.callToAction || 'Shop Now'}
                   </Button>
@@ -122,7 +122,7 @@ const PromotionSlider: React.FC<PromotionSliderProps> = ({ customSlides }) => {
         </div>
       )}
       
-      {/* Stylish pagination dots - positioned in the middle right for both mobile and desktop */}
+      {/* Stylish pagination dots with light green color */}
       {slides.length > 1 && (
         <div className="absolute bottom-0 top-0 right-4 flex flex-col justify-center items-center gap-1.5">
           {slides.map((_, index) => (
@@ -132,11 +132,11 @@ const PromotionSlider: React.FC<PromotionSliderProps> = ({ customSlides }) => {
               className={cn(
                 "w-2 h-2 rounded-full transition-all duration-300 relative",
                 currentSlide === index 
-                  ? "bg-white scale-125 shadow-glow" 
-                  : "bg-white/40 hover:bg-white/60"
+                  ? "bg-veggie-secondary scale-125 shadow-glow" 
+                  : "bg-veggie-light/80 hover:bg-veggie-light"
               )}
               style={{ 
-                boxShadow: currentSlide === index ? '0 0 5px 1px rgba(255, 255, 255, 0.7)' : 'none',
+                boxShadow: currentSlide === index ? '0 0 5px 1px rgba(139, 195, 74, 0.6)' : 'none',
                 transform: `scale(${currentSlide === index ? 1.25 : 1})` 
               }}
               aria-label={`Go to slide ${index + 1}`}
