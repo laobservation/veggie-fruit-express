@@ -21,7 +21,7 @@ export default defineConfig(({ mode }) => ({
     },
   },
   build: {
-    outDir: "build", // This matches the root in nginx.conf
+    outDir: "dist", // This matches the root in nginx.conf
     sourcemap: false,
   },
 }));
