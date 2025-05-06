@@ -88,7 +88,9 @@ const ThankYouPage = () => {
       
       toast({
         title: "PDF téléchargé",
-        description: "Le récapitulatif de votre commande a été téléchargé."
+        description: "Le récapitulatif de votre commande a été téléchargé.",
+        variant: "default",
+        className: "bg-[#F2FCE2] border-green-300 text-green-800"
       });
     } catch (err) {
       console.error('Error generating PDF:', err);

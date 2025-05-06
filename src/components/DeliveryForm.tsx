@@ -48,10 +48,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
 
   const onSubmit = async (data: FormValues) => {
     try {
-      // Close the form/cart panel immediately to create a cleaner transition
-      onClose();
-      
-      // Prepare order items data
+      // Get order data before closing/redirecting
       const itemsData = items.map(item => ({
         productId: item.product.id,
         productName: item.product.name,
@@ -59,7 +56,24 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
         price: item.product.price
       }));
       
-      // Store order in Supabase
+      // Close the form/cart panel immediately to ensure it's not visible
+      onClose();
+      
+      // Create order details object for thank you page
+      const orderDetails = {
+        name: data.name,
+        address: data.address,
+        phone: data.phone,
+        preferredTime: data.preferDeliveryTime ? data.deliveryTime : '',
+        totalAmount: getTotalPrice(),
+        items: items,
+        date: new Date().toISOString()
+      };
+      
+      // First redirect to thank you page for immediate visual feedback
+      navigate('/thank-you', { state: { orderDetails } });
+      
+      // After redirect, store order in Supabase asynchronously
       const { data: orderData, error } = await supabase
         .from('Orders')
         .insert({
@@ -81,23 +95,13 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
         return;
       }
 
-      // Create order details object for thank you page
-      const orderDetails = {
-        orderId: orderData?.id,
-        name: data.name,
-        address: data.address,
-        phone: data.phone,
-        preferredTime: data.preferDeliveryTime ? data.deliveryTime : '',
-        totalAmount: getTotalPrice(),
-        items: items,
-        date: new Date().toISOString()
-      };
+      // Update orderDetails with the order ID if available
+      if (orderData?.id) {
+        orderDetails.orderId = orderData.id;
+      }
 
-      // Clear the cart
+      // Clear the cart after the order is processed
       clearCart();
-      
-      // Immediate redirect to thank you page with order details
-      navigate('/thank-you', { state: { orderDetails } });
     } catch (err) {
       console.error('Error processing order:', err);
       toast.error("Une erreur s'est produite. Veuillez réessayer.");
