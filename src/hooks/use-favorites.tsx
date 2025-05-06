@@ -1,10 +1,11 @@
 
 import { create } from 'zustand';
 import { Product } from '@/types/product';
-import { supabase } from '@/integrations/supabase/client';
 import { useEffect } from 'react';
 import { useToast } from "@/components/ui/use-toast";
-import { Json } from '@/integrations/supabase/types';
+
+// Local storage key for favorites
+const FAVORITES_STORAGE_KEY = 'user_favorites';
 
 interface FavoritesState {
   favorites: Product[];
@@ -17,9 +18,29 @@ interface FavoritesState {
   fetchFavorites: () => Promise<void>;
 }
 
+// Helper function to get favorites from localStorage
+const getFavoritesFromStorage = (): Product[] => {
+  try {
+    const storedFavorites = localStorage.getItem(FAVORITES_STORAGE_KEY);
+    return storedFavorites ? JSON.parse(storedFavorites) : [];
+  } catch (error) {
+    console.error('Error retrieving favorites from localStorage:', error);
+    return [];
+  }
+};
+
+// Helper function to save favorites to localStorage
+const saveFavoritesToStorage = (favorites: Product[]): void => {
+  try {
+    localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(favorites));
+  } catch (error) {
+    console.error('Error saving favorites to localStorage:', error);
+  }
+};
+
 export const useFavoritesStore = create<FavoritesState>((set, get) => ({
   favorites: [],
-  isLoading: false, // Changed to false by default
+  isLoading: false,
   
   isFavorite: (productId: string) => {
     return get().favorites.some(item => item.id === productId);
@@ -42,18 +63,12 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
       const isAlreadyFavorite = favorites.some(item => item.id === product.id);
       
       if (!isAlreadyFavorite) {
-        // Update local state immediately
-        set({ favorites: [...favorites, product] });
+        // Update state
+        const updatedFavorites = [...favorites, product];
+        set({ favorites: updatedFavorites });
         
-        // Save to Supabase - here we need to ensure the product is JSON-compatible
-        const { error } = await supabase
-          .from('favorites')
-          .insert({
-            product_id: product.id,
-            product_data: product as unknown as Json // Cast to Json type
-          });
-          
-        if (error) throw error;
+        // Save to localStorage
+        saveFavoritesToStorage(updatedFavorites);
       }
     } catch (error) {
       console.error('Error adding favorite:', error);
@@ -64,16 +79,12 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
     try {
       const { favorites } = get();
       
-      // Update local state immediately
-      set({ favorites: favorites.filter(item => item.id !== productId) });
+      // Update state
+      const updatedFavorites = favorites.filter(item => item.id !== productId);
+      set({ favorites: updatedFavorites });
       
-      // Remove from Supabase
-      const { error } = await supabase
-        .from('favorites')
-        .delete()
-        .eq('product_id', productId);
-        
-      if (error) throw error;
+      // Save to localStorage
+      saveFavoritesToStorage(updatedFavorites);
     } catch (error) {
       console.error('Error removing favorite:', error);
     }
@@ -81,16 +92,11 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
   
   clearFavorites: async () => {
     try {
-      // Update local state immediately
+      // Update state
       set({ favorites: [] });
       
-      // Clear from Supabase
-      const { error } = await supabase
-        .from('favorites')
-        .delete()
-        .neq('product_id', '');  // Delete all entries
-        
-      if (error) throw error;
+      // Clear from localStorage
+      localStorage.removeItem(FAVORITES_STORAGE_KEY);
     } catch (error) {
       console.error('Error clearing favorites:', error);
     }
@@ -100,24 +106,10 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
     try {
       set({ isLoading: true });
       
-      const { data, error } = await supabase
-        .from('favorites')
-        .select('*');
-        
-      if (error) throw error;
+      // Get from localStorage
+      const favorites = getFavoritesFromStorage();
       
-      if (data) {
-        // Transform data from Supabase format to our Product format
-        const favorites = data.map(item => {
-          // Safely cast the product_data back to Product type
-          const productData = item.product_data as unknown as Product;
-          return productData;
-        });
-        
-        set({ favorites, isLoading: false });
-      } else {
-        set({ isLoading: false });
-      }
+      set({ favorites, isLoading: false });
     } catch (error) {
       console.error('Error fetching favorites:', error);
       set({ isLoading: false });
