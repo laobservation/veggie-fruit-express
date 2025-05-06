@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Heart, ShoppingBag } from 'lucide-react';
@@ -165,7 +164,7 @@ const ProductPage = () => {
       </main>
       
       {/* Fixed Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex items-center justify-between mb-16 md:mb-0">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex items-center justify-between mb-20 md:mb-6">
         <Button
           variant="outline"
           className="flex items-center gap-2 border-gray-300"
