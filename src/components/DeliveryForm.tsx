@@ -61,8 +61,8 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
         .insert({
           'Client Name': data.name,
           'Adresse': data.address,
-          'Phone': parseInt(data.phone, 10) || null, // Convert to number or null if invalid
-          'order_items': itemsData, // Store order items as JSON
+          'Phone': parseInt(data.phone, 10) || null,
+          'order_items': itemsData,
           'total_amount': getTotalPrice(),
           'preferred_time': data.preferDeliveryTime ? data.deliveryTime : null,
           'status': 'new',
@@ -77,7 +77,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
         return;
       }
 
-      // If successful, proceed with order confirmation
+      // Create order details object for thank you page
       const orderDetails = {
         orderId: orderData?.id,
         name: data.name,
@@ -89,8 +89,10 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
         date: new Date().toISOString()
       };
 
+      // Clear the cart and immediately redirect to thank you page
       clearCart();
-      toast.success("Commande enregistrée avec succès!");
+      
+      // Immediate redirect to thank you page with order details
       navigate('/thank-you', { state: { orderDetails } });
     } catch (err) {
       console.error('Error processing order:', err);
