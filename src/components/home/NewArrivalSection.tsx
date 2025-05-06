@@ -6,6 +6,7 @@ import { formatPrice } from '@/lib/formatPrice';
 import { Plus, Heart } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
 import { useFavorites } from '@/hooks/use-favorites';
+import '@/components/ui/plus-animation.css';
 
 interface NewArrivalSectionProps {
   products: Product[];
@@ -19,7 +20,22 @@ const NewArrivalSection: React.FC<NewArrivalSectionProps> = ({ products, isLoadi
   const handleAddToCart = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
-    addItem(product);
+    
+    // Get the button element
+    const button = e.currentTarget as HTMLButtonElement;
+    const icon = button.querySelector('.plus-icon');
+    
+    if (icon) {
+      icon.classList.add('animate-spin');
+      
+      // Add item after a slight delay to let the animation play
+      setTimeout(() => {
+        addItem(product);
+        icon.classList.remove('animate-spin');
+      }, 300);
+    } else {
+      addItem(product);
+    }
   };
 
   const handleFavoriteClick = (e: React.MouseEvent, product: Product) => {
@@ -64,11 +80,11 @@ const NewArrivalSection: React.FC<NewArrivalSectionProps> = ({ products, isLoadi
                 <span className="text-lg font-bold">{formatPrice(product.price)}</span>
               </div>
               <button 
-                className="absolute bottom-3 right-3 bg-yellow-400 hover:bg-yellow-500 rounded-full p-2 transition-colors z-10"
+                className="absolute bottom-3 right-3 bg-yellow-400 hover:bg-yellow-500 rounded-full p-2 transition-colors plus-button"
                 onClick={(e) => handleAddToCart(e, product)}
                 aria-label="Add to cart"
               >
-                <Plus className="h-4 w-4 text-white" />
+                <Plus className="h-4 w-4 text-white plus-icon" />
               </button>
             </Link>
           ))

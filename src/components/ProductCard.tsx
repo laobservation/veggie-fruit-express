@@ -1,5 +1,5 @@
 
-import { Heart, Plus } from 'lucide-react';
+import { Heart, Plus, ShoppingCart } from 'lucide-react';
 import { Product } from '@/types/product';
 import { Link } from 'react-router-dom';
 import { formatPrice } from '@/lib/formatPrice';
@@ -7,6 +7,7 @@ import { useCart } from '@/hooks/use-cart';
 import { useState, useEffect } from 'react';
 import { useFavorites } from '@/hooks/use-favorites';
 import '@/components/ui/heart-animation.css';
+import '@/components/ui/plus-animation.css';
 
 interface ProductCardProps {
   product: Product;
@@ -18,6 +19,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
   const { isFavorite, toggleFavorite, favorites } = useFavorites();
   const [animating, setAnimating] = useState(false);
   const [favoriteStatus, setFavoriteStatus] = useState(false);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
   
   // Check if product has stock information
   const hasStock = typeof product.stock !== 'undefined';
@@ -31,7 +33,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addItem(product);
+    setIsAddingToCart(true);
+    
+    // Add item after a slight delay to let the animation play
+    setTimeout(() => {
+      addItem(product);
+      setIsAddingToCart(false);
+    }, 300);
   };
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
@@ -84,14 +92,14 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
           <button 
             onClick={handleAddToCart}
             disabled={hasStock && !isInStock}
-            className={`rounded-full p-2 mt-2 ${
+            className={`rounded-full p-2 mt-2 plus-button ${
               hasStock && !isInStock 
                 ? 'bg-gray-300 cursor-not-allowed' 
                 : 'bg-yellow-400 hover:bg-yellow-500'
             } transition-colors`}
             aria-label="Add to cart"
           >
-            <Plus className="h-4 w-4 text-white" />
+            <Plus className={`h-4 w-4 text-white plus-icon ${isAddingToCart ? 'animate-spin' : ''}`} />
           </button>
           
           {hasStock && !isInStock && (
