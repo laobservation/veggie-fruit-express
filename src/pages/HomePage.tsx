@@ -48,21 +48,24 @@ const HomePage: React.FC = () => {
       title: "MEAL PLAN WITH GROCERY STORE",
       color: "bg-emerald-800",
       image: "/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png",
-      position: "left"
+      position: "left",
+      callToAction: "Shop Meal Plans"
     },
     {
       id: '2',
       title: "MAKING THE MOST OF YOUR GROCERY",
       color: "bg-purple-700",
       image: "/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png",
-      position: "center"
+      position: "center",
+      callToAction: "Learn More"
     },
     {
       id: '3',
       title: "SHOPPING WITH GROCERY STORE",
       color: "bg-teal-700",
       image: "/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png",
-      position: "right"
+      position: "right",
+      callToAction: "Shop Now"
     }
   ];
 

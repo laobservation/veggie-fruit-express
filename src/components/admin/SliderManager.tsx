@@ -23,7 +23,6 @@ import {
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Plus, Edit, Trash, Image } from 'lucide-react';
-import { ColorPicker, RGB as ColorPickerRGB, HEX as ColorPickerHEX } from '@/components/ui/color-picker';
 
 const SliderManager: React.FC = () => {
   const { slides, loading, fetchSlides, addSlide, updateSlide, deleteSlide } = useSlider();
@@ -33,7 +32,8 @@ const SliderManager: React.FC = () => {
     title: '',
     color: 'bg-emerald-800',
     image: '',
-    position: 'left'
+    position: 'left',
+    callToAction: 'Shop Now'
   });
   const { toast } = useToast();
   
@@ -59,7 +59,8 @@ const SliderManager: React.FC = () => {
       title: '',
       color: 'bg-emerald-800',
       image: '',
-      position: 'left'
+      position: 'left',
+      callToAction: 'Shop Now'
     });
     setIsDialogOpen(true);
   };
@@ -138,8 +139,10 @@ const SliderManager: React.FC = () => {
                   backgroundColor: !slide.image ? slide.color.replace('bg-', '') : undefined 
                 }}
               >
-                <div className="absolute inset-0 bg-black/30 flex items-center p-4">
-                  <h3 className="text-white font-bold truncate">{slide.title}</h3>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className={`${slide.color} text-white font-bold px-3 py-1 rounded border border-white`}>
+                    {slide.callToAction || 'Shop Now'}
+                  </span>
                 </div>
                 {!slide.image && (
                   <div className="absolute bottom-2 right-2 bg-white/70 text-xs px-2 py-1 rounded">
@@ -162,6 +165,7 @@ const SliderManager: React.FC = () => {
                     {slide.color.replace('bg-', '')}
                   </span>
                 </div>
+                <p className="text-sm font-medium mb-1 truncate">{slide.title}</p>
                 <p className="text-sm text-gray-500 truncate">{slide.image || 'No image URL'}</p>
               </CardContent>
               <CardFooter className="flex justify-end gap-2 pt-0">
@@ -199,6 +203,7 @@ const SliderManager: React.FC = () => {
                 onChange={handleInputChange}
                 placeholder="Slide Title"
               />
+              <p className="text-xs text-gray-500">Used for admin reference (not displayed on slider)</p>
             </div>
             
             <div className="grid gap-2">
@@ -214,7 +219,19 @@ const SliderManager: React.FC = () => {
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="color">Background Color</Label>
+              <Label htmlFor="callToAction">Call to Action Text</Label>
+              <Input
+                id="callToAction"
+                name="callToAction"
+                value={currentSlide.callToAction}
+                onChange={handleInputChange}
+                placeholder="Shop Now"
+              />
+              <p className="text-xs text-gray-500">Text for the button (e.g., 'Shop Now', 'Learn More')</p>
+            </div>
+            
+            <div className="grid gap-2">
+              <Label htmlFor="color">Button Color</Label>
               <Select
                 value={currentSlide.color}
                 onValueChange={(value) => handleSelectChange('color', value)}
@@ -239,7 +256,7 @@ const SliderManager: React.FC = () => {
             </div>
             
             <div className="grid gap-2">
-              <Label htmlFor="position">Content Position</Label>
+              <Label htmlFor="position">Button Position</Label>
               <Select
                 value={currentSlide.position}
                 onValueChange={(value) => handleSelectChange('position', value as 'left' | 'right' | 'center')}
@@ -260,20 +277,18 @@ const SliderManager: React.FC = () => {
             <div className="mt-2">
               <p className="text-sm font-medium mb-2">Preview:</p>
               <div 
-                className={`${currentSlide.color} rounded-md h-20 relative overflow-hidden`}
+                className="rounded-md h-20 relative overflow-hidden"
                 style={{ 
                   backgroundImage: currentSlide.image ? `url(${currentSlide.image})` : undefined,
                   backgroundSize: 'cover',
-                  backgroundPosition: 'center'
+                  backgroundPosition: 'center',
+                  backgroundColor: !currentSlide.image ? 'gray' : undefined
                 }}
               >
-                <div className="absolute inset-0 bg-black/30 flex items-center">
-                  <div className={`p-3 w-full ${
-                    currentSlide.position === 'center' ? 'text-center' :
-                    currentSlide.position === 'right' ? 'text-right' : 'text-left'
-                  }`}>
-                    <p className="text-white font-bold truncate">{currentSlide.title || 'Slide Title'}</p>
-                  </div>
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <span className={`${currentSlide.color} text-white font-bold px-3 py-1 rounded border border-white`}>
+                    {currentSlide.callToAction || 'Shop Now'}
+                  </span>
                 </div>
               </div>
             </div>

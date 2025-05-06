@@ -37,22 +37,25 @@ export const useSlider = () => {
             id: '1',
             title: 'FRESH FRUITS FROM LOCAL FARMS',
             color: 'bg-emerald-800',
-            image: '/public/images/fruit-banner.jpg',
-            position: 'left'
+            image: '/images/fruit-banner.jpg',
+            position: 'left',
+            callToAction: 'Shop Fruits'
           },
           {
             id: '2',
             title: 'ORGANIC VEGETABLES DELIVERED TO YOUR DOOR',
             color: 'bg-purple-700',
-            image: '/public/images/vegetable-banner.jpg',
-            position: 'center'
+            image: '/images/vegetable-banner.jpg',
+            position: 'center',
+            callToAction: 'Shop Vegetables'
           },
           {
             id: '3',
             title: 'SHOPPING WITH GROCERY STORE',
             color: 'bg-teal-700',
-            image: '/public/lovable-uploads/827a5a28-0db3-4c43-90d7-280863c75660.png',
-            position: 'right'
+            image: '/lovable-uploads/827a5a28-0db3-4c43-90d7-280863c75660.png',
+            position: 'right',
+            callToAction: 'Shop Now'
           }
         ]);
       }

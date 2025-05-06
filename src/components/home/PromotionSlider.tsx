@@ -4,6 +4,8 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Slide } from '@/types/slider'; 
 import { useSlider } from '@/hooks/use-slider';
+import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom';
 
 interface PromotionSliderProps {
   customSlides?: Slide[];
@@ -59,16 +61,27 @@ const PromotionSlider: React.FC<PromotionSliderProps> = ({ customSlides }) => {
           {slides.map((slide) => (
             <div 
               key={slide.id} 
-              className={`${slide.color} rounded-xl flex-shrink-0 w-full md:w-1/3 h-48 flex items-center p-6 text-white relative`}
+              className={`flex-shrink-0 w-full md:w-1/3 h-48 relative rounded-xl overflow-hidden`}
               style={{ 
                 minWidth: isMobile ? '100%' : '33.333%',
-                backgroundImage: slide.image ? `url(${slide.image})` : undefined,
-                backgroundSize: 'cover',
-                backgroundPosition: 'center'
               }}
             >
-              <div className="absolute inset-0 bg-black/30 rounded-xl"></div>
-              <h3 className="text-2xl font-bold max-w-[70%] leading-tight relative z-10">{slide.title}</h3>
+              {/* Image background */}
+              <img 
+                src={slide.image} 
+                alt={slide.title} 
+                className="w-full h-full object-cover"
+              />
+              
+              {/* Call to action button */}
+              <div className={`absolute inset-0 flex items-center justify-center`}>
+                <Button 
+                  variant="default" 
+                  className={`${slide.color} border-2 border-white hover:opacity-90 text-white font-bold px-6 py-2 shadow-md`}
+                >
+                  {slide.callToAction || 'Shop Now'}
+                </Button>
+              </div>
             </div>
           ))}
         </div>

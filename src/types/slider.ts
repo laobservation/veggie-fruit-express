@@ -5,6 +5,7 @@ export interface Slide {
   color: string;
   image: string;
   position?: 'left' | 'right' | 'center';
+  callToAction?: string;
 }
 
 export interface SlideFormData {
@@ -13,4 +14,5 @@ export interface SlideFormData {
   color: string;
   image: string;
   position?: 'left' | 'right' | 'center';
+  callToAction?: string;
 }
