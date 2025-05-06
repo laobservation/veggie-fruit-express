@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useForm } from 'react-hook-form';
 import { 
@@ -47,6 +48,9 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
 
   const onSubmit = async (data: FormValues) => {
     try {
+      // Close the form/cart panel immediately to create a cleaner transition
+      onClose();
+      
       // Prepare order items data
       const itemsData = items.map(item => ({
         productId: item.product.id,
@@ -89,7 +93,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
         date: new Date().toISOString()
       };
 
-      // Clear the cart and immediately redirect to thank you page
+      // Clear the cart
       clearCart();
       
       // Immediate redirect to thank you page with order details

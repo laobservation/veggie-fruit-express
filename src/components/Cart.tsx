@@ -1,3 +1,4 @@
+
 import {
   Sheet,
   SheetContent,
@@ -50,6 +51,9 @@ const Cart: React.FC<CartProps> = ({ isOpen: propIsOpen, onClose: propOnClose })
     if (items.length > 0) {
       toggleCartReminder(true);
     }
+    
+    // Reset the delivery form state when closing the cart
+    setShowDeliveryForm(false);
   };
   
   // Use prop isOpen if provided, otherwise use from store
