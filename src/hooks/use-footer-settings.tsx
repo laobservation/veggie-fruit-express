@@ -79,18 +79,20 @@ export function useFooterSettings() {
     try {
       console.log('Initializing footer settings...');
       
-      // Fix: Use a single object for insert instead of an array
+      // Convert our FooterSettings object to the DB schema format
+      const dbRecord = {
+        id: 1, // Always use ID 1 for the single settings record
+        company_name: defaultFooterSettings.companyName,
+        description: defaultFooterSettings.description,
+        copyright_text: defaultFooterSettings.copyrightText,
+        contact_info: defaultFooterSettings.contactInfo as Json,
+        social_links: defaultFooterSettings.socialLinks as Json,
+        quick_links: defaultFooterSettings.quickLinks as Json,
+      };
+      
       const { error } = await supabase
         .from('footer_settings')
-        .insert({
-          id: 1, // Always use ID 1 for the single settings record
-          company_name: defaultFooterSettings.companyName,
-          description: defaultFooterSettings.description,
-          copyright_text: defaultFooterSettings.copyrightText,
-          contact_info: defaultFooterSettings.contactInfo,
-          social_links: defaultFooterSettings.socialLinks,
-          quick_links: defaultFooterSettings.quickLinks,
-        });
+        .insert(dbRecord);
       
       if (error) {
         console.error('Error creating footer settings:', error);
@@ -114,19 +116,21 @@ export function useFooterSettings() {
   const saveFooterSettings = async () => {
     setSaveLoading(true);
     try {
-      // Fix: Use a single object for upsert instead of an array
+      // Convert our FooterSettings object to the DB schema format
+      const dbRecord = {
+        id: 1, // Always use ID 1 for the single settings record
+        company_name: footerSettings.companyName,
+        description: footerSettings.description,
+        copyright_text: footerSettings.copyrightText,
+        contact_info: footerSettings.contactInfo as Json,
+        social_links: footerSettings.socialLinks as Json,
+        quick_links: footerSettings.quickLinks as Json,
+        updated_at: new Date().toISOString(),
+      };
+      
       const { error } = await supabase
         .from('footer_settings')
-        .upsert({
-          id: 1, // Always use ID 1 for the single settings record
-          company_name: footerSettings.companyName,
-          description: footerSettings.description,
-          copyright_text: footerSettings.copyrightText,
-          contact_info: footerSettings.contactInfo,
-          social_links: footerSettings.socialLinks,
-          quick_links: footerSettings.quickLinks,
-          updated_at: new Date().toISOString(),
-        });
+        .upsert(dbRecord);
       
       if (error) {
         console.error('Error saving footer settings:', error);
