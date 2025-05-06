@@ -18,9 +18,7 @@
   transition: all 0.3s ease;
 }
 
-.plus-button:hover .plus-icon {
-  animation: plus-to-cart 0.5s ease forwards;
-}
+/* Removed animation keyframes and animation properties */
 
 .plus-button.touched .plus-icon {
   display: none;
@@ -32,20 +30,4 @@
 
 .plus-button .command-icon {
   display: none;
-}
-
-@keyframes plus-to-cart {
-  0% {
-    transform: rotate(0deg);
-  }
-  50% {
-    transform: rotate(90deg) scale(0.8);
-    opacity: 0.5;
-  }
-  75% {
-    transform: rotate(180deg) scale(1.2);
-  }
-  100% {
-    transform: rotate(0deg);
-  }
 }

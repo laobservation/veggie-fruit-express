@@ -12,6 +12,7 @@ import Footer from '@/components/Footer';
 import MediaDisplay from '@/components/MediaDisplay';
 import ProductGrid from '@/components/ProductGrid';
 import { Button } from '@/components/ui/button';
+import MobileBottomNav from '@/components/MobileBottomNav';
 import { useState, useEffect } from 'react';
 
 const ProductPage = () => {
@@ -64,6 +65,7 @@ const ProductPage = () => {
           <div className="animate-pulse w-full max-w-md h-96 bg-gray-200 rounded-lg"></div>
         </main>
         <Footer />
+        <MobileBottomNav />
       </div>
     );
   }
@@ -79,6 +81,7 @@ const ProductPage = () => {
           </div>
         </main>
         <Footer />
+        <MobileBottomNav />
       </div>
     );
   }
@@ -162,7 +165,7 @@ const ProductPage = () => {
       </main>
       
       {/* Fixed Bottom Action Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex items-center justify-between">
+      <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex items-center justify-between mb-16 md:mb-0">
         <Button
           variant="outline"
           className="flex items-center gap-2 border-gray-300"
@@ -173,7 +176,7 @@ const ProductPage = () => {
         </Button>
         
         <Button
-          className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8"
+          className="bg-green-500 hover:bg-green-600 text-black font-semibold px-8"
           onClick={handleBuyNow}
         >
           Acheter maintenant
@@ -181,6 +184,7 @@ const ProductPage = () => {
       </div>
       
       <Footer />
+      <MobileBottomNav />
     </div>
   );
 };

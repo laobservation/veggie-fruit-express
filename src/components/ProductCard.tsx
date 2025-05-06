@@ -104,7 +104,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
             className={`rounded-full mt-2 plus-button ${
               hasStock && !isInStock 
                 ? 'bg-gray-300 cursor-not-allowed' 
-                : 'bg-yellow-400 hover:bg-yellow-500'
+                : 'bg-green-500 hover:bg-green-600'
             } ${isTouched ? 'touched' : ''} transition-colors flex items-center px-3 py-1`}
             aria-label="Ajouter au panier"
           >

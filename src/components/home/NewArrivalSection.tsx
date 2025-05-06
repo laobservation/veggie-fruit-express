@@ -90,7 +90,7 @@ const NewArrivalSection: React.FC<NewArrivalSectionProps> = ({ products, isLoadi
                 <span className="text-lg font-bold">{formatPrice(product.price)}</span>
               </div>
               <button 
-                className={`absolute bottom-3 right-3 bg-yellow-400 hover:bg-yellow-500 rounded-full py-1 px-3 transition-colors plus-button flex items-center ${touchedProductId === product.id ? 'touched' : ''}`}
+                className={`absolute bottom-3 right-3 bg-green-500 hover:bg-green-600 rounded-full py-1 px-3 transition-colors plus-button flex items-center ${touchedProductId === product.id ? 'touched' : ''}`}
                 onClick={(e) => handleAddToCart(e, product)}
                 aria-label="Ajouter au panier"
               >

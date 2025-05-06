@@ -100,7 +100,7 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({ products, isL
                   <span className="text-lg font-bold">{formatPrice(product.price)}</span>
                 </div>
                 <button 
-                  className={`mt-2 bg-yellow-400 hover:bg-yellow-500 rounded-full py-1 px-3 transition-colors plus-button flex items-center ${touchedProductId === product.id ? 'touched' : ''}`}
+                  className={`mt-2 bg-green-500 hover:bg-green-600 rounded-full py-1 px-3 transition-colors plus-button flex items-center ${touchedProductId === product.id ? 'touched' : ''}`}
                   onClick={(e) => handleAddToCart(e, product)}
                   aria-label="Ajouter au panier"
                 >
