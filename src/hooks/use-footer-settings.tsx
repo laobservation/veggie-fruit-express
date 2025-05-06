@@ -79,6 +79,7 @@ export function useFooterSettings() {
     try {
       console.log('Initializing footer settings...');
       
+      // Fix: Use a single object for insert instead of an array
       const { error } = await supabase
         .from('footer_settings')
         .insert({
@@ -113,6 +114,7 @@ export function useFooterSettings() {
   const saveFooterSettings = async () => {
     setSaveLoading(true);
     try {
+      // Fix: Use a single object for upsert instead of an array
       const { error } = await supabase
         .from('footer_settings')
         .upsert({
