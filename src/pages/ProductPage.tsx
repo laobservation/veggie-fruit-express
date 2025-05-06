@@ -6,7 +6,7 @@ import { useCart } from '@/hooks/use-cart';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useProductDetails } from '@/hooks/use-product-details';
 import { formatPrice } from '@/lib/formatPrice';
-import { Product } from '@/types/product';
+import { ServiceOption } from '@/types/product';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import MediaDisplay from '@/components/MediaDisplay';
@@ -18,13 +18,6 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
 // Define additional service options
-interface ServiceOption {
-  id: string;
-  name: string;
-  nameAr: string;
-  price: number;
-}
-
 const serviceOptions: ServiceOption[] = [
   {
     id: "washed",
@@ -53,6 +46,7 @@ const ProductPage = () => {
   const { product, relatedProducts, loading } = useProductDetails(productId);
   const { isFavorite, toggleFavorite } = useFavorites();
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [totalPrice, setTotalPrice] = useState<number>(0);
   
   useEffect(() => {
     // Reset scroll position when product changes
@@ -60,6 +54,21 @@ const ProductPage = () => {
     // Reset selected services when product changes
     setSelectedServices([]);
   }, [productId]);
+
+  useEffect(() => {
+    // Calculate total price including selected services
+    if (product) {
+      let servicesTotal = 0;
+      selectedServices.forEach(serviceId => {
+        const service = serviceOptions.find(s => s.id === serviceId);
+        if (service) {
+          servicesTotal += service.price;
+        }
+      });
+      
+      setTotalPrice(product.price + servicesTotal);
+    }
+  }, [product, selectedServices]);
   
   const handleAddToCart = () => {
     if (product) {
@@ -177,7 +186,9 @@ const ProductPage = () => {
           <div className="bg-white rounded-lg p-5 mb-4 shadow-sm">
             <div className="flex justify-between items-center mb-1">
               <h1 className="text-2xl font-bold">{product.name}</h1>
-              <span className="text-2xl font-bold">{formatPrice(product.price)}/{product.unit}</span>
+              <span className="text-2xl font-bold">
+                {formatPrice(totalPrice)}/{product.unit}
+              </span>
             </div>
             <p className="text-gray-500 mb-6">{categoryText}</p>
             
