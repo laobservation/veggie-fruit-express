@@ -1,9 +1,9 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Product } from '@/types/product';
 import { formatPrice } from '@/lib/formatPrice';
-import { Plus, Heart, ShoppingCart } from 'lucide-react';
+import { Plus, Heart, ShoppingCart, Command } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
 import { useFavorites } from '@/hooks/use-favorites';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -17,6 +17,7 @@ interface PopularItemsSectionProps {
 const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({ products, isLoading }) => {
   const { addItem } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
+  const [touchedProductId, setTouchedProductId] = useState<string | null>(null);
 
   const handleAddToCart = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
@@ -44,6 +45,10 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({ products, isL
     e.stopPropagation();
     toggleFavorite(product);
   };
+  
+  const handleProductTouch = (productId: string) => {
+    setTouchedProductId(productId);
+  };
 
   return (
     <div className="mb-8 px-4 md:px-0">
@@ -70,7 +75,12 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({ products, isL
           ))
         ) : (
           products.slice(0, 6).map((product) => (
-            <Link key={product.id} to={`/product/${product.id}`} className="bg-white p-4 rounded-lg shadow-sm relative">
+            <Link 
+              key={product.id} 
+              to={`/product/${product.id}`} 
+              className="bg-white p-4 rounded-lg shadow-sm relative"
+              onTouchStart={() => handleProductTouch(product.id)}
+            >
               <button 
                 onClick={(e) => handleFavoriteClick(e, product)}
                 className="absolute top-2 right-2 p-1 rounded-full bg-white/80 hover:bg-white z-10"
@@ -90,11 +100,12 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({ products, isL
                   <span className="text-lg font-bold">{formatPrice(product.price)}</span>
                 </div>
                 <button 
-                  className="mt-2 bg-yellow-400 hover:bg-yellow-500 rounded-full p-2 transition-colors plus-button"
+                  className={`mt-2 bg-yellow-400 hover:bg-yellow-500 rounded-full p-2 transition-colors plus-button ${touchedProductId === product.id ? 'touched' : ''}`}
                   onClick={(e) => handleAddToCart(e, product)}
                   aria-label="Add to cart"
                 >
                   <Plus className="h-4 w-4 text-white plus-icon" />
+                  <Command className="h-4 w-4 text-white command-icon" />
                 </button>
               </div>
             </Link>

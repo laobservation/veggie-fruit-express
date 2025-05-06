@@ -22,6 +22,18 @@
   animation: plus-to-cart 0.5s ease forwards;
 }
 
+.plus-button.touched .plus-icon {
+  display: none;
+}
+
+.plus-button.touched .command-icon {
+  display: inline-block;
+}
+
+.plus-button .command-icon {
+  display: none;
+}
+
 @keyframes plus-to-cart {
   0% {
     transform: rotate(0deg);

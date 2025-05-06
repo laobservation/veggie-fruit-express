@@ -1,5 +1,5 @@
 
-import { Heart, Plus, ShoppingCart } from 'lucide-react';
+import { Heart, Plus, Command } from 'lucide-react';
 import { Product } from '@/types/product';
 import { Link } from 'react-router-dom';
 import { formatPrice } from '@/lib/formatPrice';
@@ -20,6 +20,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
   const [animating, setAnimating] = useState(false);
   const [favoriteStatus, setFavoriteStatus] = useState(false);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isTouched, setIsTouched] = useState(false);
   
   // Check if product has stock information
   const hasStock = typeof product.stock !== 'undefined';
@@ -55,8 +56,16 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
     setTimeout(() => setAnimating(false), 300);
   };
 
+  const handleTouch = () => {
+    setIsTouched(true);
+  };
+
   return (
-    <Link to={`/product/${product.id}`} className="block">
+    <Link 
+      to={`/product/${product.id}`} 
+      className="block"
+      onTouchStart={handleTouch}
+    >
       <div className="bg-white rounded-xl overflow-hidden shadow-sm relative">
         <div className="relative">
           {discountPercentage > 0 && (
@@ -96,10 +105,11 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
               hasStock && !isInStock 
                 ? 'bg-gray-300 cursor-not-allowed' 
                 : 'bg-yellow-400 hover:bg-yellow-500'
-            } transition-colors`}
+            } ${isTouched ? 'touched' : ''} transition-colors`}
             aria-label="Add to cart"
           >
             <Plus className={`h-4 w-4 text-white plus-icon ${isAddingToCart ? 'animate-spin' : ''}`} />
+            <Command className="h-4 w-4 text-white command-icon" />
           </button>
           
           {hasStock && !isInStock && (
