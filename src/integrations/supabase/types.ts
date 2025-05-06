@@ -197,7 +197,6 @@ export type Database = {
       }
       slides: {
         Row: {
-          action_url: string | null
           call_to_action: string | null
           color: string
           created_at: string | null
@@ -205,12 +204,10 @@ export type Database = {
           image: string | null
           order: number | null
           position: string | null
-          show_button: boolean | null
           title: string
           updated_at: string | null
         }
         Insert: {
-          action_url?: string | null
           call_to_action?: string | null
           color?: string
           created_at?: string | null
@@ -218,12 +215,10 @@ export type Database = {
           image?: string | null
           order?: number | null
           position?: string | null
-          show_button?: boolean | null
           title: string
           updated_at?: string | null
         }
         Update: {
-          action_url?: string | null
           call_to_action?: string | null
           color?: string
           created_at?: string | null
@@ -231,30 +226,8 @@ export type Database = {
           image?: string | null
           order?: number | null
           position?: string | null
-          show_button?: boolean | null
           title?: string
           updated_at?: string | null
-        }
-        Relationships: []
-      }
-      translations: {
-        Row: {
-          created_at: string
-          id: number
-          translations: Json
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id: number
-          translations?: Json
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          translations?: Json
-          updated_at?: string
         }
         Relationships: []
       }

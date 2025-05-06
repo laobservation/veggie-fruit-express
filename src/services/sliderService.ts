@@ -24,7 +24,7 @@ export const mapDatabaseSlidesToFrontend = (dbSlides: any[]): Slide[] => {
     position: slide.position as 'left' | 'right' | 'center',
     callToAction: slide.call_to_action || 'Acheter maintenant',
     actionUrl: slide.action_url || '/fruits',
-    showButton: slide.show_button !== false, // Convert to boolean with default true
+    showButton: slide.show_button === false ? false : true,
     order: slide.order || 0
   }));
 };

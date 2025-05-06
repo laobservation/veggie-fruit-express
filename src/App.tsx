@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Route, Routes } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { Toaster } from '@/components/ui/toaster';
 import { Toaster as SonnerToaster } from 'sonner';
 import HomePage from './pages/HomePage';
@@ -21,22 +21,24 @@ import './App.css';
 const App: React.FC = () => {
   return (
     <TranslationsProvider>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/product/:productId" element={<ProductPage />} />
-        <Route path="/fruits" element={<FruitsPage />} />
-        <Route path="/vegetables" element={<VegetablesPage />} />
-        <Route path="/category/:category" element={<CategoryPage />} />
-        <Route path="/favorites" element={<FavoritesPage />} />
-        <Route path="/admin" element={<AdminPage />} />
-        <Route path="/admin/settings" element={<AdminSettingsPage />} />
-        <Route path="/admin/slider" element={<AdminSliderPage />} />
-        <Route path="/admin/translations" element={<AdminTranslationsPage />} />
-        <Route path="/thank-you" element={<ThankYouPage />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <Toaster />
-      <SonnerToaster position="top-right" expand={false} />
+      <Router>
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/product/:productId" element={<ProductPage />} />
+          <Route path="/fruits" element={<FruitsPage />} />
+          <Route path="/vegetables" element={<VegetablesPage />} />
+          <Route path="/category/:category" element={<CategoryPage />} />
+          <Route path="/favorites" element={<FavoritesPage />} />
+          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/admin/settings" element={<AdminSettingsPage />} />
+          <Route path="/admin/slider" element={<AdminSliderPage />} />
+          <Route path="/admin/translations" element={<AdminTranslationsPage />} />
+          <Route path="/thank-you" element={<ThankYouPage />} />
+          <Route path="*" element={<NotFound />} />
+        </Routes>
+        <Toaster />
+        <SonnerToaster position="top-right" expand={false} />
+      </Router>
     </TranslationsProvider>
   );
 };
