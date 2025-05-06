@@ -68,10 +68,12 @@ const CategoryBanner: React.FC<CategoryBannerProps> = ({ category }) => {
           path: '/category/drinks'
         };
       default:
+        // Fix: explicitly handle the category as string to avoid 'never' type issue
+        const categoryStr: string = category;
         return {
-          title: category.charAt(0).toUpperCase() + category.slice(1),
-          description: `Browse our selection of ${category}s`,
-          path: `/category/${category}s`
+          title: categoryStr.charAt(0).toUpperCase() + categoryStr.slice(1),
+          description: `Browse our selection of ${categoryStr}s`,
+          path: `/category/${categoryStr}s`
         };
     }
   };
