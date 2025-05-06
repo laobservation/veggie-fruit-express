@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner'; 
 import { supabase } from '@/integrations/supabase/client';
-import { FooterSettings, defaultFooterSettings } from '@/types/footer';
+import { FooterSettings, defaultFooterSettings, ContactInfo, SocialLinks, QuickLink } from '@/types/footer';
 
 export function useFooterSettings() {
   const [footerSettings, setFooterSettings] = useState<FooterSettings>(defaultFooterSettings);
@@ -30,15 +30,20 @@ export function useFooterSettings() {
       }
       
       if (data) {
-        // Map database fields to our object structure
+        // Type checking to make sure the data is in the correct format
+        const contactInfo = data.contact_info as ContactInfo | null;
+        const socialLinks = data.social_links as SocialLinks | null;
+        const quickLinks = data.quick_links as QuickLink[] | null;
+        
+        // Map database fields to our object structure with proper type assertions
         const mappedSettings: FooterSettings = {
           id: data.id,
           companyName: data.company_name || defaultFooterSettings.companyName,
           description: data.description || defaultFooterSettings.description,
           copyrightText: data.copyright_text || defaultFooterSettings.copyrightText,
-          contactInfo: data.contact_info || defaultFooterSettings.contactInfo,
-          socialLinks: data.social_links || defaultFooterSettings.socialLinks,
-          quickLinks: data.quick_links || defaultFooterSettings.quickLinks
+          contactInfo: contactInfo || defaultFooterSettings.contactInfo,
+          socialLinks: socialLinks || defaultFooterSettings.socialLinks,
+          quickLinks: quickLinks || defaultFooterSettings.quickLinks
         };
         setFooterSettings(mappedSettings);
       } else {
@@ -60,7 +65,7 @@ export function useFooterSettings() {
       
       const { error } = await supabase
         .from('footer_settings')
-        .insert({
+        .insert([{
           id: 1, // Always use ID 1 for the single settings record
           company_name: defaultFooterSettings.companyName,
           description: defaultFooterSettings.description,
@@ -68,7 +73,7 @@ export function useFooterSettings() {
           contact_info: defaultFooterSettings.contactInfo,
           social_links: defaultFooterSettings.socialLinks,
           quick_links: defaultFooterSettings.quickLinks,
-        });
+        }]);
       
       if (error) {
         console.error('Error creating footer settings:', error);
@@ -94,7 +99,7 @@ export function useFooterSettings() {
     try {
       const { error } = await supabase
         .from('footer_settings')
-        .upsert({
+        .upsert([{
           id: 1, // Always use ID 1 for the single settings record
           company_name: footerSettings.companyName,
           description: footerSettings.description,
@@ -103,7 +108,7 @@ export function useFooterSettings() {
           social_links: footerSettings.socialLinks,
           quick_links: footerSettings.quickLinks,
           updated_at: new Date().toISOString(),
-        });
+        }]);
       
       if (error) {
         console.error('Error saving footer settings:', error);

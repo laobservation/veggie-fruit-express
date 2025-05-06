@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { FooterSettings, defaultFooterSettings } from '@/types/footer';
+import { FooterSettings, defaultFooterSettings, ContactInfo, SocialLinks, QuickLink } from '@/types/footer';
 
 const Footer = () => {
   const [footerData, setFooterData] = useState<FooterSettings>(defaultFooterSettings);
@@ -22,15 +22,20 @@ const Footer = () => {
         }
         
         if (data) {
-          // Map database fields to our object structure
+          // Type checking to make sure the data is in the correct format
+          const contactInfo = data.contact_info as ContactInfo | null;
+          const socialLinks = data.social_links as SocialLinks | null;
+          const quickLinks = data.quick_links as QuickLink[] | null;
+          
+          // Map database fields to our object structure with proper type assertions
           const mappedSettings: FooterSettings = {
             id: data.id,
             companyName: data.company_name || defaultFooterSettings.companyName,
             description: data.description || defaultFooterSettings.description,
             copyrightText: data.copyright_text || defaultFooterSettings.copyrightText,
-            contactInfo: data.contact_info || defaultFooterSettings.contactInfo,
-            socialLinks: data.social_links || defaultFooterSettings.socialLinks,
-            quickLinks: data.quick_links || defaultFooterSettings.quickLinks
+            contactInfo: contactInfo || defaultFooterSettings.contactInfo,
+            socialLinks: socialLinks || defaultFooterSettings.socialLinks,
+            quickLinks: quickLinks || defaultFooterSettings.quickLinks
           };
           setFooterData(mappedSettings);
         }
