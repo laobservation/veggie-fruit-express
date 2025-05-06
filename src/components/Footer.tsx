@@ -1,8 +1,23 @@
-
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { FooterSettings, defaultFooterSettings, ContactInfo, SocialLinks, QuickLink } from '@/types/footer';
+import { Json } from '@/integrations/supabase/types';
+
+// Helper function to safely cast JSON data to specific types
+function safeJsonCast<T>(json: Json | null, defaultValue: T): T {
+  if (json === null || json === undefined) {
+    return defaultValue;
+  }
+  
+  try {
+    // For arrays and objects, we need to ensure the structure matches
+    return json as unknown as T;
+  } catch (error) {
+    console.error('Error casting JSON:', error);
+    return defaultValue;
+  }
+}
 
 const Footer = () => {
   const [footerData, setFooterData] = useState<FooterSettings>(defaultFooterSettings);
@@ -22,10 +37,10 @@ const Footer = () => {
         }
         
         if (data) {
-          // Type checking to make sure the data is in the correct format
-          const contactInfo = data.contact_info as ContactInfo | null;
-          const socialLinks = data.social_links as SocialLinks | null;
-          const quickLinks = data.quick_links as QuickLink[] | null;
+          // Type checking to make sure the data is in the correct format using our helper
+          const contactInfo = safeJsonCast<ContactInfo>(data.contact_info, defaultFooterSettings.contactInfo || {});
+          const socialLinks = safeJsonCast<SocialLinks>(data.social_links, defaultFooterSettings.socialLinks || {});
+          const quickLinks = safeJsonCast<QuickLink[]>(data.quick_links, defaultFooterSettings.quickLinks || []);
           
           // Map database fields to our object structure with proper type assertions
           const mappedSettings: FooterSettings = {
@@ -33,9 +48,9 @@ const Footer = () => {
             companyName: data.company_name || defaultFooterSettings.companyName,
             description: data.description || defaultFooterSettings.description,
             copyrightText: data.copyright_text || defaultFooterSettings.copyrightText,
-            contactInfo: contactInfo || defaultFooterSettings.contactInfo,
-            socialLinks: socialLinks || defaultFooterSettings.socialLinks,
-            quickLinks: quickLinks || defaultFooterSettings.quickLinks
+            contactInfo: contactInfo,
+            socialLinks: socialLinks,
+            quickLinks: quickLinks
           };
           setFooterData(mappedSettings);
         }
