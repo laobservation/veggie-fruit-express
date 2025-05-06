@@ -12,6 +12,17 @@ interface ProductCardProps {
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onEdit, onDelete }) => {
+  // Function to display category name with proper formatting
+  const getCategoryDisplay = (category: 'fruit' | 'vegetable' | 'pack' | 'drink') => {
+    switch(category) {
+      case 'fruit': return 'Fruit';
+      case 'vegetable': return 'Légume';
+      case 'pack': return 'Pack';
+      case 'drink': return 'Boisson';
+      default: return category;
+    }
+  };
+
   return (
     <div className="border rounded-md p-4 flex flex-col">
       <div className="flex items-center justify-between mb-2">
@@ -54,7 +65,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onEdit, onDelete }) 
       <div className="flex justify-between mt-auto">
         <span className="text-veggie-dark font-bold">{formatPrice(product.price)}</span>
         <span className="text-sm bg-gray-100 px-2 py-1 rounded">
-          {product.category === 'fruit' ? 'Fruit' : 'Légume'}
+          {getCategoryDisplay(product.category)}
         </span>
       </div>
       

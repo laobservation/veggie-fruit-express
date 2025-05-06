@@ -1,3 +1,4 @@
+
 import { Link } from 'react-router-dom';
 import { getCategoryLinkedProducts } from '@/data/products';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,7 +7,7 @@ import { transformProductFromSupabase } from '@/services/productService';
 import { Product } from '@/types/product';
 
 interface CategoryBannerProps {
-  category: 'fruit' | 'vegetable';
+  category: 'fruit' | 'vegetable' | 'pack' | 'drink';
 }
 
 const CategoryBanner: React.FC<CategoryBannerProps> = ({ category }) => {
@@ -26,10 +27,8 @@ const CategoryBanner: React.FC<CategoryBannerProps> = ({ category }) => {
         
         if (data && data.length > 0) {
           // Transform Supabase products to our Product type
-          // The transform function now handles missing featured property
           const products = data.map(product => transformProductFromSupabase({
             ...product,
-            // featured is handled in transformProductFromSupabase
           }));
           setLinkedProducts(products);
         }
@@ -41,6 +40,44 @@ const CategoryBanner: React.FC<CategoryBannerProps> = ({ category }) => {
     fetchCategoryLinkedProducts();
   }, [category]);
   
+  // Determine banner content based on category
+  const getBannerContent = () => {
+    switch(category) {
+      case 'fruit':
+        return {
+          title: 'Fresh Fruits',
+          description: 'Sweet and juicy fruits freshly harvested',
+          path: '/category/fruits'
+        };
+      case 'vegetable':
+        return {
+          title: 'Organic Vegetables',
+          description: 'Farm-fresh vegetables for your healthy diet',
+          path: '/category/vegetables'
+        };
+      case 'pack':
+        return {
+          title: 'Value Packs',
+          description: 'Get more for your money with our specially curated packs',
+          path: '/category/packs'
+        };
+      case 'drink':
+        return {
+          title: 'Healthy Drinks',
+          description: 'Refresh yourself with our selection of healthy drinks',
+          path: '/category/drinks'
+        };
+      default:
+        return {
+          title: category.charAt(0).toUpperCase() + category.slice(1),
+          description: `Browse our selection of ${category}s`,
+          path: `/category/${category}s`
+        };
+    }
+  };
+  
+  const content = getBannerContent();
+  
   return (
     <div 
       className={`relative h-40 md:h-60 w-full rounded-lg overflow-hidden mb-8 bg-cover bg-center`}
@@ -49,18 +86,16 @@ const CategoryBanner: React.FC<CategoryBannerProps> = ({ category }) => {
       <div className="absolute inset-0 bg-black/40"></div>
       <div className="absolute inset-0 flex flex-col justify-center items-center p-6 text-center">
         <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
-          {category === 'fruit' ? 'Fresh Fruits' : 'Organic Vegetables'}
+          {content.title}
         </h2>
         <p className="text-white text-lg md:text-xl mb-4">
-          {category === 'fruit' 
-            ? 'Sweet and juicy fruits freshly harvested' 
-            : 'Farm-fresh vegetables for your healthy diet'}
+          {content.description}
         </p>
         <Link 
-          to={`/${category}s`} 
+          to={content.path} 
           className="bg-white text-veggie-primary hover:bg-veggie-primary hover:text-white transition-colors px-6 py-2 rounded-md font-medium"
         >
-          Browse All {category === 'fruit' ? 'Fruits' : 'Vegetables'}
+          Browse All {content.title}
         </Link>
         
         {linkedProducts.length > 0 && (

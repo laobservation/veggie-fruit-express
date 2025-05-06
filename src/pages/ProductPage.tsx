@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Heart, ShoppingBag } from 'lucide-react';
@@ -26,6 +25,29 @@ const ProductPage = () => {
     window.scrollTo(0, 0);
   }, [productId]);
   
+  const handleAddToCart = () => {
+    if (product) {
+      addItem(product);
+    }
+  };
+
+  const handleFavoriteClick = () => {
+    if (product) {
+      toggleFavorite(product);
+    }
+  };
+
+  // Helper function to get formatted category text
+  const getCategoryText = (category: 'fruit' | 'vegetable' | 'pack' | 'drink') => {
+    switch(category) {
+      case 'fruit': return 'Fruits';
+      case 'vegetable': return 'Légumes';
+      case 'pack': return 'Packs';
+      case 'drink': return 'Boissons';
+      default: return 'Produits';
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex flex-col">
@@ -53,15 +75,7 @@ const ProductPage = () => {
     );
   }
 
-  const handleAddToCart = () => {
-    addItem(product as Product);
-  };
-
-  const handleFavoriteClick = () => {
-    toggleFavorite(product as Product);
-  };
-
-  const categoryText = product.category === 'fruit' ? 'Fruits' : 'Légumes';
+  const categoryText = getCategoryText(product.category);
   const favoriteStatus = isFavorite(product.id);
 
   return (
@@ -107,7 +121,7 @@ const ProductPage = () => {
               <h1 className="text-2xl font-bold">{product.name}</h1>
               <span className="text-2xl font-bold">{formatPrice(product.price)}/{product.unit}</span>
             </div>
-            <p className="text-gray-500 mb-6">{categoryText === 'Fruits' ? 'Fresh fruits' : 'Fresh vegetables'}</p>
+            <p className="text-gray-500 mb-6">{categoryText}</p>
             
             <h2 className="font-semibold text-lg mb-2">Description</h2>
             <p className="text-gray-600 mb-4">{product.description}</p>
