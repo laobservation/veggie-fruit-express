@@ -2,7 +2,8 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner'; 
 import { supabase } from '@/integrations/supabase/client';
-import { FooterSettings, defaultFooterSettings } from '@/types/footer';
+import { FooterSettings, defaultFooterSettings, ContactInfo, SocialLinks, QuickLink } from '@/types/footer';
+import { Json } from '@/integrations/supabase/types';
 
 export function useFooterSettings() {
   const [footerSettings, setFooterSettings] = useState<FooterSettings>(defaultFooterSettings);
@@ -36,9 +37,9 @@ export function useFooterSettings() {
           companyName: data.company_name || defaultFooterSettings.companyName,
           description: data.description || defaultFooterSettings.description,
           copyrightText: data.copyright_text || defaultFooterSettings.copyrightText,
-          contactInfo: data.contact_info || defaultFooterSettings.contactInfo,
-          socialLinks: data.social_links || defaultFooterSettings.socialLinks,
-          quickLinks: data.quick_links || defaultFooterSettings.quickLinks,
+          contactInfo: data.contact_info as unknown as ContactInfo || defaultFooterSettings.contactInfo,
+          socialLinks: data.social_links as unknown as SocialLinks || defaultFooterSettings.socialLinks,
+          quickLinks: data.quick_links as unknown as QuickLink[] || defaultFooterSettings.quickLinks,
         };
         
         setFooterSettings(mappedData);
@@ -61,15 +62,15 @@ export function useFooterSettings() {
       
       const { error } = await supabase
         .from('footer_settings')
-        .insert({
+        .insert([{
           id: 1, // Always use ID 1 for the single settings record
           company_name: defaultFooterSettings.companyName,
           description: defaultFooterSettings.description,
           copyright_text: defaultFooterSettings.copyrightText,
-          contact_info: defaultFooterSettings.contactInfo,
-          social_links: defaultFooterSettings.socialLinks,
-          quick_links: defaultFooterSettings.quickLinks,
-        });
+          contact_info: defaultFooterSettings.contactInfo as unknown as Json,
+          social_links: defaultFooterSettings.socialLinks as unknown as Json,
+          quick_links: defaultFooterSettings.quickLinks as unknown as Json,
+        }]);
       
       if (error) {
         console.error('Error creating footer settings:', error);
@@ -99,9 +100,9 @@ export function useFooterSettings() {
         company_name: footerSettings.companyName,
         description: footerSettings.description,
         copyright_text: footerSettings.copyrightText,
-        contact_info: footerSettings.contactInfo,
-        social_links: footerSettings.socialLinks,
-        quick_links: footerSettings.quickLinks,
+        contact_info: footerSettings.contactInfo as unknown as Json,
+        social_links: footerSettings.socialLinks as unknown as Json,
+        quick_links: footerSettings.quickLinks as unknown as Json,
         updated_at: new Date().toISOString(),
       };
       

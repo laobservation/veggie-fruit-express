@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { FooterSettings, defaultFooterSettings } from '@/types/footer';
+import { FooterSettings, defaultFooterSettings, ContactInfo, SocialLinks, QuickLink } from '@/types/footer';
 
 const Footer = () => {
   const [footerData, setFooterData] = useState<FooterSettings>(defaultFooterSettings);
@@ -28,9 +28,9 @@ const Footer = () => {
             companyName: data.company_name || defaultFooterSettings.companyName,
             description: data.description || defaultFooterSettings.description,
             copyrightText: data.copyright_text || defaultFooterSettings.copyrightText,
-            contactInfo: data.contact_info || defaultFooterSettings.contactInfo,
-            socialLinks: data.social_links || defaultFooterSettings.socialLinks,
-            quickLinks: data.quick_links || defaultFooterSettings.quickLinks,
+            contactInfo: data.contact_info as unknown as ContactInfo || defaultFooterSettings.contactInfo,
+            socialLinks: data.social_links as unknown as SocialLinks || defaultFooterSettings.socialLinks,
+            quickLinks: data.quick_links as unknown as QuickLink[] || defaultFooterSettings.quickLinks,
           };
           
           setFooterData(mappedData);
