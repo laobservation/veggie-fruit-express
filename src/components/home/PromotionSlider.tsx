@@ -1,154 +1,156 @@
 
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { Slide } from '@/types/slider'; 
-import { useSlider } from '@/hooks/use-slider';
 import { Button } from '@/components/ui/button';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { cn } from '@/lib/utils';
+import { useSlider } from '@/hooks/use-slider';
+import { Slide } from '@/types/slider';
 
 interface PromotionSliderProps {
   customSlides?: Slide[];
 }
 
 const PromotionSlider: React.FC<PromotionSliderProps> = ({ customSlides }) => {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const isMobile = useIsMobile();
   const { slides: fetchedSlides, loading } = useSlider();
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [animating, setAnimating] = useState(false);
+  const [touchStart, setTouchStart] = useState(0);
   
   const slides = customSlides || fetchedSlides;
-
-  // Auto-slide effect only for mobile
+  
   useEffect(() => {
-    if (isMobile && slides.length > 0) {
-      const interval = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % slides.length);
-      }, 4000);
+    // Reset index if slides change
+    setCurrentIndex(0);
+    
+    // Auto-advance slide every 5 seconds unless we're using custom slides (in preview mode)
+    if (!customSlides) {
+      const timer = setInterval(() => {
+        nextSlide();
+      }, 5000);
       
-      return () => clearInterval(interval);
+      return () => clearInterval(timer);
     }
-  }, [isMobile, slides.length]);
+  }, [customSlides, slides.length]);
   
   const nextSlide = () => {
-    if (slides.length > 0) {
-      setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }
+    if (animating || slides.length <= 1) return;
+    
+    setAnimating(true);
+    setCurrentIndex((current) => (current === slides.length - 1 ? 0 : current + 1));
+    
+    setTimeout(() => {
+      setAnimating(false);
+    }, 500);
   };
   
   const prevSlide = () => {
-    if (slides.length > 0) {
-      setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
+    if (animating || slides.length <= 1) return;
+    
+    setAnimating(true);
+    setCurrentIndex((current) => (current === 0 ? slides.length - 1 : current - 1));
+    
+    setTimeout(() => {
+      setAnimating(false);
+    }, 500);
+  };
+  
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.touches[0].clientX);
+  };
+  
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchStart - touchEnd;
+    
+    // If the swipe is significant enough (> 50px)
+    if (Math.abs(diff) > 50) {
+      if (diff > 0) {
+        nextSlide(); // Swipe left, go to next slide
+      } else {
+        prevSlide(); // Swipe right, go to previous slide
+      }
     }
   };
   
-  const goToSlide = (index: number) => {
-    setCurrentSlide(index);
-  };
-
-  if (loading || slides.length === 0) {
+  // Handle loading state
+  if (loading && !customSlides) {
     return (
-      <div className="mb-8 h-48 bg-gray-100 rounded-xl animate-pulse"></div>
+      <div className="relative h-[400px] flex items-center justify-center bg-gray-100">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
     );
   }
   
+  // Handle empty slides
+  if (slides.length === 0) {
+    return null;
+  }
+  
+  const currentSlide = slides[currentIndex];
+  
   return (
-    <div className="relative mb-8">
-      <div className="overflow-hidden rounded-xl">
-        <div 
-          className="flex transition-transform duration-500 ease-in-out"
-          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-        >
-          {slides.map((slide) => (
-            <div 
-              key={slide.id} 
-              className={`flex-shrink-0 w-full md:w-1/3 h-48 relative rounded-xl overflow-hidden`}
-              style={{ 
-                minWidth: isMobile ? '100%' : '33.333%',
-              }}
-            >
-              {/* Image background - Removed black fade overlay */}
-              <img 
-                src={slide.image} 
-                alt={slide.title} 
-                className="w-full h-full object-cover"
-              />
-              
-              {/* Title overlay - Now without dark background */}
-              <div className="absolute inset-0 flex flex-col justify-between p-4">
-                <div className={`text-white font-semibold text-sm md:text-base max-w-[80%] drop-shadow-md ${
-                  slide.position === 'center' ? 'mx-auto text-center' :
-                  slide.position === 'right' ? 'ml-auto text-right' : 'text-left'
-                }`}>
-                  {slide.title}
-                </div>
-                
-                {/* Call to action button - now conditional */}
-                {(slide.showButton !== false) && (
-                  <div className={`w-full flex ${
-                    slide.position === 'center' ? 'justify-center' :
-                    slide.position === 'right' ? 'justify-end' : 'justify-start'
-                  }`}>
-                    <Button 
-                      variant="default" 
-                      size="sm"
-                      asChild
-                      className={`${slide.color} backdrop-blur-sm bg-opacity-80 border border-white/50 hover:bg-opacity-100 hover:scale-105 text-white font-bold shadow-lg transition-all duration-300 rounded-lg px-4`}
-                    >
-                      <Link to={slide.actionUrl || '/fruits'}>
-                        {slide.callToAction || 'Acheter maintenant'}
-                      </Link>
-                    </Button>
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
+    <div 
+      className="relative overflow-hidden"
+      onTouchStart={handleTouchStart}
+      onTouchEnd={handleTouchEnd}
+    >
+      <div 
+        className="w-full h-[400px] md:h-[500px] bg-cover bg-center transition-all duration-500"
+        style={{ 
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.4)), url(${currentSlide.image})`
+        }}
+      >
+        <div className={`container mx-auto px-6 h-full flex items-center ${
+          currentSlide.position === 'left' ? 'justify-start' : 
+          currentSlide.position === 'right' ? 'justify-end' : 
+          'justify-center'
+        }`}>
+          <div className={`max-w-lg text-center md:text-left ${currentSlide.color} p-6 rounded-lg bg-opacity-80`}>
+            <h1 className="text-3xl font-bold text-white mb-4">{currentSlide.title}</h1>
+            {currentSlide.showButton && (
+              <Link to={currentSlide.actionUrl || '/fruits'}>
+                <Button className="bg-white text-emerald-800 hover:bg-gray-100">
+                  {currentSlide.callToAction || 'Acheter maintenant'}
+                </Button>
+              </Link>
+            )}
+          </div>
         </div>
       </div>
       
-      {/* Navigation arrows */}
-      {slides.length > 1 && (
-        <div className="hidden md:block">
-          <button 
-            onClick={prevSlide}
-            className="absolute top-1/2 left-4 -translate-y-1/2 bg-white/70 p-2 rounded-full shadow-md hover:bg-white transition-colors"
-            aria-label="Diapositive précédente"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <button 
-            onClick={nextSlide}
-            className="absolute top-1/2 right-4 -translate-y-1/2 bg-white/70 p-2 rounded-full shadow-md hover:bg-white transition-colors"
-            aria-label="Diapositive suivante"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
-        </div>
-      )}
+      <div className="absolute inset-0 flex items-center justify-between p-4">
+        <Button 
+          variant="ghost" 
+          size="icon"
+          className="rounded-full bg-black/20 text-white hover:bg-black/40"
+          onClick={prevSlide}
+        >
+          <ArrowLeft className="h-6 w-6" />
+          <span className="sr-only">Previous</span>
+        </Button>
+        <Button 
+          variant="ghost" 
+          size="icon"
+          className="rounded-full bg-black/20 text-white hover:bg-black/40"
+          onClick={nextSlide}
+        >
+          <ArrowRight className="h-6 w-6" />
+          <span className="sr-only">Next</span>
+        </Button>
+      </div>
       
-      {/* Stylish pagination dots with light green color */}
-      {slides.length > 1 && (
-        <div className="absolute bottom-0 top-0 right-4 flex flex-col justify-center items-center gap-1.5">
-          {slides.map((_, index) => (
-            <button
-              key={index}
-              onClick={() => goToSlide(index)}
-              className={cn(
-                "w-2 h-2 rounded-full transition-all duration-300 relative",
-                currentSlide === index 
-                  ? "bg-veggie-secondary scale-125 shadow-glow" 
-                  : "bg-veggie-light/80 hover:bg-veggie-light"
-              )}
-              style={{ 
-                boxShadow: currentSlide === index ? '0 0 5px 1px rgba(139, 195, 74, 0.6)' : 'none',
-                transform: `scale(${currentSlide === index ? 1.25 : 1})` 
-              }}
-              aria-label={`Aller à la diapositive ${index + 1}`}
-            />
-          ))}
-        </div>
-      )}
+      <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
+        {slides.map((_, index) => (
+          <button
+            key={index}
+            className={`h-2 rounded-full transition-all ${
+              index === currentIndex ? 'w-8 bg-white' : 'w-2 bg-white/50'
+            }`}
+            onClick={() => setCurrentIndex(index)}
+            aria-label={`Go to slide ${index + 1}`}
+          />
+        ))}
+      </div>
     </div>
   );
 };

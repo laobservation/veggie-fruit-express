@@ -46,6 +46,7 @@ export const TranslationsProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const fetchTranslations = async () => {
     setIsLoading(true);
     try {
+      // Using 'from' method with string argument requires adding type information
       const { data, error } = await supabase
         .from('translations')
         .select('*')
@@ -134,6 +135,7 @@ export const useTranslationsAdmin = () => {
   const fetchTranslations = async () => {
     setLoading(true);
     try {
+      // Using 'from' method with string argument requires adding type information
       const { data, error } = await supabase
         .from('translations')
         .select('*')
@@ -168,6 +170,7 @@ export const useTranslationsAdmin = () => {
     try {
       console.log('Initializing translations...');
       
+      // Using 'from' method with string argument requires adding type information
       const { error } = await supabase
         .from('translations')
         .insert({
@@ -191,6 +194,7 @@ export const useTranslationsAdmin = () => {
   const saveTranslations = async (updatedTranslations: Translation[]) => {
     setSaveLoading(true);
     try {
+      // Using 'from' method with string argument requires adding type information
       const { error } = await supabase
         .from('translations')
         .update({
