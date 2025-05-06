@@ -11,7 +11,6 @@ import {
   SelectTrigger, 
   SelectValue 
 } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 
 interface SlideFormProps {
@@ -19,7 +18,6 @@ interface SlideFormProps {
   isEditing: boolean;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleSelectChange: (name: string, value: string) => void;
-  handleSwitchChange: (name: string, checked: boolean) => void;
   handleSubmit: () => void;
   onCancel: () => void;
 }
@@ -29,7 +27,6 @@ const SlideForm: React.FC<SlideFormProps> = ({
   isEditing,
   handleInputChange,
   handleSelectChange,
-  handleSwitchChange,
   handleSubmit,
   onCancel
 }) => {
@@ -44,109 +41,82 @@ const SlideForm: React.FC<SlideFormProps> = ({
   ];
   
   const positionOptions = [
-    { name: 'Gauche', value: 'left' },
-    { name: 'Centre', value: 'center' },
-    { name: 'Droite', value: 'right' }
+    { name: 'Left', value: 'left' },
+    { name: 'Center', value: 'center' },
+    { name: 'Right', value: 'right' }
   ];
   
   return (
     <div className="grid gap-4 py-4">
       <div className="grid gap-2">
-        <Label htmlFor="title">Titre</Label>
+        <Label htmlFor="title">Title</Label>
         <Input
           id="title"
           name="title"
           value={currentSlide.title}
           onChange={handleInputChange}
-          placeholder="Titre de la diapositive"
+          placeholder="Slide Title"
         />
-        <p className="text-xs text-gray-500">Utilisé comme référence admin (non affiché sur le slider)</p>
+        <p className="text-xs text-gray-500">Used for admin reference (not displayed on slider)</p>
       </div>
       
       <div className="grid gap-2">
-        <Label htmlFor="image">URL de l'image</Label>
+        <Label htmlFor="image">Image URL</Label>
         <Input
           id="image"
           name="image"
           value={currentSlide.image}
           onChange={handleInputChange}
-          placeholder="/images/votre-image.jpg"
+          placeholder="/images/your-image.jpg"
         />
-        <p className="text-xs text-gray-500">Entrez le chemin d'une image (ex: /images/fruit-banner.jpg)</p>
+        <p className="text-xs text-gray-500">Enter the path to an image (e.g., /images/fruit-banner.jpg)</p>
       </div>
       
       <div className="grid gap-2">
-        <div className="flex items-center justify-between">
-          <Label htmlFor="showButton">Afficher le bouton d'action</Label>
-          <Switch 
-            id="showButton" 
-            checked={currentSlide.showButton ?? true} 
-            onCheckedChange={(checked) => handleSwitchChange('showButton', checked)}
-          />
-        </div>
+        <Label htmlFor="callToAction">Call to Action Text</Label>
+        <Input
+          id="callToAction"
+          name="callToAction"
+          value={currentSlide.callToAction}
+          onChange={handleInputChange}
+          placeholder="Shop Now"
+        />
+        <p className="text-xs text-gray-500">Text for the button (e.g., 'Shop Now', 'Learn More')</p>
       </div>
       
-      {(currentSlide.showButton ?? true) && (
-        <>
-          <div className="grid gap-2">
-            <Label htmlFor="callToAction">Texte du bouton</Label>
-            <Input
-              id="callToAction"
-              name="callToAction"
-              value={currentSlide.callToAction}
-              onChange={handleInputChange}
-              placeholder="Acheter maintenant"
-            />
-            <p className="text-xs text-gray-500">Texte du bouton (ex: 'Acheter', 'En savoir plus')</p>
-          </div>
-          
-          <div className="grid gap-2">
-            <Label htmlFor="actionUrl">URL du bouton</Label>
-            <Input
-              id="actionUrl"
-              name="actionUrl"
-              value={currentSlide.actionUrl || ''}
-              onChange={handleInputChange}
-              placeholder="/fruits"
-            />
-            <p className="text-xs text-gray-500">Lien de destination du bouton (ex: /fruits, /legumes)</p>
-          </div>
-          
-          <div className="grid gap-2">
-            <Label htmlFor="color">Couleur du bouton</Label>
-            <Select
-              value={currentSlide.color}
-              onValueChange={(value) => handleSelectChange('color', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Sélectionner une couleur" />
-              </SelectTrigger>
-              <SelectContent>
-                {colorOptions.map(option => (
-                  <SelectItem key={option.value} value={option.value}>
-                    <div className="flex items-center">
-                      <div 
-                        className="w-4 h-4 rounded-full mr-2"
-                        style={{ backgroundColor: `var(--${option.value.replace('bg-', '')})` }}
-                      ></div>
-                      {option.name}
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </>
-      )}
+      <div className="grid gap-2">
+        <Label htmlFor="color">Button Color</Label>
+        <Select
+          value={currentSlide.color}
+          onValueChange={(value) => handleSelectChange('color', value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select a color" />
+          </SelectTrigger>
+          <SelectContent>
+            {colorOptions.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                <div className="flex items-center">
+                  <div 
+                    className="w-4 h-4 rounded-full mr-2"
+                    style={{ backgroundColor: `var(--${option.value.replace('bg-', '')})` }}
+                  ></div>
+                  {option.name}
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
       
       <div className="grid gap-2">
-        <Label htmlFor="position">Position du contenu</Label>
+        <Label htmlFor="position">Button Position</Label>
         <Select
           value={currentSlide.position}
           onValueChange={(value) => handleSelectChange('position', value as 'left' | 'right' | 'center')}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Sélectionner une position" />
+            <SelectValue placeholder="Select a position" />
           </SelectTrigger>
           <SelectContent>
             {positionOptions.map(option => (
@@ -159,7 +129,7 @@ const SlideForm: React.FC<SlideFormProps> = ({
       </div>
       
       <div className="mt-2">
-        <p className="text-sm font-medium mb-2">Aperçu:</p>
+        <p className="text-sm font-medium mb-2">Preview:</p>
         <div 
           className="rounded-md h-20 relative overflow-hidden"
           style={{ 
@@ -170,21 +140,19 @@ const SlideForm: React.FC<SlideFormProps> = ({
           }}
         >
           <div className="absolute inset-0 flex items-center justify-center">
-            {(currentSlide.showButton ?? true) && (
-              <span className={`${currentSlide.color} text-white font-bold px-3 py-1 rounded border border-white`}>
-                {currentSlide.callToAction || 'Acheter maintenant'}
-              </span>
-            )}
+            <span className={`${currentSlide.color} text-white font-bold px-3 py-1 rounded border border-white`}>
+              {currentSlide.callToAction || 'Shop Now'}
+            </span>
           </div>
         </div>
       </div>
       
       <div className="flex justify-end gap-2 mt-4">
         <Button variant="outline" onClick={onCancel}>
-          Annuler
+          Cancel
         </Button>
         <Button onClick={handleSubmit}>
-          {isEditing ? 'Mettre à jour' : 'Créer'} la diapositive
+          {isEditing ? 'Update' : 'Create'} Slide
         </Button>
       </div>
     </div>

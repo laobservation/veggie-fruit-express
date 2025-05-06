@@ -83,24 +83,19 @@ const PromotionSlider: React.FC<PromotionSliderProps> = ({ customSlides }) => {
                   {slide.title}
                 </div>
                 
-                {/* Call to action button - now conditional */}
-                {(slide.showButton !== false) && (
-                  <div className={`w-full flex ${
-                    slide.position === 'center' ? 'justify-center' :
-                    slide.position === 'right' ? 'justify-end' : 'justify-start'
-                  }`}>
-                    <Button 
-                      variant="default" 
-                      size="sm"
-                      asChild
-                      className={`${slide.color} backdrop-blur-sm bg-opacity-80 border border-white/50 hover:bg-opacity-100 hover:scale-105 text-white font-bold shadow-lg transition-all duration-300 rounded-lg px-4`}
-                    >
-                      <Link to={slide.actionUrl || '/fruits'}>
-                        {slide.callToAction || 'Acheter maintenant'}
-                      </Link>
-                    </Button>
-                  </div>
-                )}
+                {/* Enhanced stylish call to action button */}
+                <div className={`w-full flex ${
+                  slide.position === 'center' ? 'justify-center' :
+                  slide.position === 'right' ? 'justify-end' : 'justify-start'
+                }`}>
+                  <Button 
+                    variant="default" 
+                    size="sm"
+                    className={`${slide.color} backdrop-blur-sm bg-opacity-80 border border-white/50 hover:bg-opacity-100 hover:scale-105 text-white font-bold shadow-lg transition-all duration-300 rounded-lg px-4`}
+                  >
+                    {slide.callToAction || 'Shop Now'}
+                  </Button>
+                </div>
               </div>
             </div>
           ))}
@@ -113,14 +108,14 @@ const PromotionSlider: React.FC<PromotionSliderProps> = ({ customSlides }) => {
           <button 
             onClick={prevSlide}
             className="absolute top-1/2 left-4 -translate-y-1/2 bg-white/70 p-2 rounded-full shadow-md hover:bg-white transition-colors"
-            aria-label="Diapositive précédente"
+            aria-label="Previous slide"
           >
             <ChevronLeft className="h-5 w-5" />
           </button>
           <button 
             onClick={nextSlide}
             className="absolute top-1/2 right-4 -translate-y-1/2 bg-white/70 p-2 rounded-full shadow-md hover:bg-white transition-colors"
-            aria-label="Diapositive suivante"
+            aria-label="Next slide"
           >
             <ChevronRight className="h-5 w-5" />
           </button>
@@ -144,7 +139,7 @@ const PromotionSlider: React.FC<PromotionSliderProps> = ({ customSlides }) => {
                 boxShadow: currentSlide === index ? '0 0 5px 1px rgba(139, 195, 74, 0.6)' : 'none',
                 transform: `scale(${currentSlide === index ? 1.25 : 1})` 
               }}
-              aria-label={`Aller à la diapositive ${index + 1}`}
+              aria-label={`Go to slide ${index + 1}`}
             />
           ))}
         </div>

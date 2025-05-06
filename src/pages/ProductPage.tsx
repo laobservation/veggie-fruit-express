@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Heart, ShoppingBag } from 'lucide-react';
@@ -96,7 +95,7 @@ const ProductPage = () => {
             <button 
               onClick={handleFavoriteClick} 
               className="p-2"
-              aria-label={favoriteStatus ? "Retirer des favoris" : "Ajouter aux favoris"}
+              aria-label={favoriteStatus ? "Remove from favorites" : "Add to favorites"}
             >
               <Heart 
                 className={`h-6 w-6 transition-colors ${favoriteStatus ? 'fill-red-500 text-red-500' : ''}`}
@@ -131,7 +130,7 @@ const ProductPage = () => {
           {/* Related Products */}
           {relatedProducts.length > 0 && (
             <div className="bg-white rounded-lg p-5 mb-4 shadow-sm">
-              <h2 className="font-semibold text-lg mb-4">Plus de {categoryText}</h2>
+              <h2 className="font-semibold text-lg mb-4">More {categoryText}</h2>
               <div className="grid grid-cols-4 gap-2">
                 {relatedProducts.slice(0, 4).map((relatedProduct) => (
                   <div 
@@ -162,17 +161,17 @@ const ProductPage = () => {
           onClick={handleAddToCart}
         >
           <ShoppingBag className="h-5 w-5" />
-          Ajouter au panier
+          Add to cart
         </Button>
         
         <Button
-          className="bg-green-600 hover:bg-green-700 text-white font-semibold px-8"
+          className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8"
           onClick={() => {
             handleAddToCart();
             navigate('/checkout');
           }}
         >
-          Acheter maintenant
+          Buy now
         </Button>
       </div>
       

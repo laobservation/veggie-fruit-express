@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useSlider } from '@/hooks/use-slider';
 import { Slide, SlideFormData } from '@/types/slider';
@@ -21,9 +20,7 @@ const SliderManager: React.FC = () => {
     color: 'bg-emerald-800',
     image: '',
     position: 'left',
-    callToAction: 'Acheter maintenant',
-    actionUrl: '/fruits',
-    showButton: true
+    callToAction: 'Shop Now'
   });
   const { toast } = useToast();
   
@@ -34,24 +31,19 @@ const SliderManager: React.FC = () => {
       color: 'bg-emerald-800',
       image: '',
       position: 'left',
-      callToAction: 'Acheter maintenant',
-      actionUrl: '/fruits',
-      showButton: true
+      callToAction: 'Shop Now'
     });
     setIsDialogOpen(true);
   };
   
   const handleEditSlide = (slide: Slide) => {
     setIsEditing(true);
-    setCurrentSlide({ 
-      ...slide, 
-      showButton: slide.showButton === false ? false : true 
-    });
+    setCurrentSlide({ ...slide });
     setIsDialogOpen(true);
   };
   
   const handleDeleteSlide = async (slideId: string) => {
-    if (window.confirm('Êtes-vous sûr de vouloir supprimer cette diapositive?')) {
+    if (window.confirm('Are you sure you want to delete this slide?')) {
       await deleteSlide(slideId);
     }
   };
@@ -65,10 +57,6 @@ const SliderManager: React.FC = () => {
     setCurrentSlide({ ...currentSlide, [name]: value });
   };
   
-  const handleSwitchChange = (name: string, checked: boolean) => {
-    setCurrentSlide({ ...currentSlide, [name]: checked });
-  };
-  
   const handleSubmit = async () => {
     try {
       if (isEditing) {
@@ -78,7 +66,7 @@ const SliderManager: React.FC = () => {
       }
       setIsDialogOpen(false);
     } catch (error) {
-      console.error('Erreur lors de l\'enregistrement de la diapositive:', error);
+      console.error('Error saving slide:', error);
     }
   };
   
@@ -96,14 +84,14 @@ const SliderManager: React.FC = () => {
     try {
       await reorderSlides(newSlides);
       toast({
-        title: 'Succès',
-        description: 'Ordre des diapositives mis à jour',
+        title: 'Success',
+        description: 'Slide order updated',
       });
     } catch (error) {
-      console.error('Erreur lors de la réorganisation des diapositives:', error);
+      console.error('Error reordering slides:', error);
       toast({
-        title: 'Erreur',
-        description: 'Impossible de mettre à jour l\'ordre des diapositives',
+        title: 'Error',
+        description: 'Failed to update slide order',
         variant: 'destructive'
       });
     }
@@ -118,7 +106,7 @@ const SliderManager: React.FC = () => {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold">Gestion du Slider de la Page d'Accueil</h2>
+        <h2 className="text-2xl font-bold">Home Page Slider Management</h2>
         <div className="flex gap-2">
           <Button 
             onClick={() => setShowPreview(!showPreview)} 
@@ -126,11 +114,11 @@ const SliderManager: React.FC = () => {
             className="flex items-center gap-2"
           >
             <SlidersHorizontal className="h-4 w-4" />
-            {showPreview ? "Masquer l'aperçu" : "Afficher l'aperçu"}
+            {showPreview ? "Hide Preview" : "Show Preview"}
           </Button>
           <Button onClick={handleAddSlide} className="flex items-center gap-2">
             <Plus className="h-4 w-4" />
-            Ajouter une diapositive
+            Add New Slide
           </Button>
         </div>
       </div>
@@ -139,7 +127,7 @@ const SliderManager: React.FC = () => {
       {showPreview && (
         <div className="mb-8 border rounded-xl overflow-hidden">
           <div className="bg-gray-50 p-2 text-sm text-center text-gray-600 border-b">
-            Aperçu - Voici comment votre slider apparaîtra sur la page d'accueil
+            Preview - This is how your slider will appear on the homepage
           </div>
           <PromotionSlider customSlides={slides} />
         </div>
@@ -148,7 +136,7 @@ const SliderManager: React.FC = () => {
       {slides.length === 0 ? (
         <Card>
           <CardContent className="pt-6 text-center">
-            <p>Aucune diapositive trouvée. Ajoutez une nouvelle diapositive pour commencer.</p>
+            <p>No slides found. Add a new slide to get started.</p>
           </CardContent>
         </Card>
       ) : (
@@ -172,14 +160,13 @@ const SliderManager: React.FC = () => {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>{isEditing ? 'Modifier la diapositive' : 'Ajouter une nouvelle diapositive'}</DialogTitle>
+            <DialogTitle>{isEditing ? 'Edit Slide' : 'Add New Slide'}</DialogTitle>
           </DialogHeader>
           <SlideForm
             currentSlide={currentSlide}
             isEditing={isEditing}
             handleInputChange={handleInputChange}
             handleSelectChange={handleSelectChange}
-            handleSwitchChange={handleSwitchChange}
             handleSubmit={handleSubmit}
             onCancel={() => setIsDialogOpen(false)}
           />

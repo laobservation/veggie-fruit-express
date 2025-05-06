@@ -1,44 +1,39 @@
 
 import React from 'react';
-import { Route, Routes } from 'react-router-dom';
-import { Toaster } from '@/components/ui/toaster';
-import { Toaster as SonnerToaster } from 'sonner';
-import HomePage from './pages/HomePage';
-import ProductPage from './pages/ProductPage';
-import FruitsPage from './pages/FruitsPage';
-import VegetablesPage from './pages/VegetablesPage';
-import CategoryPage from './pages/CategoryPage';
-import FavoritesPage from './pages/FavoritesPage';
-import NotFound from './pages/NotFound';
-import AdminPage from './pages/AdminPage';
-import AdminSettingsPage from './pages/AdminSettingsPage';
-import AdminSliderPage from './pages/AdminSliderPage';
-import AdminTranslationsPage from './pages/AdminTranslationsPage';
-import ThankYouPage from './pages/ThankYouPage';
-import { TranslationsProvider } from './hooks/use-translations';
-import './App.css';
+import { Routes, Route } from 'react-router-dom';
+import Index from '@/pages/Index';
+import ProductPage from '@/pages/ProductPage';
+import CategoryPage from '@/pages/CategoryPage';
+import ThankYouPage from '@/pages/ThankYouPage';
+import NotFound from '@/pages/NotFound';
+import AdminPage from '@/pages/AdminPage';
+import AdminSliderPage from '@/pages/AdminSliderPage';
+import { CartNotificationProvider } from '@/hooks/use-cart';
+import { Toaster } from "@/components/ui/toaster";
+import FavoritesPage from '@/pages/FavoritesPage';
+import Cart from '@/components/Cart';
 
-const App: React.FC = () => {
+function App() {
   return (
-    <TranslationsProvider>
-      <Routes>
-        <Route path="/" element={<HomePage />} />
-        <Route path="/product/:productId" element={<ProductPage />} />
-        <Route path="/fruits" element={<FruitsPage />} />
-        <Route path="/vegetables" element={<VegetablesPage />} />
-        <Route path="/category/:category" element={<CategoryPage />} />
-        <Route path="/favorites" element={<FavoritesPage />} />
-        <Route path="/admin" element={<AdminPage />} />
-        <Route path="/admin/settings" element={<AdminSettingsPage />} />
-        <Route path="/admin/slider" element={<AdminSliderPage />} />
-        <Route path="/admin/translations" element={<AdminTranslationsPage />} />
-        <Route path="/thank-you" element={<ThankYouPage />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
-      <Toaster />
-      <SonnerToaster position="top-right" expand={false} />
-    </TranslationsProvider>
+    <CartNotificationProvider>
+      <div className="flex flex-col min-h-screen">
+        <Toaster />
+        <div className="flex-grow">
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/product/:productId" element={<ProductPage />} />
+            <Route path="/category/:categoryId" element={<CategoryPage />} />
+            <Route path="/favorites" element={<FavoritesPage />} />
+            <Route path="/thank-you" element={<ThankYouPage />} />
+            <Route path="/admin" element={<AdminPage />} />
+            <Route path="/admin/slider" element={<AdminSliderPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
+        <Cart />
+      </div>
+    </CartNotificationProvider>
   );
-};
+}
 
 export default App;

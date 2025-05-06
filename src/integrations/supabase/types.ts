@@ -30,42 +30,6 @@ export type Database = {
         }
         Relationships: []
       }
-      footer_settings: {
-        Row: {
-          company_name: string | null
-          contact_info: Json | null
-          copyright_text: string | null
-          created_at: string | null
-          description: string | null
-          id: number
-          quick_links: Json | null
-          social_links: Json | null
-          updated_at: string | null
-        }
-        Insert: {
-          company_name?: string | null
-          contact_info?: Json | null
-          copyright_text?: string | null
-          created_at?: string | null
-          description?: string | null
-          id?: number
-          quick_links?: Json | null
-          social_links?: Json | null
-          updated_at?: string | null
-        }
-        Update: {
-          company_name?: string | null
-          contact_info?: Json | null
-          copyright_text?: string | null
-          created_at?: string | null
-          description?: string | null
-          id?: number
-          quick_links?: Json | null
-          social_links?: Json | null
-          updated_at?: string | null
-        }
-        Relationships: []
-      }
       Orders: {
         Row: {
           Adresse: string | null
@@ -197,7 +161,6 @@ export type Database = {
       }
       slides: {
         Row: {
-          action_url: string | null
           call_to_action: string | null
           color: string
           created_at: string | null
@@ -205,12 +168,10 @@ export type Database = {
           image: string | null
           order: number | null
           position: string | null
-          show_button: boolean | null
           title: string
           updated_at: string | null
         }
         Insert: {
-          action_url?: string | null
           call_to_action?: string | null
           color?: string
           created_at?: string | null
@@ -218,12 +179,10 @@ export type Database = {
           image?: string | null
           order?: number | null
           position?: string | null
-          show_button?: boolean | null
           title: string
           updated_at?: string | null
         }
         Update: {
-          action_url?: string | null
           call_to_action?: string | null
           color?: string
           created_at?: string | null
@@ -231,30 +190,8 @@ export type Database = {
           image?: string | null
           order?: number | null
           position?: string | null
-          show_button?: boolean | null
           title?: string
           updated_at?: string | null
-        }
-        Relationships: []
-      }
-      translations: {
-        Row: {
-          created_at: string
-          id: number
-          translations: Json
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          id: number
-          translations?: Json
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          id?: number
-          translations?: Json
-          updated_at?: string
         }
         Relationships: []
       }

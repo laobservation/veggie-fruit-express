@@ -1,5 +1,5 @@
 
-import { Heart, Command } from 'lucide-react';
+import { Heart, Plus, Command } from 'lucide-react';
 import { Product } from '@/types/product';
 import { Link } from 'react-router-dom';
 import { formatPrice } from '@/lib/formatPrice';
@@ -77,7 +77,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
           <button 
             onClick={handleFavoriteClick}
             className="absolute top-2 right-2 p-1 rounded-full bg-white/80 hover:bg-white z-10"
-            aria-label={favoriteStatus ? "Retirer des favoris" : "Ajouter aux favoris"}
+            aria-label={favoriteStatus ? "Remove from favorites" : "Add to favorites"}
           >
             <Heart 
               className={`h-4 w-4 heart-animation ${favoriteStatus ? 'fill-red-500 text-red-500' : 'text-gray-400'} ${animating ? 'active' : ''}`} 
@@ -101,21 +101,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
           <button 
             onClick={handleAddToCart}
             disabled={hasStock && !isInStock}
-            className={`rounded-full p-2 mt-2 w-full ${
+            className={`rounded-full p-2 mt-2 plus-button ${
               hasStock && !isInStock 
                 ? 'bg-gray-300 cursor-not-allowed' 
                 : 'bg-yellow-400 hover:bg-yellow-500'
-            } ${isTouched ? 'touched' : ''} transition-colors text-white font-medium text-sm`}
-            aria-label="Ajouter au panier"
+            } ${isTouched ? 'touched' : ''} transition-colors`}
+            aria-label="Add to cart"
           >
-            {isAddingToCart ? (
-              <span className="flex justify-center items-center">
-                <Command className="h-4 w-4 text-white animate-spin mr-2" />
-                Ajout...
-              </span>
-            ) : (
-              <span>Ajouter</span>
-            )}
+            <Plus className={`h-4 w-4 text-white plus-icon ${isAddingToCart ? 'animate-spin' : ''}`} />
+            <Command className="h-4 w-4 text-white command-icon" />
           </button>
           
           {hasStock && !isInStock && (

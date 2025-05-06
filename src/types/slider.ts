@@ -6,8 +6,6 @@ export interface Slide {
   image: string;
   position?: 'left' | 'right' | 'center';
   callToAction?: string;
-  actionUrl?: string;
-  showButton?: boolean;
   order?: number;
 }
 
@@ -18,7 +16,5 @@ export interface SlideFormData {
   image: string;
   position?: 'left' | 'right' | 'center';
   callToAction?: string;
-  actionUrl?: string;
-  showButton?: boolean;
   order?: number;
 }

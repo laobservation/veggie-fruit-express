@@ -2,23 +2,7 @@
 import { useState, useEffect } from 'react';
 import { toast } from 'sonner'; 
 import { supabase } from '@/integrations/supabase/client';
-import { FooterSettings, defaultFooterSettings, ContactInfo, SocialLinks, QuickLink } from '@/types/footer';
-import { Json } from '@/integrations/supabase/types';
-
-// Helper function to safely cast JSON data to specific types
-function safeJsonCast<T>(json: Json | null, defaultValue: T): T {
-  if (json === null || json === undefined) {
-    return defaultValue;
-  }
-  
-  try {
-    // For arrays and objects, we need to ensure the structure matches
-    return json as unknown as T;
-  } catch (error) {
-    console.error('Error casting JSON:', error);
-    return defaultValue;
-  }
-}
+import { FooterSettings, defaultFooterSettings } from '@/types/footer';
 
 export function useFooterSettings() {
   const [footerSettings, setFooterSettings] = useState<FooterSettings>(defaultFooterSettings);
@@ -46,22 +30,7 @@ export function useFooterSettings() {
       }
       
       if (data) {
-        // Type checking to make sure the data is in the correct format using our helper
-        const contactInfo = safeJsonCast<ContactInfo>(data.contact_info, defaultFooterSettings.contactInfo || {});
-        const socialLinks = safeJsonCast<SocialLinks>(data.social_links, defaultFooterSettings.socialLinks || {});
-        const quickLinks = safeJsonCast<QuickLink[]>(data.quick_links, defaultFooterSettings.quickLinks || []);
-        
-        // Map database fields to our object structure with proper type assertions
-        const mappedSettings: FooterSettings = {
-          id: data.id,
-          companyName: data.company_name || defaultFooterSettings.companyName,
-          description: data.description || defaultFooterSettings.description,
-          copyrightText: data.copyright_text || defaultFooterSettings.copyrightText,
-          contactInfo: contactInfo,
-          socialLinks: socialLinks,
-          quickLinks: quickLinks
-        };
-        setFooterSettings(mappedSettings);
+        setFooterSettings(data as FooterSettings);
       } else {
         // No settings found, initialize
         await initializeFooterSettings();
@@ -79,20 +48,17 @@ export function useFooterSettings() {
     try {
       console.log('Initializing footer settings...');
       
-      // Convert our FooterSettings object to the DB schema format
-      const dbRecord = {
-        id: 1, // Always use ID 1 for the single settings record
-        company_name: defaultFooterSettings.companyName,
-        description: defaultFooterSettings.description,
-        copyright_text: defaultFooterSettings.copyrightText,
-        contact_info: defaultFooterSettings.contactInfo as unknown as Json,
-        social_links: defaultFooterSettings.socialLinks as unknown as Json,
-        quick_links: defaultFooterSettings.quickLinks as unknown as Json,
-      };
-      
       const { error } = await supabase
         .from('footer_settings')
-        .insert(dbRecord);
+        .insert({
+          id: 1, // Always use ID 1 for the single settings record
+          companyName: defaultFooterSettings.companyName,
+          description: defaultFooterSettings.description,
+          copyrightText: defaultFooterSettings.copyrightText,
+          contactInfo: defaultFooterSettings.contactInfo,
+          socialLinks: defaultFooterSettings.socialLinks,
+          quickLinks: defaultFooterSettings.quickLinks,
+        });
       
       if (error) {
         console.error('Error creating footer settings:', error);
@@ -116,21 +82,13 @@ export function useFooterSettings() {
   const saveFooterSettings = async () => {
     setSaveLoading(true);
     try {
-      // Convert our FooterSettings object to the DB schema format
-      const dbRecord = {
-        id: 1, // Always use ID 1 for the single settings record
-        company_name: footerSettings.companyName,
-        description: footerSettings.description,
-        copyright_text: footerSettings.copyrightText,
-        contact_info: footerSettings.contactInfo as unknown as Json,
-        social_links: footerSettings.socialLinks as unknown as Json,
-        quick_links: footerSettings.quickLinks as unknown as Json,
-        updated_at: new Date().toISOString(),
-      };
-      
       const { error } = await supabase
         .from('footer_settings')
-        .upsert(dbRecord);
+        .upsert({
+          id: 1, // Always use ID 1 for the single settings record
+          ...footerSettings,
+          updated_at: new Date().toISOString(),
+        });
       
       if (error) {
         console.error('Error saving footer settings:', error);
