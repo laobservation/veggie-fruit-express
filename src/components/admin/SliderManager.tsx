@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useSlider } from '@/hooks/use-slider';
 import { Slide, SlideFormData } from '@/types/slider';
@@ -59,15 +58,6 @@ const SliderManager: React.FC = () => {
   };
   
   const handleSubmit = async () => {
-    if (!currentSlide.title || !currentSlide.color) {
-      toast({
-        title: 'Error',
-        description: 'Title and color are required',
-        variant: 'destructive'
-      });
-      return;
-    }
-    
     try {
       if (isEditing) {
         await updateSlide(currentSlide as Slide);
