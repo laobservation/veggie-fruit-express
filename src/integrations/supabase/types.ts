@@ -159,6 +159,36 @@ export type Database = {
         }
         Relationships: []
       }
+      slides: {
+        Row: {
+          color: string
+          created_at: string | null
+          id: string
+          image: string | null
+          position: string | null
+          title: string
+          updated_at: string | null
+        }
+        Insert: {
+          color?: string
+          created_at?: string | null
+          id?: string
+          image?: string | null
+          position?: string | null
+          title: string
+          updated_at?: string | null
+        }
+        Update: {
+          color?: string
+          created_at?: string | null
+          id?: string
+          image?: string | null
+          position?: string | null
+          title?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
