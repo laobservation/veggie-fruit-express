@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
 import { Json } from "@/integrations/supabase/types";
@@ -47,10 +46,23 @@ export const transformProductFromSupabase = (product: SupabaseProduct): Extended
     throw new Error('Invalid product data from database');
   }
   
+  // Map category from database to local format with broader type support
+  let category: 'fruit' | 'vegetable' | 'pack' | 'drink' = 'vegetable';
+  
+  if (product.category === 'fruit') {
+    category = 'fruit';
+  } else if (product.category === 'vegetable') {
+    category = 'vegetable';
+  } else if (product.category === 'pack') {
+    category = 'pack';
+  } else if (product.category === 'drink') {
+    category = 'drink';
+  }
+  
   return {
     id: String(product.id), // Convert number to string for compatibility
     name: product.name || '',
-    category: (product.category || 'vegetable') as 'fruit' | 'vegetable', // Force to correct type
+    category: category, // Force to correct type with expanded options
     price: product.price || 0,
     image: product.image_url || '',
     description: product.description || '',

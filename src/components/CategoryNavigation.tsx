@@ -4,16 +4,16 @@ import { Link } from 'react-router-dom';
 
 export const CategoryNavigation: React.FC = () => {
   const categories = [
-    { id: 'fruits', name: 'Fruits', icon: '🍎', bg: 'bg-red-100', path: '/fruits' },
-    { id: 'vegetables', name: 'Vegetables', icon: '🥦', bg: 'bg-green-100', path: '/vegetables' },
+    { id: 'fruits', name: 'Fruits', icon: '🍎', bg: 'bg-red-100', path: '/category/fruits' },
+    { id: 'vegetables', name: 'Vegetables', icon: '🥦', bg: 'bg-green-100', path: '/category/vegetables' },
     { 
       id: 'packs', 
       name: 'Packs', 
       imageIcon: '/lovable-uploads/3e6664d5-ad8b-4a42-8cd9-a740bb96dcd4.png', 
       bg: 'bg-amber-100', 
-      path: '/' 
+      path: '/category/packs' 
     },
-    { id: 'drinks', name: 'Drinks', icon: '🥤', bg: 'bg-blue-100', path: '/' },
+    { id: 'drinks', name: 'Drinks', icon: '🥤', bg: 'bg-blue-100', path: '/category/drinks' },
   ];
   
   return (

@@ -95,6 +95,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
             <SelectContent>
               <SelectItem value="fruit">Fruit</SelectItem>
               <SelectItem value="vegetable">Légume</SelectItem>
+              <SelectItem value="pack">Pack</SelectItem>
+              <SelectItem value="drink">Boisson</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -138,6 +140,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
               <SelectItem value="bunch">Botte</SelectItem>
               <SelectItem value="basket">Panier</SelectItem>
               <SelectItem value="head">Pièce</SelectItem>
+              <SelectItem value="bottle">Bouteille</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -241,7 +244,10 @@ const ProductForm: React.FC<ProductFormProps> = ({
               handleCheckboxChange(Boolean(checked), 'categoryLink')
             } 
           />
-          <Label htmlFor="categoryLink">Lier à la Page de Catégorie</Label>
+          <Label htmlFor="categoryLink">Afficher dans la page de Catégorie</Label>
+          <p className="text-xs text-gray-500 ml-2">
+            (Les produits sélectionnés apparaîtront sur leur page de catégorie respective)
+          </p>
         </div>
       </div>
       
