@@ -1,13 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { 
-  Table, TableHeader, TableBody, TableHead, 
-  TableRow, TableCell 
-} from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
 import { supabase, getCategoriesTable } from '@/integrations/supabase/client';
-import { Edit, Trash2, Save, X, Loader2 } from 'lucide-react';
+import NewCategoryForm from './categories/NewCategoryForm';
+import CategoryList from './categories/CategoryList';
 
 // Define the Category interface
 export interface Category {
@@ -256,168 +252,25 @@ const CategoryManager: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-4">
-        <h2 className="text-xl font-medium">Add New Category</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div>
-            <Input
-              name="name"
-              value={newCategory.name}
-              onChange={handleNewCategoryChange}
-              placeholder="Category Name"
-            />
-          </div>
-          <div>
-            <Input
-              name="icon"
-              value={newCategory.icon}
-              onChange={handleNewCategoryChange}
-              placeholder="Emoji Icon (e.g. 🍎)"
-            />
-          </div>
-          <div>
-            <Input
-              name="bg"
-              value={newCategory.bg}
-              onChange={handleNewCategoryChange}
-              placeholder="Background Class (e.g. bg-red-100)"
-            />
-          </div>
-          <div>
-            <Button 
-              onClick={handleAddCategory}
-              className="w-full"
-            >
-              Add Category
-            </Button>
-          </div>
-        </div>
-        <div>
-          <Input
-            name="imageIcon"
-            value={newCategory.imageIcon || ''}
-            onChange={handleNewCategoryChange}
-            placeholder="Image URL (optional, overrides emoji)"
-          />
-        </div>
-      </div>
+      <NewCategoryForm 
+        newCategory={newCategory} 
+        onNewCategoryChange={handleNewCategoryChange} 
+        onAddCategory={handleAddCategory} 
+      />
 
       <div className="space-y-4">
         <h2 className="text-xl font-medium">Categories</h2>
-        {loading ? (
-          <div className="flex justify-center py-8">
-            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
-          </div>
-        ) : (
-          <div className="border rounded-md overflow-hidden">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Icon</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Background</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {categories.length > 0 ? (
-                  categories.map((category) => (
-                    <TableRow key={category.id}>
-                      {editingId === category.id ? (
-                        // Edit mode row
-                        <>
-                          <TableCell>
-                            <Input
-                              name="icon"
-                              value={editForm?.icon || ''}
-                              onChange={handleEditChange}
-                              className="w-24"
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Input
-                              name="name"
-                              value={editForm?.name || ''}
-                              onChange={handleEditChange}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <Input
-                              name="bg"
-                              value={editForm?.bg || ''}
-                              onChange={handleEditChange}
-                            />
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center space-x-2">
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={handleSaveEdit}
-                              >
-                                <Save className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={handleCancelEdit}
-                              >
-                                <X className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </>
-                      ) : (
-                        // View mode row
-                        <>
-                          <TableCell>
-                            {category.imageIcon ? (
-                              <img 
-                                src={category.imageIcon} 
-                                alt={category.name} 
-                                className="w-8 h-8 object-contain"
-                              />
-                            ) : (
-                              <span className="text-2xl">{category.icon}</span>
-                            )}
-                          </TableCell>
-                          <TableCell>{category.name}</TableCell>
-                          <TableCell>
-                            <div className={`w-6 h-6 rounded ${category.bg}`}></div>
-                          </TableCell>
-                          <TableCell>
-                            <div className="flex items-center space-x-2">
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => handleEdit(category)}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                size="sm" 
-                                variant="outline"
-                                onClick={() => handleDelete(category.id)}
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </>
-                      )}
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={4} className="text-center py-4">
-                      No categories found. Add your first category above.
-                    </TableCell>
-                  </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </div>
-        )}
+        <CategoryList 
+          categories={categories}
+          loading={loading}
+          editingId={editingId}
+          editForm={editForm}
+          onEdit={handleEdit}
+          onCancelEdit={handleCancelEdit}
+          onEditChange={handleEditChange}
+          onSaveEdit={handleSaveEdit}
+          onDelete={handleDelete}
+        />
       </div>
     </div>
   );
