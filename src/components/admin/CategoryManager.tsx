@@ -121,16 +121,20 @@ const CategoryManager: React.FC = () => {
     try {
       console.log('Updating category:', editForm);
       
+      // Map the form fields to database column names
+      const updateData = {
+        name: editForm.name,
+        icon: editForm.icon,
+        image_icon: editForm.imageIcon,
+        background_color: editForm.bg,
+        updated_at: new Date().toISOString()
+      };
+      
+      console.log('Update data being sent to Supabase:', updateData);
+      
       // Update the category in the database
-      // Ensure field names match the database columns
       const { error } = await getCategoriesTable()
-        .update({
-          name: editForm.name,
-          icon: editForm.icon,
-          image_icon: editForm.imageIcon,
-          background_color: editForm.bg,
-          updated_at: new Date().toISOString()
-        })
+        .update(updateData)
         .eq('id', editForm.id);
       
       if (error) {
