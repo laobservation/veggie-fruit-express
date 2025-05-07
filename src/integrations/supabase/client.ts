@@ -25,3 +25,8 @@ export const getOrdersTable = () => {
 export const getSettingsTable = () => {
   return supabase.from('settings');
 };
+
+// Function to fix type issues with Supabase Categories table
+export const getCategoriesTable = () => {
+  return supabase.from('categories');
+};

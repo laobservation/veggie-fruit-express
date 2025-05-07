@@ -1,12 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, getCategoriesTable } from '@/integrations/supabase/client';
 
 interface Category {
   id: string;
   name: string;
-  icon: string;
+  icon?: string;
   imageIcon?: string;
   bg: string;
   path: string;
@@ -57,8 +57,7 @@ export const CategoryNavigation: React.FC = () => {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('categories')
+      const { data, error } = await getCategoriesTable()
         .select('*')
         .order('name', { ascending: true });
       

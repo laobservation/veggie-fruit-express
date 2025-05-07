@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,17 +6,17 @@ import {
   TableRow, TableCell 
 } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, getCategoriesTable } from '@/integrations/supabase/client';
 import { Edit, Trash2, Save, X, Loader2 } from 'lucide-react';
 
 // Define the Category interface
 export interface Category {
   id: string;
   name: string;
-  icon: string;
+  icon?: string;
   imageIcon?: string;
   bg: string;
-  path: string;
+  path?: string;
 }
 
 const CategoryManager: React.FC = () => {
@@ -28,8 +27,7 @@ const CategoryManager: React.FC = () => {
   const [newCategory, setNewCategory] = useState<Omit<Category, 'id'>>({
     name: '',
     icon: '🍎',
-    bg: 'bg-red-100',
-    path: ''
+    bg: 'bg-red-100'
   });
   const { toast } = useToast();
 
@@ -62,24 +60,25 @@ const CategoryManager: React.FC = () => {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('categories')
+      const { data, error } = await getCategoriesTable()
         .select('*')
         .order('name', { ascending: true });
       
       if (error) throw error;
       
       // Transform data to match our Category interface
-      const formattedCategories: Category[] = data.map(cat => ({
-        id: cat.id,
-        name: cat.name,
-        icon: cat.icon,
-        imageIcon: cat.image_icon,
-        bg: cat.background_color || 'bg-gray-100',
-        path: `/category/${cat.name.toLowerCase()}`
-      }));
-      
-      setCategories(formattedCategories);
+      if (data && data.length > 0) {
+        const formattedCategories: Category[] = data.map(cat => ({
+          id: cat.id,
+          name: cat.name,
+          icon: cat.icon || undefined,
+          imageIcon: cat.image_icon,
+          bg: cat.background_color || 'bg-gray-100',
+          path: `/category/${cat.name.toLowerCase()}`
+        }));
+        
+        setCategories(formattedCategories);
+      }
     } catch (error) {
       console.error('Error fetching categories:', error);
       toast({
@@ -121,8 +120,7 @@ const CategoryManager: React.FC = () => {
     
     try {
       // Update the category in the database
-      const { error } = await supabase
-        .from('categories')
+      const { error } = await getCategoriesTable()
         .update({
           name: editForm.name,
           icon: editForm.icon,
@@ -180,8 +178,7 @@ const CategoryManager: React.FC = () => {
     
     try {
       // Add the category to the database
-      const { data, error } = await supabase
-        .from('categories')
+      const { data, error } = await getCategoriesTable()
         .insert({
           name: newCategory.name,
           icon: newCategory.icon,
@@ -197,7 +194,7 @@ const CategoryManager: React.FC = () => {
       const newCat: Category = {
         id: data.id,
         name: data.name,
-        icon: data.icon,
+        icon: data.icon || undefined,
         imageIcon: data.image_icon,
         bg: data.background_color || 'bg-gray-100',
         path: `/category/${data.name.toLowerCase()}`
@@ -209,8 +206,7 @@ const CategoryManager: React.FC = () => {
       setNewCategory({
         name: '',
         icon: '🍎',
-        bg: 'bg-red-100',
-        path: ''
+        bg: 'bg-red-100'
       });
       
       toast({
@@ -235,8 +231,7 @@ const CategoryManager: React.FC = () => {
     
     try {
       // Delete the category from the database
-      const { error } = await supabase
-        .from('categories')
+      const { error } = await getCategoriesTable()
         .delete()
         .eq('id', id);
       
