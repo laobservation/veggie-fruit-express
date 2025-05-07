@@ -3,10 +3,12 @@
   transform-origin: center;
 }
 
+/* Removing animation */
 .heart-animation.active {
-  animation: heart-beat 0.3s ease-in-out;
+  animation: none;
 }
 
+/* Keep the keyframes definition but we won't use it */
 @keyframes heart-beat {
   0% {
     transform: scale(1);

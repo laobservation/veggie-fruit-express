@@ -16,37 +16,19 @@ interface NewArrivalSectionProps {
 const NewArrivalSection: React.FC<NewArrivalSectionProps> = ({ products, isLoading }) => {
   const { addItem } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
-  const [touchedProductId, setTouchedProductId] = useState<string | null>(null);
 
   const handleAddToCart = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // Get the button element
-    const button = e.currentTarget as HTMLButtonElement;
-    const icon = button.querySelector('.plus-icon');
-    
-    if (icon) {
-      icon.classList.add('animate-spin');
-      
-      // Add item after a slight delay to let the animation play
-      setTimeout(() => {
-        addItem(product);
-        icon.classList.remove('animate-spin');
-      }, 300);
-    } else {
-      addItem(product);
-    }
+    // Add item immediately without animation
+    addItem(product);
   };
 
   const handleFavoriteClick = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
     toggleFavorite(product);
-  };
-
-  const handleProductTouch = (productId: string) => {
-    setTouchedProductId(productId);
   };
 
   return (
@@ -70,11 +52,10 @@ const NewArrivalSection: React.FC<NewArrivalSectionProps> = ({ products, isLoadi
               key={product.id} 
               to={`/product/${product.id}`}
               className="bg-white p-4 rounded-lg shadow-sm relative"
-              onTouchStart={() => handleProductTouch(product.id)}
             >
               <button 
                 onClick={(e) => handleFavoriteClick(e, product)}
-                className="absolute top-2 right-2 p-1 rounded-full bg-white/80 hover:bg-white z-10"
+                className="absolute top-2 right-2 p-1 rounded-full bg-white/80 z-10"
               >
                 <Heart 
                   className={`h-4 w-4 ${isFavorite(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 
@@ -90,12 +71,12 @@ const NewArrivalSection: React.FC<NewArrivalSectionProps> = ({ products, isLoadi
                 <span className="text-lg font-bold">{formatPrice(product.price)}</span>
               </div>
               <button 
-                className={`absolute bottom-3 right-3 bg-green-500 hover:bg-green-600 rounded-full py-1 px-3 transition-colors plus-button flex items-center ${touchedProductId === product.id ? 'touched' : ''}`}
+                className="absolute bottom-3 right-3 bg-green-500 rounded-full py-1 px-3 flex items-center"
                 onClick={(e) => handleAddToCart(e, product)}
                 aria-label="Ajouter au panier"
               >
-                <span className="text-white text-sm plus-icon">Ajouter</span>
-                <Command className="h-4 w-4 ml-1 text-white command-icon" />
+                <span className="text-white text-sm">Ajouter</span>
+                <Command className="h-4 w-4 ml-1 text-white" />
               </button>
             </Link>
           ))

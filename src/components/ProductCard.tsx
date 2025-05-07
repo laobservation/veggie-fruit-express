@@ -7,7 +7,6 @@ import { useCart } from '@/hooks/use-cart';
 import { useState, useEffect } from 'react';
 import { useFavorites } from '@/hooks/use-favorites';
 import '@/components/ui/heart-animation.css';
-import '@/components/ui/plus-animation.css';
 
 interface ProductCardProps {
   product: Product;
@@ -19,8 +18,6 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
   const { isFavorite, toggleFavorite, favorites } = useFavorites();
   const [animating, setAnimating] = useState(false);
   const [favoriteStatus, setFavoriteStatus] = useState(false);
-  const [isAddingToCart, setIsAddingToCart] = useState(false);
-  const [isTouched, setIsTouched] = useState(false);
   
   // Check if product has stock information
   const hasStock = typeof product.stock !== 'undefined';
@@ -34,13 +31,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    setIsAddingToCart(true);
     
-    // Add item after a slight delay to let the animation play
-    setTimeout(() => {
-      addItem(product);
-      setIsAddingToCart(false);
-    }, 300);
+    // Add item immediately without animation
+    addItem(product);
   };
 
   const handleFavoriteClick = async (e: React.MouseEvent) => {
@@ -49,22 +42,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
     
     // Update UI immediately for faster feedback
     setFavoriteStatus(!favoriteStatus);
-    setAnimating(true);
     
     // Process in background
     await toggleFavorite(product);
-    setTimeout(() => setAnimating(false), 300);
-  };
-
-  const handleTouch = () => {
-    setIsTouched(true);
   };
 
   return (
     <Link 
       to={`/product/${product.id}`} 
       className="block"
-      onTouchStart={handleTouch}
     >
       <div className="bg-white rounded-xl overflow-hidden shadow-sm relative">
         <div className="relative">
@@ -80,7 +66,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
             aria-label={favoriteStatus ? "Retirer des favoris" : "Ajouter aux favoris"}
           >
             <Heart 
-              className={`h-4 w-4 heart-animation ${favoriteStatus ? 'fill-red-500 text-red-500' : 'text-gray-400'} ${animating ? 'active' : ''}`} 
+              className={`h-4 w-4 ${favoriteStatus ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} 
             />
           </button>
           
@@ -101,15 +87,15 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
           <button 
             onClick={handleAddToCart}
             disabled={hasStock && !isInStock}
-            className={`rounded-full mt-2 plus-button ${
+            className={`rounded-full mt-2 ${
               hasStock && !isInStock 
                 ? 'bg-gray-300 cursor-not-allowed' 
-                : 'bg-green-500 hover:bg-green-600'
-            } ${isTouched ? 'touched' : ''} transition-colors flex items-center px-3 py-1`}
+                : 'bg-green-500'
+            } transition-colors flex items-center px-3 py-1`}
             aria-label="Ajouter au panier"
           >
-            <span className="text-white text-sm mr-1 plus-icon">Ajouter</span>
-            <Command className="h-4 w-4 text-white command-icon" />
+            <span className="text-white text-sm mr-1">Ajouter</span>
+            <Command className="h-4 w-4 text-white" />
           </button>
           
           {hasStock && !isInStock && (

@@ -1,24 +1,12 @@
 
 .plus-button {
-  transition: all 0.2s ease;
   position: relative;
   overflow: hidden;
 }
 
-.plus-button:hover {
-  transform: scale(1.1);
-  background-color: #22c55e; /* Green-500 */
-}
-
-.plus-button:active {
-  transform: scale(0.95);
-}
-
 .plus-button .plus-icon {
-  transition: all 0.3s ease;
+  transition: none;
 }
-
-/* Removed animation keyframes and animation properties */
 
 .plus-button.touched .plus-icon {
   display: none;
