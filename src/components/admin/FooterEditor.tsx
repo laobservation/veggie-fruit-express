@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -89,9 +90,13 @@ const FooterEditor: React.FC = () => {
       
       if (data) {
         // Type assertion to ensure the correct shape
-        const contactInfo = typeof data.contact_info === 'object' && data.contact_info !== null 
-          ? data.contact_info 
-          : { email: '', phone: '', address: '' };
+        const contactInfoObj = data.contact_info as unknown as Record<string, string> || {};
+        
+        const contactInfo = {
+          email: contactInfoObj.email || '',
+          phone: contactInfoObj.phone || '',
+          address: contactInfoObj.address || ''
+        };
           
         const parsedSettings: FooterSettings = {
           id: data.id,
@@ -110,11 +115,7 @@ const FooterEditor: React.FC = () => {
                 return acc;
               }, {} as { [key: string]: string })
             : { facebook: '#', twitter: '#', instagram: '#' },
-          contact_info: {
-            email: contactInfo?.email || '',
-            phone: contactInfo?.phone || '',
-            address: contactInfo?.address || ''
-          }
+          contact_info: contactInfo
         };
         
         setSettings(parsedSettings);

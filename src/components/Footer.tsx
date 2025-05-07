@@ -30,7 +30,6 @@ const Footer = () => {
             copyrightText: data.copyright_text || defaultFooterSettings.copyrightText,
             contactInfo: data.contact_info as unknown as ContactInfo || defaultFooterSettings.contactInfo,
             socialLinks: data.social_links as unknown as SocialLinks || defaultFooterSettings.socialLinks,
-            quickLinks: data.quick_links as unknown as QuickLink[] || defaultFooterSettings.quickLinks,
           };
           
           setFooterData(mappedData);
@@ -54,7 +53,7 @@ const Footer = () => {
           schema: 'public',
           table: 'footer_settings'
         },
-        (payload) => {
+        () => {
           loadFooterSettings();
         }
       )
@@ -68,7 +67,7 @@ const Footer = () => {
   return (
     <footer className="bg-veggie-light mt-12 pt-8 pb-4">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
             <h3 className="text-lg font-semibold text-veggie-dark mb-4">{footerData.companyName}</h3>
             <p className="text-gray-600 mb-4">
@@ -94,19 +93,6 @@ const Footer = () => {
                 </a>
               )}
             </div>
-          </div>
-          
-          <div>
-            <h3 className="text-lg font-semibold text-veggie-dark mb-4">Quick Links</h3>
-            <ul className="space-y-2">
-              {footerData.quickLinks?.map((link, index) => (
-                <li key={index}>
-                  <Link to={link.url} className="text-gray-600 hover:text-veggie-primary">
-                    {link.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
           </div>
           
           <div>
