@@ -1,9 +1,7 @@
 
 import React from 'react';
 import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import HomePage from './HomePage';
-import { useCart } from '@/hooks/use-cart';
 import MobileBottomNav from '@/components/MobileBottomNav';
 
 const Index = () => {
@@ -15,11 +13,6 @@ const Index = () => {
           <HomePage />
         </div>
       </main>
-      
-      {/* Desktop Footer - Only shown on desktop */}
-      <div className="hidden md:block">
-        <Footer />
-      </div>
       
       {/* Mobile Bottom Navigation */}
       <MobileBottomNav />

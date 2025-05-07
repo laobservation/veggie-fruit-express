@@ -75,6 +75,7 @@ const CategoryManager: React.FC = () => {
         }));
         
         setCategories(formattedCategories);
+        console.log('Categories fetched:', formattedCategories);
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -90,6 +91,7 @@ const CategoryManager: React.FC = () => {
 
   // Start editing a category
   const handleEdit = (category: Category) => {
+    console.log('Starting edit for category:', category);
     setEditingId(category.id);
     setEditForm({...category});
   };
@@ -104,6 +106,7 @@ const CategoryManager: React.FC = () => {
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     if (editForm) {
+      console.log(`Changing ${name} to ${value}`);
       setEditForm({
         ...editForm,
         [name]: value
@@ -125,7 +128,8 @@ const CategoryManager: React.FC = () => {
           name: editForm.name,
           icon: editForm.icon,
           image_icon: editForm.imageIcon,
-          background_color: editForm.bg
+          background_color: editForm.bg,
+          updated_at: new Date().toISOString()
         })
         .eq('id', editForm.id);
       
@@ -145,11 +149,11 @@ const CategoryManager: React.FC = () => {
       // Fetch updated categories to ensure UI is in sync
       fetchCategories();
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating category:', error);
       toast({
         title: 'Error',
-        description: 'Failed to update category',
+        description: `Failed to update category: ${error.message || 'Unknown error'}`,
         variant: 'destructive'
       });
     }
@@ -180,18 +184,21 @@ const CategoryManager: React.FC = () => {
       
       // Add the category to the database
       // Ensure field names match the database columns
-      const { error } = await getCategoriesTable()
+      const { data, error } = await getCategoriesTable()
         .insert({
           name: newCategory.name,
           icon: newCategory.icon || null,
           image_icon: newCategory.imageIcon || null,
           background_color: newCategory.bg || 'bg-gray-100'
-        });
+        })
+        .select();
       
       if (error) {
         console.error('Database error when adding category:', error);
         throw error;
       }
+      
+      console.log('New category added:', data);
       
       // Reset the form
       setNewCategory({
@@ -208,11 +215,11 @@ const CategoryManager: React.FC = () => {
       // Fetch updated categories to ensure UI is in sync
       fetchCategories();
       
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding category:', error);
       toast({
         title: 'Error',
-        description: 'Failed to add category',
+        description: `Failed to add category: ${error.message || 'Unknown error'}`,
         variant: 'destructive'
       });
     }

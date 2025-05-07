@@ -2,7 +2,6 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import ProductGrid from '@/components/ProductGrid';
 import { supabase, getCategoriesTable } from '@/integrations/supabase/client';
 import { transformProductFromSupabase } from '@/services/productService';
@@ -164,7 +163,6 @@ const CategoryPage = () => {
           <ProductGrid products={products} isLoading={isLoading} />
         </div>
       </main>
-      <Footer />
     </div>
   );
 };

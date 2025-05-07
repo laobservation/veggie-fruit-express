@@ -1,5 +1,4 @@
 
-import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { FooterSettings, defaultFooterSettings, ContactInfo, SocialLinks } from '@/types/footer';
@@ -65,7 +64,7 @@ const Footer = () => {
   }, []);
 
   return (
-    <footer className="bg-veggie-light mt-12 pt-8 pb-4">
+    <footer className="bg-veggie-light pt-8 pb-4">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>

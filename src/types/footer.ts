@@ -42,10 +42,5 @@ export const defaultFooterSettings: FooterSettings = {
     facebook: '#',
     instagram: '#',
     twitter: '#'
-  },
-  quickLinks: [
-    { title: 'Home', url: '/' },
-    { title: 'Fruits', url: '/fruits' },
-    { title: 'Vegetables', url: '/vegetables' }
-  ]
+  }
 };
