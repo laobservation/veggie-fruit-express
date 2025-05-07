@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Product } from '@/types/product';
@@ -7,10 +8,12 @@ import { useCart } from '@/hooks/use-cart';
 import { useFavorites } from '@/hooks/use-favorites';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import '@/components/ui/plus-animation.css';
+
 interface PopularItemsSectionProps {
   products: Product[];
   isLoading: boolean;
 }
+
 const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
   products,
   isLoading
@@ -23,6 +26,7 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
     toggleFavorite
   } = useFavorites();
   const [touchedProductId, setTouchedProductId] = useState<string | null>(null);
+  
   const handleAddToCart = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
@@ -42,14 +46,17 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
       addItem(product);
     }
   };
+  
   const handleFavoriteClick = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
     toggleFavorite(product);
   };
+  
   const handleProductTouch = (productId: string) => {
     setTouchedProductId(productId);
   };
+  
   return <div className="mb-8 px-4 md:px-0">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-800">Packs Populaires</h2>
@@ -77,12 +84,12 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
               </div>
               <div className="flex flex-col items-center">
                 <h3 className="text-sm font-medium mb-1 text-center">{product.name}</h3>
-                <div className="flex items-baseline justify-center">
+                <div className="flex items-baseline justify-center mb-2">
                   <span className="text-sm text-gray-500 mr-1">{product.unit}</span>
                   <span className="text-sm text-gray-500 mr-1">•</span>
-                  <span className="text-lg font-bold">{formatPrice(product.price)}</span>
+                  <span className="text-lg font-bold text-green-600">{formatPrice(product.price)}</span>
                 </div>
-                <button className={`mt-2 bg-green-500 hover:bg-green-600 rounded-full py-1 px-3 transition-colors plus-button flex items-center ${touchedProductId === product.id ? 'touched' : ''}`} onClick={e => handleAddToCart(e, product)} aria-label="Ajouter au panier">
+                <button className={`bg-green-500 hover:bg-green-600 rounded-full py-1 px-3 transition-colors plus-button flex items-center ${touchedProductId === product.id ? 'touched' : ''}`} onClick={e => handleAddToCart(e, product)} aria-label="Ajouter au panier">
                   <span className="text-white text-sm plus-icon">Ajouter</span>
                   <Command className="h-4 w-4 ml-1 text-white command-icon" />
                 </button>
@@ -91,4 +98,5 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
       </div>
     </div>;
 };
+
 export default PopularItemsSection;

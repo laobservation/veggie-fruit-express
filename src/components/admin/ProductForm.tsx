@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
@@ -19,6 +19,7 @@ import { Image, Youtube, Loader2 } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MediaPreview from './MediaPreview';
 import { Product } from '@/types/product';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ProductFormProps {
   product: Product;
@@ -26,6 +27,12 @@ interface ProductFormProps {
   isSaving?: boolean;
   onSave: (product: Product, mediaType: 'image' | 'video') => void;
   onCancel: () => void;
+}
+
+interface Category {
+  id: string;
+  name: string;
+  value: string;
 }
 
 const ProductForm: React.FC<ProductFormProps> = ({ 
@@ -37,6 +44,57 @@ const ProductForm: React.FC<ProductFormProps> = ({
 }) => {
   const [formData, setFormData] = useState<Product>(product);
   const [mediaType, setMediaType] = useState<'image' | 'video'>(product.videoUrl ? 'video' : 'image');
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loadingCategories, setLoadingCategories] = useState(true);
+
+  // Fetch categories on component mount
+  useEffect(() => {
+    fetchCategories();
+
+    // Subscribe to category changes
+    const channel = supabase
+      .channel('dynamic-categories')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'categories'
+        },
+        () => {
+          fetchCategories();
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, []);
+
+  const fetchCategories = async () => {
+    setLoadingCategories(true);
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('id, name')
+        .order('name', { ascending: true });
+      
+      if (error) throw error;
+      
+      const formattedCategories = data.map(cat => ({
+        id: cat.id,
+        name: cat.name,
+        value: cat.name.toLowerCase()
+      }));
+      
+      setCategories(formattedCategories);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -85,20 +143,31 @@ const ProductForm: React.FC<ProductFormProps> = ({
         
         <div className="grid gap-2">
           <Label htmlFor="category">Catégorie</Label>
-          <Select 
-            value={formData.category} 
-            onValueChange={(value) => handleSelectChange(value, 'category')}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="fruit">Fruit</SelectItem>
-              <SelectItem value="vegetable">Légume</SelectItem>
-              <SelectItem value="pack">Pack</SelectItem>
-              <SelectItem value="drink">Boisson</SelectItem>
-            </SelectContent>
-          </Select>
+          {loadingCategories ? (
+            <div className="flex items-center space-x-2">
+              <Loader2 className="h-4 w-4 animate-spin" />
+              <span>Chargement des catégories...</span>
+            </div>
+          ) : (
+            <Select 
+              value={formData.category} 
+              onValueChange={(value) => handleSelectChange(value, 'category')}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {categories.map(category => (
+                  <SelectItem 
+                    key={category.id} 
+                    value={category.value}
+                  >
+                    {category.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
         </div>
         
         <div className="grid grid-cols-2 gap-4">

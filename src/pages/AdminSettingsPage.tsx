@@ -12,6 +12,7 @@ import ContentEditor from '@/components/admin/ContentEditor';
 import SliderEditor from '@/components/admin/SliderEditor';
 import CustomersList from '@/components/admin/CustomersList';
 import FooterEditor from '@/components/admin/FooterEditor';
+import CategoryManager from '@/components/admin/CategoryManager';
 
 const AdminSettingsPage = () => {
   const [activeTab, setActiveTab] = useState("general");
@@ -29,10 +30,11 @@ const AdminSettingsPage = () => {
       </div>
       
       <Tabs defaultValue="general" className="w-full" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-5 mb-8">
+        <TabsList className="grid grid-cols-6 mb-8">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
           <TabsTrigger value="content">Content</TabsTrigger>
+          <TabsTrigger value="categories">Categories</TabsTrigger>
           <TabsTrigger value="footer">Footer</TabsTrigger>
           <TabsTrigger value="customers">Customers</TabsTrigger>
         </TabsList>
@@ -84,6 +86,18 @@ const AdminSettingsPage = () => {
                   <SliderEditor />
                 </TabsContent>
               </Tabs>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="categories">
+          <Card>
+            <CardHeader>
+              <CardTitle>Category Management</CardTitle>
+              <CardDescription>Manage product categories and their display options</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <CategoryManager />
             </CardContent>
           </Card>
         </TabsContent>
