@@ -44,6 +44,7 @@ export const CategoryNavigation: React.FC = () => {
           table: 'categories'
         },
         () => {
+          console.log('CategoryNavigation: Detected category change, refreshing...');
           fetchCategories();
         }
       )

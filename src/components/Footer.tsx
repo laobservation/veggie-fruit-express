@@ -2,7 +2,7 @@
 import { Link } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { FooterSettings, defaultFooterSettings, ContactInfo, SocialLinks, QuickLink } from '@/types/footer';
+import { FooterSettings, defaultFooterSettings, ContactInfo, SocialLinks } from '@/types/footer';
 
 const Footer = () => {
   const [footerData, setFooterData] = useState<FooterSettings>(defaultFooterSettings);

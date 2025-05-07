@@ -42,6 +42,7 @@ const CategoryManager: React.FC = () => {
           table: 'categories'
         },
         () => {
+          console.log('CategoryManager: Detected category change, refreshing...');
           fetchCategories();
         }
       )
@@ -115,6 +116,8 @@ const CategoryManager: React.FC = () => {
     if (!editForm) return;
     
     try {
+      console.log('Updating category:', editForm);
+      
       // Update the category in the database
       const { error } = await getCategoriesTable()
         .update({
@@ -173,6 +176,8 @@ const CategoryManager: React.FC = () => {
     }
     
     try {
+      console.log('Adding category:', newCategory);
+      
       // Add the category to the database
       const { data, error } = await getCategoriesTable()
         .insert({
@@ -226,6 +231,8 @@ const CategoryManager: React.FC = () => {
     }
     
     try {
+      console.log('Deleting category:', id);
+      
       // Delete the category from the database
       const { error } = await getCategoriesTable()
         .delete()

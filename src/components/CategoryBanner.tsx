@@ -1,7 +1,7 @@
 
 import { Link } from 'react-router-dom';
 import { getCategoryLinkedProducts } from '@/data/products';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, getCategoriesTable } from '@/integrations/supabase/client';
 import { useState, useEffect } from 'react';
 import { transformProductFromSupabase } from '@/services/productService';
 import { Product } from '@/types/product';
@@ -12,33 +12,87 @@ interface CategoryBannerProps {
 
 const CategoryBanner: React.FC<CategoryBannerProps> = ({ category }) => {
   const [linkedProducts, setLinkedProducts] = useState<Product[]>([]);
+  const [categoryInfo, setCategoryInfo] = useState({
+    title: '',
+    description: '',
+    path: ''
+  });
   
   useEffect(() => {
-    const fetchCategoryLinkedProducts = async () => {
-      try {
-        // Fetch products from Supabase that are linked to this category
-        const { data, error } = await supabase
-          .from('Products')
-          .select('*')
-          .eq('category', category)
-          .eq('link_to_category', true);
-        
-        if (error) throw error;
-        
-        if (data && data.length > 0) {
-          // Transform Supabase products to our Product type
-          const products = data.map(product => transformProductFromSupabase({
-            ...product,
-          }));
-          setLinkedProducts(products);
-        }
-      } catch (error) {
-        console.error('Error fetching category linked products:', error);
-      }
-    };
-    
     fetchCategoryLinkedProducts();
+    fetchCategoryInfo();
+    
+    // Listen for category changes
+    const categoriesChannel = supabase
+      .channel('category-banner-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'categories'
+        },
+        () => {
+          console.log('CategoryBanner: Detected category change, refreshing...');
+          fetchCategoryInfo();
+        }
+      )
+      .subscribe();
+      
+    return () => {
+      supabase.removeChannel(categoriesChannel);
+    };
   }, [category]);
+
+  const fetchCategoryInfo = async () => {
+    try {
+      // Convert category to plural for url matching
+      const categoryPlural = category + 's';
+      
+      // Try to get category info from database
+      const { data, error } = await getCategoriesTable()
+        .select('*')
+        .ilike('name', categoryPlural)
+        .single();
+        
+      if (!error && data) {
+        setCategoryInfo({
+          title: data.name,
+          description: `Browse our selection of ${data.name.toLowerCase()}.`,
+          path: `/category/${data.name.toLowerCase()}`
+        });
+      } else {
+        // Use fallback if no match in database
+        setCategoryInfo(getBannerContent());
+      }
+    } catch (error) {
+      console.error('Error fetching category info:', error);
+      setCategoryInfo(getBannerContent());
+    }
+  };
+  
+  const fetchCategoryLinkedProducts = async () => {
+    try {
+      // Fetch products from Supabase that are linked to this category
+      const { data, error } = await supabase
+        .from('Products')
+        .select('*')
+        .eq('category', category)
+        .eq('link_to_category', true);
+      
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        // Transform Supabase products to our Product type
+        const products = data.map(product => transformProductFromSupabase({
+          ...product,
+        }));
+        setLinkedProducts(products);
+      }
+    } catch (error) {
+      console.error('Error fetching category linked products:', error);
+    }
+  };
   
   // Determine banner content based on category
   const getBannerContent = () => {
@@ -78,8 +132,6 @@ const CategoryBanner: React.FC<CategoryBannerProps> = ({ category }) => {
     }
   };
   
-  const content = getBannerContent();
-  
   return (
     <div 
       className={`relative h-40 md:h-60 w-full rounded-lg overflow-hidden mb-8 bg-cover bg-center`}
@@ -88,16 +140,16 @@ const CategoryBanner: React.FC<CategoryBannerProps> = ({ category }) => {
       <div className="absolute inset-0 bg-black/40"></div>
       <div className="absolute inset-0 flex flex-col justify-center items-center p-6 text-center">
         <h2 className="text-3xl md:text-4xl font-bold text-white mb-2">
-          {content.title}
+          {categoryInfo.title}
         </h2>
         <p className="text-white text-lg md:text-xl mb-4">
-          {content.description}
+          {categoryInfo.description}
         </p>
         <Link 
-          to={content.path} 
+          to={categoryInfo.path} 
           className="bg-white text-veggie-primary hover:bg-veggie-primary hover:text-white transition-colors px-6 py-2 rounded-md font-medium"
         >
-          Browse All {content.title}
+          Browse All {categoryInfo.title}
         </Link>
         
         {linkedProducts.length > 0 && (

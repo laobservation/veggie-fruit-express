@@ -47,6 +47,7 @@ const CategoryCircles: React.FC = () => {
           table: 'categories'
         },
         () => {
+          console.log('CategoryCircles: Detected category change, refreshing...');
           fetchCategories();
         }
       )
