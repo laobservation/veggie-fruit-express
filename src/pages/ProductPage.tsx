@@ -6,7 +6,6 @@ import { useFavorites } from '@/hooks/use-favorites';
 import { useProductDetails } from '@/hooks/use-product-details';
 import { ServiceOption } from '@/types/product';
 import Header from '@/components/Header';
-import Footer from '@/components/Footer';
 import MobileBottomNav from '@/components/MobileBottomNav';
 import { useState, useEffect } from 'react';
 
@@ -113,7 +112,6 @@ const ProductPage = () => {
         <main className="flex-grow flex items-center justify-center">
           <div className="animate-pulse w-full max-w-md h-96 bg-gray-200 rounded-lg"></div>
         </main>
-        <Footer />
         <MobileBottomNav />
       </div>
     );
@@ -129,7 +127,6 @@ const ProductPage = () => {
             <button onClick={() => navigate('/')}>Retour à l'accueil</button>
           </div>
         </main>
-        <Footer />
         <MobileBottomNav />
       </div>
     );
@@ -178,7 +175,6 @@ const ProductPage = () => {
         handleBuyNow={handleBuyNow}
       />
       
-      <Footer />
       <MobileBottomNav />
     </div>
   );
