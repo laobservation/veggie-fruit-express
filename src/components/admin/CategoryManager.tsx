@@ -119,6 +119,7 @@ const CategoryManager: React.FC = () => {
       console.log('Updating category:', editForm);
       
       // Update the category in the database
+      // Ensure field names match the database columns
       const { error } = await getCategoriesTable()
         .update({
           name: editForm.name,
@@ -128,15 +129,10 @@ const CategoryManager: React.FC = () => {
         })
         .eq('id', editForm.id);
       
-      if (error) throw error;
-      
-      // Update local state
-      setCategories(categories.map(cat => 
-        cat.id === editForm.id ? {
-          ...editForm,
-          path: `/category/${editForm.name.toLowerCase()}`
-        } : cat
-      ));
+      if (error) {
+        console.error('Database error when updating category:', error);
+        throw error;
+      }
       
       toast({
         title: 'Success',
@@ -145,6 +141,10 @@ const CategoryManager: React.FC = () => {
       
       setEditingId(null);
       setEditForm(null);
+      
+      // Fetch updated categories to ensure UI is in sync
+      fetchCategories();
+      
     } catch (error) {
       console.error('Error updating category:', error);
       toast({
@@ -176,32 +176,22 @@ const CategoryManager: React.FC = () => {
     }
     
     try {
-      console.log('Adding category:', newCategory);
+      console.log('Adding new category:', newCategory);
       
       // Add the category to the database
-      const { data, error } = await getCategoriesTable()
+      // Ensure field names match the database columns
+      const { error } = await getCategoriesTable()
         .insert({
           name: newCategory.name,
-          icon: newCategory.icon,
-          image_icon: newCategory.imageIcon,
-          background_color: newCategory.bg
-        })
-        .select()
-        .single();
+          icon: newCategory.icon || null,
+          image_icon: newCategory.imageIcon || null,
+          background_color: newCategory.bg || 'bg-gray-100'
+        });
       
-      if (error) throw error;
-      
-      // Update local state
-      const newCat: Category = {
-        id: data.id,
-        name: data.name,
-        icon: data.icon || undefined,
-        imageIcon: data.image_icon,
-        bg: data.background_color || 'bg-gray-100',
-        path: `/category/${data.name.toLowerCase()}`
-      };
-      
-      setCategories([...categories, newCat]);
+      if (error) {
+        console.error('Database error when adding category:', error);
+        throw error;
+      }
       
       // Reset the form
       setNewCategory({
@@ -214,6 +204,10 @@ const CategoryManager: React.FC = () => {
         title: 'Success',
         description: 'Category added successfully'
       });
+      
+      // Fetch updated categories to ensure UI is in sync
+      fetchCategories();
+      
     } catch (error) {
       console.error('Error adding category:', error);
       toast({

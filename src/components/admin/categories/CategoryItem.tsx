@@ -27,15 +27,17 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
   onSaveEdit,
   onDelete
 }) => {
+  const isEditing = editingId === category.id;
+  
   return (
     <TableRow key={category.id}>
-      {editingId === category.id ? (
+      {isEditing && editForm ? (
         // Edit mode row
         <>
           <TableCell>
             <Input
               name="icon"
-              value={editForm?.icon || ''}
+              value={editForm.icon || ''}
               onChange={onEditChange}
               className="w-24"
             />
@@ -43,14 +45,15 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
           <TableCell>
             <Input
               name="name"
-              value={editForm?.name || ''}
+              value={editForm.name || ''}
               onChange={onEditChange}
+              required
             />
           </TableCell>
           <TableCell>
             <Input
               name="bg"
-              value={editForm?.bg || ''}
+              value={editForm.bg || ''}
               onChange={onEditChange}
             />
           </TableCell>
@@ -60,6 +63,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
                 size="sm" 
                 variant="outline"
                 onClick={onSaveEdit}
+                type="button"
               >
                 <Save className="h-4 w-4" />
               </Button>
@@ -67,6 +71,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
                 size="sm" 
                 variant="outline"
                 onClick={onCancelEdit}
+                type="button"
               >
                 <X className="h-4 w-4" />
               </Button>
@@ -97,6 +102,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
                 size="sm" 
                 variant="outline"
                 onClick={() => onEdit(category)}
+                type="button"
               >
                 <Edit className="h-4 w-4" />
               </Button>
@@ -104,6 +110,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
                 size="sm" 
                 variant="outline"
                 onClick={() => onDelete(category.id)}
+                type="button"
               >
                 <Trash2 className="h-4 w-4" />
               </Button>
