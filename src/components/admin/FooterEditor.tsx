@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -90,6 +89,10 @@ const FooterEditor: React.FC = () => {
       
       if (data) {
         // Type assertion to ensure the correct shape
+        const contactInfo = typeof data.contact_info === 'object' && data.contact_info !== null 
+          ? data.contact_info 
+          : { email: '', phone: '', address: '' };
+          
         const parsedSettings: FooterSettings = {
           id: data.id,
           company_name: data.company_name || 'Veggie Express',
@@ -107,17 +110,11 @@ const FooterEditor: React.FC = () => {
                 return acc;
               }, {} as { [key: string]: string })
             : { facebook: '#', twitter: '#', instagram: '#' },
-          contact_info: typeof data.contact_info === 'object' && data.contact_info !== null
-            ? {
-                email: String(data.contact_info.email || ''),
-                phone: String(data.contact_info.phone || ''),
-                address: String(data.contact_info.address || '')
-              }
-            : {
-                email: 'info@veggieexpress.com',
-                phone: '+1 234 567 8900',
-                address: '123 Fresh Street, Veggie City'
-              }
+          contact_info: {
+            email: contactInfo?.email || '',
+            phone: contactInfo?.phone || '',
+            address: contactInfo?.address || ''
+          }
         };
         
         setSettings(parsedSettings);

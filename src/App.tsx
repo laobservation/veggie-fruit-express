@@ -8,6 +8,7 @@ import ThankYouPage from '@/pages/ThankYouPage';
 import NotFound from '@/pages/NotFound';
 import AdminPage from '@/pages/AdminPage';
 import AdminSliderPage from '@/pages/AdminSliderPage';
+import AdminSettingsPage from '@/pages/AdminSettingsPage';
 import { CartNotificationProvider } from '@/hooks/use-cart';
 import { Toaster } from "@/components/ui/toaster";
 import FavoritesPage from '@/pages/FavoritesPage';
@@ -27,6 +28,7 @@ function App() {
             <Route path="/thank-you" element={<ThankYouPage />} />
             <Route path="/admin" element={<AdminPage />} />
             <Route path="/admin/slider" element={<AdminSliderPage />} />
+            <Route path="/admin/settings" element={<AdminSettingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </div>

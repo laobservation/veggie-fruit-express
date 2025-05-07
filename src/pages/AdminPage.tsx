@@ -1,6 +1,6 @@
 
 // Fix the import conflict between Lucide and React Router
-import { ArrowLeft, Home, Package, ShoppingBag, Sliders } from 'lucide-react';
+import { ArrowLeft, Home, Package, Settings, ShoppingBag, Sliders } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -18,6 +18,12 @@ const AdminPage = () => {
       <div className="mb-6 flex justify-between items-center">
         <h1 className="text-3xl font-bold">Tableau de bord</h1>
         <div className="flex gap-3">
+          <Link to="/admin/settings">
+            <Button variant="outline" size="sm" className="flex items-center gap-1">
+              <Settings className="h-4 w-4" />
+              Paramètres du site
+            </Button>
+          </Link>
           <Link to="/admin/slider">
             <Button variant="outline" size="sm" className="flex items-center gap-1">
               <Sliders className="h-4 w-4" />
