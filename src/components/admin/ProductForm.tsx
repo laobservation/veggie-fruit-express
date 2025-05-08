@@ -15,7 +15,7 @@ import { Button } from '@/components/ui/button';
 import { 
   DialogHeader, DialogTitle, DialogFooter 
 } from '@/components/ui/dialog';
-import { Image, Youtube, Loader2 } from 'lucide-react';
+import { Image, Youtube, Loader2, Plus, X } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import MediaPreview from './MediaPreview';
 import { Product } from '@/types/product';
@@ -46,6 +46,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
   const [mediaType, setMediaType] = useState<'image' | 'video'>(product.videoUrl ? 'video' : 'image');
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
+  const [additionalImageUrl, setAdditionalImageUrl] = useState("");
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -70,6 +71,16 @@ const ProductForm: React.FC<ProductFormProps> = ({
     return () => {
       supabase.removeChannel(channel);
     };
+  }, []);
+
+  // Initialize additionalImages if not present
+  useEffect(() => {
+    if (!formData.additionalImages) {
+      setFormData({
+        ...formData,
+        additionalImages: []
+      });
+    }
   }, []);
 
   const fetchCategories = async () => {
@@ -115,6 +126,23 @@ const ProductForm: React.FC<ProductFormProps> = ({
     setFormData({
       ...formData,
       [field]: checked
+    });
+  };
+
+  const handleAddAdditionalImage = () => {
+    if (additionalImageUrl && additionalImageUrl.trim()) {
+      setFormData({
+        ...formData,
+        additionalImages: [...(formData.additionalImages || []), additionalImageUrl.trim()]
+      });
+      setAdditionalImageUrl("");
+    }
+  };
+
+  const handleRemoveAdditionalImage = (indexToRemove: number) => {
+    setFormData({
+      ...formData,
+      additionalImages: (formData.additionalImages || []).filter((_, index) => index !== indexToRemove)
     });
   };
 
@@ -234,7 +262,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
             
             <TabsContent value="image" className="pt-4">
               <div className="grid gap-2">
-                <Label htmlFor="image">URL de l'Image</Label>
+                <Label htmlFor="image">URL de l'Image Principale</Label>
                 <Input 
                   id="image" 
                   name="image" 
@@ -242,6 +270,51 @@ const ProductForm: React.FC<ProductFormProps> = ({
                   onChange={handleInputChange} 
                   placeholder="https://example.com/image.jpg"
                 />
+              </div>
+
+              {/* Additional Images Section */}
+              <div className="mt-4">
+                <Label htmlFor="additionalImages">Images Additionnelles</Label>
+                
+                {/* Display added images */}
+                {formData.additionalImages && formData.additionalImages.length > 0 && (
+                  <div className="mt-2 space-y-2">
+                    {formData.additionalImages.map((img, index) => (
+                      <div key={index} className="flex items-center justify-between rounded border p-2">
+                        <div className="flex items-center">
+                          <div className="w-10 h-10 rounded overflow-hidden mr-2">
+                            <img src={img} alt={`Additional ${index + 1}`} className="w-full h-full object-cover" />
+                          </div>
+                          <span className="text-sm truncate max-w-[200px]">{img}</span>
+                        </div>
+                        <Button 
+                          type="button" 
+                          size="sm" 
+                          variant="ghost"
+                          onClick={() => handleRemoveAdditionalImage(index)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Add new image field */}
+                <div className="flex items-center gap-2 mt-2">
+                  <Input 
+                    value={additionalImageUrl} 
+                    onChange={(e) => setAdditionalImageUrl(e.target.value)} 
+                    placeholder="URL de l'image additionnelle"
+                  />
+                  <Button 
+                    type="button" 
+                    onClick={handleAddAdditionalImage} 
+                    size="sm"
+                  >
+                    <Plus className="h-4 w-4 mr-1" /> Ajouter
+                  </Button>
+                </div>
               </div>
             </TabsContent>
             

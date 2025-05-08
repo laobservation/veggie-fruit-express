@@ -15,6 +15,7 @@ import ProductImage from '@/components/product/ProductImage';
 import ProductInfo from '@/components/product/ProductInfo';
 import RelatedProducts from '@/components/product/RelatedProducts';
 import ProductActions from '@/components/product/ProductActions';
+import ProductImageGallery from '@/components/product/ProductImageGallery';
 
 // Define additional service options
 const serviceOptions: ServiceOption[] = [
@@ -148,8 +149,14 @@ const ProductPage = () => {
             handleFavoriteClick={handleFavoriteClick}
           />
           
-          {/* Product Image */}
-          <ProductImage product={product} />
+          {/* Product Images */}
+          {product.additionalImages && product.additionalImages.length > 0 ? (
+            <ProductImageGallery 
+              product={product}
+            />
+          ) : (
+            <ProductImage product={product} />
+          )}
           
           {/* Product Info */}
           <ProductInfo

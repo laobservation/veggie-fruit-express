@@ -11,6 +11,7 @@ export interface Product {
   videoUrl?: string;
   categoryLink?: boolean;
   stock?: number;
+  additionalImages?: string[]; // Array of additional image URLs
 }
 
 export interface ServiceOption {

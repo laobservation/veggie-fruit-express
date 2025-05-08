@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
 import { Json } from "@/integrations/supabase/types";
@@ -15,6 +16,7 @@ export type SupabaseProduct = {
   media_type: string | null;  
   created_at: string | null;
   stock: number | null;  
+  additional_images: string[] | null;
   // Remove featured from the SupabaseProduct type since it doesn't exist in the DB
 };
 
@@ -35,7 +37,8 @@ export const transformProductForSupabase = (product: ExtendedProduct): Omit<Supa
     unit: product.unit,
     link_to_category: product.categoryLink || false,
     media_type: product.videoUrl && product.videoUrl.trim() !== '' ? 'video' : 'image',
-    stock: product.stock || 0
+    stock: product.stock || 0,
+    additional_images: product.additionalImages || null
     // Remove featured from here - don't send it to Supabase
   };
 };
@@ -71,6 +74,7 @@ export const transformProductFromSupabase = (product: SupabaseProduct): Extended
     videoUrl: product.media_type === 'video' ? product.image_url : undefined,
     featured: true, // Always default to true since it doesn't exist in DB
     stock: product.stock || 0,
+    additionalImages: product.additional_images || []
   };
 };
 
