@@ -86,6 +86,7 @@ const CategoryBanner: React.FC<CategoryBannerProps> = ({ category }) => {
         // Transform Supabase products to our Product type
         const products = data.map(product => transformProductFromSupabase({
           ...product,
+          additional_images: product.additional_images || null // Ensure additional_images is present
         }));
         setLinkedProducts(products);
       }

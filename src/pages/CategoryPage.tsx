@@ -133,7 +133,10 @@ const CategoryPage = () => {
       
       // Transform the products
       if (data && data.length > 0) {
-        const categoryProducts = data.map(product => transformProductFromSupabase(product));
+        const categoryProducts = data.map(product => transformProductFromSupabase({
+          ...product,
+          additional_images: product.additional_images || null
+        }));
         setProducts(categoryProducts);
       } else {
         console.log('No products found for category:', categoryId);

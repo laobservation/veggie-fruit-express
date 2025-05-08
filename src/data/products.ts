@@ -1,3 +1,4 @@
+import { Product } from '@/types/product';
 
 export interface Product {
   id: string;
@@ -152,8 +153,14 @@ export const getProductByIdFromSupabase = async (id: string) => {
       throw error;
     }
     
+    // Ensure additional_images is present in the data
+    const productData = {
+      ...data,
+      additional_images: data.additional_images || null
+    };
+    
     // The transform function now handles missing featured property
-    return transformProductFromSupabase(data);
+    return transformProductFromSupabase(productData);
   } catch (error) {
     console.error('Error fetching product from Supabase:', error);
     // Fall back to local data
