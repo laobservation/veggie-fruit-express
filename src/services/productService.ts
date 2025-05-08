@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
 import { Json } from "@/integrations/supabase/types";
@@ -17,7 +16,6 @@ export type SupabaseProduct = {
   created_at: string | null;
   stock: number | null;  
   additional_images: string[] | null;
-  // Remove featured from the SupabaseProduct type since it doesn't exist in the DB
 };
 
 // Extended Product interface with optional stock

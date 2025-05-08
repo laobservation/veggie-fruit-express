@@ -1,25 +1,12 @@
 
-import React, { useState, useEffect } from 'react';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Label } from '@/components/ui/label';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
+import React from 'react';
 import { Button } from '@/components/ui/button';
-import { 
-  DialogHeader, DialogTitle, DialogFooter 
-} from '@/components/ui/dialog';
-import { Image, Youtube, Loader2, Plus, X } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import MediaPreview from './MediaPreview';
+import { DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
+import { Loader2 } from 'lucide-react';
 import { Product } from '@/types/product';
-import { supabase } from '@/integrations/supabase/client';
+import { useProductForm } from '@/hooks/use-product-form';
+import ProductDetails from './products/ProductDetails';
+import MediaSelector from './products/MediaSelector';
 
 interface ProductFormProps {
   product: Product;
@@ -29,12 +16,6 @@ interface ProductFormProps {
   onCancel: () => void;
 }
 
-interface Category {
-  id: string;
-  name: string;
-  value: string;
-}
-
 const ProductForm: React.FC<ProductFormProps> = ({ 
   product, 
   isEditing, 
@@ -42,109 +23,20 @@ const ProductForm: React.FC<ProductFormProps> = ({
   onSave, 
   onCancel 
 }) => {
-  const [formData, setFormData] = useState<Product>(product);
-  const [mediaType, setMediaType] = useState<'image' | 'video'>(product.videoUrl ? 'video' : 'image');
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loadingCategories, setLoadingCategories] = useState(true);
-  const [additionalImageUrl, setAdditionalImageUrl] = useState("");
-
-  // Fetch categories on component mount
-  useEffect(() => {
-    fetchCategories();
-
-    // Subscribe to category changes
-    const channel = supabase
-      .channel('dynamic-categories')
-      .on(
-        'postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'categories'
-        },
-        () => {
-          fetchCategories();
-        }
-      )
-      .subscribe();
-      
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, []);
-
-  // Initialize additionalImages if not present
-  useEffect(() => {
-    if (!formData.additionalImages) {
-      setFormData({
-        ...formData,
-        additionalImages: []
-      });
-    }
-  }, []);
-
-  const fetchCategories = async () => {
-    setLoadingCategories(true);
-    try {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('id, name')
-        .order('name', { ascending: true });
-      
-      if (error) throw error;
-      
-      const formattedCategories = data.map(cat => ({
-        id: cat.id,
-        name: cat.name,
-        value: cat.name.toLowerCase()
-      }));
-      
-      setCategories(formattedCategories);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-    } finally {
-      setLoadingCategories(false);
-    }
-  };
-
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: ['price', 'stock'].includes(name) ? parseFloat(value) : value
-    });
-  };
-  
-  const handleSelectChange = (value: string, field: string) => {
-    setFormData({
-      ...formData,
-      [field]: value
-    });
-  };
-  
-  const handleCheckboxChange = (checked: boolean, field: string) => {
-    setFormData({
-      ...formData,
-      [field]: checked
-    });
-  };
-
-  const handleAddAdditionalImage = () => {
-    if (additionalImageUrl && additionalImageUrl.trim()) {
-      setFormData({
-        ...formData,
-        additionalImages: [...(formData.additionalImages || []), additionalImageUrl.trim()]
-      });
-      setAdditionalImageUrl("");
-    }
-  };
-
-  const handleRemoveAdditionalImage = (indexToRemove: number) => {
-    setFormData({
-      ...formData,
-      additionalImages: (formData.additionalImages || []).filter((_, index) => index !== indexToRemove)
-    });
-  };
+  const {
+    formData,
+    mediaType,
+    setMediaType,
+    categories,
+    loadingCategories,
+    additionalImageUrl,
+    setAdditionalImageUrl,
+    handleInputChange,
+    handleSelectChange,
+    handleCheckboxChange,
+    handleAddAdditionalImage,
+    handleRemoveAdditionalImage
+  } = useProductForm(product);
 
   const handleSubmit = () => {
     onSave(formData, mediaType);
@@ -159,238 +51,35 @@ const ProductForm: React.FC<ProductFormProps> = ({
       </DialogHeader>
       
       <div className="grid gap-4 py-4">
-        <div className="grid gap-2">
-          <Label htmlFor="name">Nom du Produit</Label>
-          <Input 
-            id="name" 
-            name="name" 
-            value={formData.name} 
-            onChange={handleInputChange} 
-          />
-        </div>
-        
-        <div className="grid gap-2">
-          <Label htmlFor="category">Catégorie</Label>
-          {loadingCategories ? (
-            <div className="flex items-center space-x-2">
-              <Loader2 className="h-4 w-4 animate-spin" />
-              <span>Chargement des catégories...</span>
-            </div>
-          ) : (
-            <Select 
-              value={formData.category} 
-              onValueChange={(value) => handleSelectChange(value, 'category')}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {categories.map(category => (
-                  <SelectItem 
-                    key={category.id} 
-                    value={category.value}
-                  >
-                    {category.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          )}
-        </div>
-        
-        <div className="grid grid-cols-2 gap-4">
-          <div className="grid gap-2">
-            <Label htmlFor="price">Prix (DH)</Label>
-            <Input 
-              id="price" 
-              name="price" 
-              type="number" 
-              value={formData.price} 
-              onChange={handleInputChange} 
-              step="0.01" 
-            />
-          </div>
-          
-          <div className="grid gap-2">
-            <Label htmlFor="stock">Stock</Label>
-            <Input 
-              id="stock" 
-              name="stock" 
-              type="number" 
-              value={formData.stock || 0} 
-              onChange={handleInputChange} 
-            />
-          </div>
-        </div>
-        
-        <div className="grid gap-2">
-          <Label htmlFor="unit">Unité</Label>
-          <Select 
-            value={formData.unit} 
-            onValueChange={(value) => handleSelectChange(value, 'unit')}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="kg">Kilogramme (kg)</SelectItem>
-              <SelectItem value="bunch">Botte</SelectItem>
-              <SelectItem value="basket">Panier</SelectItem>
-              <SelectItem value="head">Pièce</SelectItem>
-              <SelectItem value="bottle">Bouteille</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div className="grid gap-2">
-          <Label>Type de média</Label>
-          <Tabs 
-            value={mediaType} 
-            onValueChange={(value) => setMediaType(value as 'image' | 'video')}
-            className="w-full"
-          >
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="image" className="flex items-center gap-2">
-                <Image className="h-4 w-4" />
-                Image
-              </TabsTrigger>
-              <TabsTrigger value="video" className="flex items-center gap-2">
-                <Youtube className="h-4 w-4" />
-                Vidéo YouTube
-              </TabsTrigger>
-            </TabsList>
-            
-            <TabsContent value="image" className="pt-4">
-              <div className="grid gap-2">
-                <Label htmlFor="image">URL de l'Image Principale</Label>
-                <Input 
-                  id="image" 
-                  name="image" 
-                  value={formData.image} 
-                  onChange={handleInputChange} 
-                  placeholder="https://example.com/image.jpg"
-                />
-              </div>
-
-              {/* Additional Images Section */}
-              <div className="mt-4">
-                <Label htmlFor="additionalImages">Images Additionnelles</Label>
-                
-                {/* Display added images */}
-                {formData.additionalImages && formData.additionalImages.length > 0 && (
-                  <div className="mt-2 space-y-2">
-                    {formData.additionalImages.map((img, index) => (
-                      <div key={index} className="flex items-center justify-between rounded border p-2">
-                        <div className="flex items-center">
-                          <div className="w-10 h-10 rounded overflow-hidden mr-2">
-                            <img src={img} alt={`Additional ${index + 1}`} className="w-full h-full object-cover" />
-                          </div>
-                          <span className="text-sm truncate max-w-[200px]">{img}</span>
-                        </div>
-                        <Button 
-                          type="button" 
-                          size="sm" 
-                          variant="ghost"
-                          onClick={() => handleRemoveAdditionalImage(index)}
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-                
-                {/* Add new image field */}
-                <div className="flex items-center gap-2 mt-2">
-                  <Input 
-                    value={additionalImageUrl} 
-                    onChange={(e) => setAdditionalImageUrl(e.target.value)} 
-                    placeholder="URL de l'image additionnelle"
-                  />
-                  <Button 
-                    type="button" 
-                    onClick={handleAddAdditionalImage} 
-                    size="sm"
-                  >
-                    <Plus className="h-4 w-4 mr-1" /> Ajouter
-                  </Button>
-                </div>
-              </div>
-            </TabsContent>
-            
-            <TabsContent value="video" className="pt-4">
-              <div className="grid gap-2">
-                <Label htmlFor="videoUrl">URL YouTube</Label>
-                <Input 
-                  id="videoUrl" 
-                  name="videoUrl" 
-                  value={formData.videoUrl || ''} 
-                  onChange={handleInputChange} 
-                  placeholder="https://www.youtube.com/watch?v=..."
-                />
-                <p className="text-xs text-gray-500">
-                  Coller le lien d'une vidéo YouTube (ex: https://www.youtube.com/watch?v=abcdefghijk)
-                </p>
-              </div>
-              
-              <div className="grid gap-2 mt-4">
-                <Label htmlFor="image">Image de couverture (optionnelle)</Label>
-                <Input 
-                  id="image" 
-                  name="image" 
-                  value={formData.image} 
-                  onChange={handleInputChange} 
-                  placeholder="URL d'une image de couverture"
-                />
-                <p className="text-xs text-gray-500">
-                  Si non spécifiée, une miniature de la vidéo sera utilisée
-                </p>
-              </div>
-            </TabsContent>
-          </Tabs>
-        </div>
-        
-        <MediaPreview 
-          mediaType={mediaType} 
-          imageUrl={formData.image} 
-          videoUrl={formData.videoUrl}
+        <ProductDetails
+          name={formData.name}
+          price={formData.price}
+          stock={formData.stock}
+          category={formData.category}
+          unit={formData.unit}
+          description={formData.description}
+          featured={formData.featured}
+          categoryLink={formData.categoryLink}
+          categories={categories}
+          loadingCategories={loadingCategories}
+          onInputChange={handleInputChange}
+          onSelectChange={handleSelectChange}
+          onCheckboxChange={handleCheckboxChange}
         />
         
-        <div className="grid gap-2">
-          <Label htmlFor="description">Description</Label>
-          <Textarea 
-            id="description" 
-            name="description" 
-            value={formData.description} 
-            onChange={handleInputChange} 
-            rows={3} 
-          />
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <Checkbox 
-            id="featured" 
-            checked={formData.featured} 
-            onCheckedChange={(checked) => 
-              handleCheckboxChange(Boolean(checked), 'featured')
-            } 
-          />
-          <Label htmlFor="featured">Produit Vedette</Label>
-        </div>
-        
-        <div className="flex items-center space-x-2">
-          <Checkbox 
-            id="categoryLink" 
-            checked={formData.categoryLink} 
-            onCheckedChange={(checked) => 
-              handleCheckboxChange(Boolean(checked), 'categoryLink')
-            } 
-          />
-          <Label htmlFor="categoryLink">Afficher dans la page de Catégorie</Label>
-          <p className="text-xs text-gray-500 ml-2">
-            (Les produits sélectionnés apparaîtront sur leur page de catégorie respective)
-          </p>
-        </div>
+        <MediaSelector
+          mediaType={mediaType}
+          setMediaType={setMediaType}
+          imageUrl={formData.image}
+          videoUrl={formData.videoUrl}
+          additionalImages={formData.additionalImages}
+          onImageChange={handleInputChange}
+          onVideoChange={handleInputChange}
+          onAddAdditionalImage={handleAddAdditionalImage}
+          onRemoveAdditionalImage={handleRemoveAdditionalImage}
+          additionalImageUrl={additionalImageUrl}
+          setAdditionalImageUrl={setAdditionalImageUrl}
+        />
       </div>
       
       <DialogFooter>
