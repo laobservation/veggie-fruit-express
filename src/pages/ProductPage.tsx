@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '@/hooks/use-cart';
@@ -34,7 +33,7 @@ const serviceOptions: ServiceOption[] = [
   {
     id: "bags",
     name: "Légumes lavés et coupés (Sachets de 500g) (+35,00 Dh)",
-    nameAr: "خضرة مغسولة ومقطعة (فأكياس ديال 500غ)",
+    nameAr: "خضرة مغسولة ومقطعة (فأكياس ��يال 500غ)",
     price: 35
   }
 ];
@@ -140,7 +139,7 @@ const ProductPage = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
-      <main className="flex-grow">
+      <main className="flex-grow pb-32">
         <div className="container mx-auto px-4">
           {/* Product Header */}
           <ProductHeader 
@@ -158,7 +157,7 @@ const ProductPage = () => {
             <ProductImage product={product} />
           )}
           
-          {/* Product Info */}
+          {/* Product Info - Now includes description above product actions */}
           <ProductInfo
             product={product}
             totalPrice={totalPrice}

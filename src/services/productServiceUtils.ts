@@ -32,6 +32,11 @@ export const validateProductForm = (formData: Product, mediaType: 'image' | 'vid
 export const prepareProductData = (formData: Product, mediaType: 'image' | 'video'): Product => {
   const finalFormData = {...formData};
   
+  // Ensure additionalImages is an array
+  if (!finalFormData.additionalImages) {
+    finalFormData.additionalImages = [];
+  }
+  
   if (mediaType === 'image') {
     finalFormData.videoUrl = '';
   } else {

@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Product } from '@/types/product';
 import { supabase } from '@/integrations/supabase/client';
-import { transformProductFromSupabase } from '@/services/productService';
+import { transformProductFromSupabase, SupabaseProduct } from '@/services/productService';
 import { getProductById } from '@/data/products';
 
 export const useProductDetails = (productId: string | undefined) => {
@@ -46,7 +46,7 @@ export const useProductDetails = (productId: string | undefined) => {
           }
         } else {
           // Transform Supabase product data
-          const transformedProduct = transformProductFromSupabase(supabaseProduct);
+          const transformedProduct = transformProductFromSupabase(supabaseProduct as SupabaseProduct);
           setProduct(transformedProduct);
           
           // Fetch related products from the same category
@@ -59,7 +59,7 @@ export const useProductDetails = (productId: string | undefined) => {
             
           if (relatedData && relatedData.length > 0) {
             // Transform each related product using our helper
-            setRelatedProducts(relatedData.map(p => transformProductFromSupabase(p)));
+            setRelatedProducts(relatedData.map(p => transformProductFromSupabase(p as SupabaseProduct)));
           }
         }
       } catch (err) {

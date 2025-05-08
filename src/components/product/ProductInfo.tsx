@@ -46,15 +46,16 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
       </div>
       <p className="text-gray-500 mb-4">{getCategoryText(product.category)}</p>
       
+      {/* Description - Now positioned above services */}
+      <h2 className="font-semibold text-lg mb-2">Description</h2>
+      <p className="text-gray-600 whitespace-pre-wrap mb-6">{product.description}</p>
+      
       {/* Additional Services */}
       <ServiceOptions 
         serviceOptions={serviceOptions}
         selectedService={selectedService}
         setSelectedService={setSelectedService}
       />
-      
-      <h2 className="font-semibold text-lg mb-2">Description</h2>
-      <p className="text-gray-600 whitespace-pre-wrap">{product.description}</p>
     </div>
   );
 };
