@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
 import { Json } from "@/integrations/supabase/types";
@@ -178,6 +179,7 @@ export const fixProductImportType = (products: any[]): Product[] => {
     ...product,
     id: String(product.id),
     category: product.category as 'fruit' | 'vegetable', // Force type cast for compatibility
-    featured: true // Always set featured to true since it doesn't exist in DB
+    featured: true, // Always set featured to true since it doesn't exist in DB
+    additionalImages: product.additional_images || []
   }));
 };

@@ -1,15 +1,13 @@
 
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
-import { Plus, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { Link } from 'react-router-dom';
 import { Product } from '@/types/product';
 import ProductList from './ProductList';
-import ProductForm from './ProductForm';
 import { createProduct, updateProduct, fetchProducts, deleteProduct } from '@/services/productService';
+import { validateProductForm, prepareProductData } from '@/services/productServiceUtils';
+import ProductManagerActions from './ProductManagerActions';
+import ProductDialogManager from './ProductDialogManager';
 
 const ProductManager: React.FC = () => {
   const { toast } = useToast();
@@ -93,54 +91,24 @@ const ProductManager: React.FC = () => {
   };
   
   const handleSaveProduct = async (formData: Product, mediaType: 'image' | 'video') => {
-    if (!formData.name || !formData.description || formData.price <= 0) {
+    // Validate form data
+    const validation = validateProductForm(formData, mediaType);
+    if (!validation.isValid) {
       toast({
         title: "Erreur",
-        description: "Veuillez remplir tous les champs requis.",
+        description: validation.errorMessage,
         variant: "destructive",
       });
       return;
     }
     
-    // Validate media
-    if (mediaType === 'image' && !formData.image) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez ajouter une URL d'image.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (mediaType === 'video' && !formData.videoUrl) {
-      toast({
-        title: "Erreur",
-        description: "Veuillez ajouter une URL YouTube.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // If media type is image, clear videoUrl
-    const finalFormData = {...formData};
-    if (mediaType === 'image') {
-      finalFormData.videoUrl = '';
-    } else {
-      // For video, ensure there's a placeholder image if image is empty
-      if (!finalFormData.image) {
-        finalFormData.image = '/images/placeholder.svg';
-      }
-    }
+    const finalFormData = prepareProductData(formData, mediaType);
     
     setIsSaving(true);
     try {
       if (isEditing && selectedProduct) {
         // Update existing product
-        await updateProduct(selectedProduct.id, {
-          ...finalFormData,
-          // Ensure media_type is properly set based on the selected type
-          videoUrl: mediaType === 'video' ? finalFormData.videoUrl : undefined
-        });
+        await updateProduct(selectedProduct.id, finalFormData);
         
         toast({
           title: "Succès",
@@ -148,11 +116,7 @@ const ProductManager: React.FC = () => {
         });
       } else {
         // Add new product
-        await createProduct({
-          ...finalFormData,
-          // Ensure media_type is properly set based on the selected type
-          videoUrl: mediaType === 'video' ? finalFormData.videoUrl : undefined
-        });
+        await createProduct(finalFormData);
         
         toast({
           title: "Succès",
@@ -204,19 +168,7 @@ const ProductManager: React.FC = () => {
   
   return (
     <div>
-      <div className="flex justify-between items-center mb-8">
-        <Link to="/">
-          <Button variant="outline" className="flex items-center gap-2">
-            <ArrowLeft className="h-4 w-4" />
-            Retourner au Site
-          </Button>
-        </Link>
-        <h2 className="text-2xl font-bold">Gestion des Produits</h2>
-        <Button onClick={handleAddNewProduct} className="bg-veggie-primary hover:bg-veggie-dark">
-          <Plus className="h-4 w-4 mr-2" />
-          Ajouter un Produit
-        </Button>
-      </div>
+      <ProductManagerActions onAddProduct={handleAddNewProduct} />
       
       <ProductList 
         products={allProducts}
@@ -226,18 +178,15 @@ const ProductManager: React.FC = () => {
         onDeleteProduct={handleDeleteProduct}
       />
       
-      {/* Product Dialog */}
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent className="max-w-md">
-          <ProductForm 
-            product={selectedProduct || emptyProduct}
-            isEditing={isEditing}
-            onSave={handleSaveProduct}
-            onCancel={() => setIsDialogOpen(false)}
-            isSaving={isSaving}
-          />
-        </DialogContent>
-      </Dialog>
+      <ProductDialogManager 
+        isOpen={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        selectedProduct={selectedProduct}
+        emptyProduct={emptyProduct}
+        isEditing={isEditing}
+        isSaving={isSaving}
+        onSaveProduct={handleSaveProduct}
+      />
     </div>
   );
 };
