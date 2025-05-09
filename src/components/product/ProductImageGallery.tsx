@@ -2,21 +2,28 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { Product } from '@/types/product';
 
 interface ProductImageGalleryProps {
   mainImage: string;
   additionalImages?: string[];
+  product?: Product; // Added product prop
 }
 
 const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
   mainImage,
-  additionalImages = []
+  additionalImages = [],
+  product
 }) => {
+  // If product is provided, use its images
+  const productMainImage = product ? product.image : mainImage;
+  const productAdditionalImages = product ? product.additionalImages || [] : additionalImages;
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [autoplayEnabled, setAutoplayEnabled] = useState(true);
   const [userInteracted, setUserInteracted] = useState(false);
   
-  const allImages = [mainImage, ...(additionalImages || [])].filter(Boolean);
+  const allImages = [productMainImage, ...(productAdditionalImages || [])].filter(Boolean);
   
   // Set up auto-switching for images
   useEffect(() => {
@@ -51,7 +58,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
   };
   
   // Handle empty state
-  if (!mainImage && (!additionalImages || additionalImages.length === 0)) {
+  if (!productMainImage && (!productAdditionalImages || productAdditionalImages.length === 0)) {
     return (
       <div className="aspect-square w-full bg-gray-100 flex items-center justify-center rounded-lg">
         <span className="text-gray-400">No image available</span>

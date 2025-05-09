@@ -8,6 +8,8 @@ interface MediaPreviewProps {
   autoplay?: boolean;
   muted?: boolean;
   controls?: boolean;
+  className?: string;
+  onSelect?: (url: string) => void;
 }
 
 const MediaPreview: React.FC<MediaPreviewProps> = ({ 
@@ -16,7 +18,9 @@ const MediaPreview: React.FC<MediaPreviewProps> = ({
   videoUrl,
   autoplay = false,
   muted = true,
-  controls = true
+  controls = true,
+  className = "",
+  onSelect
 }) => {
   if (mediaType === 'video' && videoUrl) {
     // Extract video ID from YouTube URL
@@ -26,7 +30,7 @@ const MediaPreview: React.FC<MediaPreviewProps> = ({
     
     if (videoId) {
       return (
-        <div className="aspect-video w-full rounded overflow-hidden bg-gray-100 mb-4">
+        <div className={`aspect-video w-full rounded overflow-hidden bg-gray-100 ${className}`}>
           <iframe 
             width="100%" 
             height="100%" 
@@ -41,7 +45,7 @@ const MediaPreview: React.FC<MediaPreviewProps> = ({
     }
   } else if (mediaType === 'image' && imageUrl) {
     return (
-      <div className="aspect-square w-full rounded overflow-hidden bg-gray-100 mb-4">
+      <div className={`aspect-square w-full rounded overflow-hidden bg-gray-100 ${className}`}>
         <img 
           src={imageUrl} 
           alt="Aperçu du produit" 
