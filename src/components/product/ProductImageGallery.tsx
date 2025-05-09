@@ -5,13 +5,13 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Product } from '@/types/product';
 
 interface ProductImageGalleryProps {
-  mainImage: string;
+  mainImage?: string;  // Make this optional
   additionalImages?: string[];
-  product?: Product; // Added product prop
+  product?: Product; 
 }
 
 const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({
-  mainImage,
+  mainImage = '',  // Provide default value
   additionalImages = [],
   product
 }) => {
