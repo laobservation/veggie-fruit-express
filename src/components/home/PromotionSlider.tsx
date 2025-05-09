@@ -83,19 +83,21 @@ const PromotionSlider: React.FC<PromotionSliderProps> = ({ customSlides }) => {
                   {slide.title}
                 </div>
                 
-                {/* Enhanced stylish call to action button */}
-                <div className={`w-full flex ${
-                  slide.position === 'center' ? 'justify-center' :
-                  slide.position === 'right' ? 'justify-end' : 'justify-start'
-                }`}>
-                  <Button 
-                    variant="default" 
-                    size="sm"
-                    className={`${slide.color} backdrop-blur-sm bg-opacity-80 border border-white/50 hover:bg-opacity-100 hover:scale-105 text-white font-bold shadow-lg transition-all duration-300 rounded-lg px-4`}
-                  >
-                    {slide.callToAction || 'Shop Now'}
-                  </Button>
-                </div>
+                {/* Enhanced stylish call to action button - Now conditional */}
+                {slide.showButton && (
+                  <div className={`w-full flex ${
+                    slide.position === 'center' ? 'justify-center' :
+                    slide.position === 'right' ? 'justify-end' : 'justify-start'
+                  }`}>
+                    <Button 
+                      variant="default" 
+                      size="sm"
+                      className={`${slide.color} backdrop-blur-sm bg-opacity-80 border border-white/50 hover:bg-opacity-100 hover:scale-105 text-white font-bold shadow-lg transition-all duration-300 rounded-lg px-4`}
+                    >
+                      {slide.callToAction || 'Shop Now'}
+                    </Button>
+                  </div>
+                )}
               </div>
             </div>
           ))}
