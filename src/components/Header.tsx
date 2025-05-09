@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
@@ -8,6 +7,7 @@ import Cart from './Cart';
 import MobileMenu from './MobileMenu';
 import { useIsMobile } from '@/hooks/use-mobile';
 import SearchBar from './SearchBar';
+import LanguageSwitcher from './LanguageSwitcher';
 
 const Header = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -79,6 +79,10 @@ const Header = () => {
               {getTotalItems() < 10 ? `0${getTotalItems()}` : getTotalItems()}
             </span>
           </button>
+        </div>
+        
+        <div className="ml-2">
+          <LanguageSwitcher />
         </div>
       </div>
       
