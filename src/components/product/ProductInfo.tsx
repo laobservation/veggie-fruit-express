@@ -38,10 +38,10 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
       <div className="flex justify-between items-center mb-3">
         <h1 className="text-2xl font-bold">{product.name}</h1>
         <div className="text-right">
-          <span className="text-lg font-bold text-green-600">
+          <span className="text-base font-bold text-green-600">
             {formatPrice(totalPrice)}
           </span>
-          <span className="text-sm text-gray-500 block">/{product.unit}</span>
+          <span className="text-xs text-gray-500 block">/{product.unit}</span>
         </div>
       </div>
       <p className="text-gray-500 mb-4">{getCategoryText(product.category)}</p>

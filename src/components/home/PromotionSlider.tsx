@@ -1,146 +1,95 @@
 
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { Slide } from '@/types/slider'; 
-import { useSlider } from '@/hooks/use-slider';
 import { Button } from '@/components/ui/button';
+import { useSlider } from '@/hooks/use-slider';
+import { Slide } from '@/types/slider';
 import { Link } from 'react-router-dom';
-import { cn } from '@/lib/utils';
 
 interface PromotionSliderProps {
   customSlides?: Slide[];
 }
 
 const PromotionSlider: React.FC<PromotionSliderProps> = ({ customSlides }) => {
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const isMobile = useIsMobile();
   const { slides: fetchedSlides, loading } = useSlider();
-  
-  const slides = customSlides || fetchedSlides;
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [slides, setSlides] = useState<Slide[]>([]);
 
-  // Auto-slide effect only for mobile
+  // Use either custom slides passed as props or fetched slides
   useEffect(() => {
-    if (isMobile && slides.length > 0) {
-      const interval = setInterval(() => {
-        setCurrentSlide((prev) => (prev + 1) % slides.length);
-      }, 4000);
-      
-      return () => clearInterval(interval);
+    if (customSlides) {
+      setSlides(customSlides);
+    } else if (fetchedSlides.length > 0) {
+      setSlides(fetchedSlides);
     }
-  }, [isMobile, slides.length]);
-  
-  const nextSlide = () => {
-    if (slides.length > 0) {
+  }, [customSlides, fetchedSlides]);
+
+  // Auto-advance slides every 5 seconds
+  useEffect(() => {
+    if (slides.length <= 1) return;
+    
+    const interval = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slides.length);
-    }
-  };
-  
-  const prevSlide = () => {
-    if (slides.length > 0) {
-      setCurrentSlide((prev) => (prev - 1 + slides.length) % slides.length);
-    }
-  };
-  
-  const goToSlide = (index: number) => {
+    }, 5000);
+    
+    return () => clearInterval(interval);
+  }, [slides.length]);
+
+  const handleDotClick = (index: number) => {
     setCurrentSlide(index);
   };
 
   if (loading || slides.length === 0) {
     return (
-      <div className="mb-8 h-48 bg-gray-100 rounded-xl animate-pulse"></div>
+      <div className="h-[400px] bg-gray-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500"></div>
+      </div>
     );
   }
-  
+
   return (
-    <div className="relative mb-8">
-      <div className="overflow-hidden rounded-xl">
-        <div 
-          className="flex transition-transform duration-500 ease-in-out"
-          style={{ transform: `translateX(-${currentSlide * 100}%)` }}
-        >
-          {slides.map((slide) => (
+    <div className="relative w-full h-[400px] overflow-hidden">
+      <div 
+        className="flex transition-transform duration-700 h-full" 
+        style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+      >
+        {slides.map((slide, index) => (
+          <div key={slide.id || index} className="min-w-full h-full flex-shrink-0">
             <div 
-              key={slide.id} 
-              className={`flex-shrink-0 w-full md:w-1/3 h-48 relative rounded-xl overflow-hidden`}
-              style={{ 
-                minWidth: isMobile ? '100%' : '33.333%',
-              }}
+              className="w-full h-full bg-cover bg-center flex items-center" 
+              style={{ backgroundImage: `url(${slide.image})` }}
             >
-              {/* Image background - Removed black fade overlay */}
-              <img 
-                src={slide.image} 
-                alt={slide.title} 
-                className="w-full h-full object-cover"
-              />
-              
-              {/* Title overlay - Now without dark background */}
-              <div className="absolute inset-0 flex flex-col justify-between p-4">
-                <div className={`text-white font-semibold text-sm md:text-base max-w-[80%] drop-shadow-md ${
-                  slide.position === 'center' ? 'mx-auto text-center' :
-                  slide.position === 'right' ? 'ml-auto text-right' : 'text-left'
+              <div className={`container mx-auto px-6 ${
+                slide.position === 'left' ? 'text-left' : 
+                slide.position === 'right' ? 'text-right' : 
+                'text-center'
+              }`}>
+                <div className={`max-w-lg ${
+                  slide.position === 'left' ? '' : 
+                  slide.position === 'right' ? 'ml-auto' : 
+                  'mx-auto'
                 }`}>
-                  {slide.title}
-                </div>
-                
-                {/* Enhanced stylish call to action button - Now conditional */}
-                {slide.showButton && (
-                  <div className={`w-full flex ${
-                    slide.position === 'center' ? 'justify-center' :
-                    slide.position === 'right' ? 'justify-end' : 'justify-start'
-                  }`}>
-                    <Button 
-                      variant="default" 
-                      size="sm"
-                      className={`${slide.color} backdrop-blur-sm bg-opacity-80 border border-white/50 hover:bg-opacity-100 hover:scale-105 text-white font-bold shadow-lg transition-all duration-300 rounded-lg px-4`}
-                    >
-                      {slide.callToAction || 'Shop Now'}
+                  <h2 className="text-3xl md:text-4xl font-bold mb-4">{slide.title}</h2>
+                  {slide.showButton && (
+                    <Button asChild className={`${slide.color} hover:opacity-90 text-white`}>
+                      <Link to="/fruits">{slide.callToAction}</Link>
                     </Button>
-                  </div>
-                )}
+                  )}
+                </div>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
       
-      {/* Navigation arrows */}
       {slides.length > 1 && (
-        <div className="hidden md:block">
-          <button 
-            onClick={prevSlide}
-            className="absolute top-1/2 left-4 -translate-y-1/2 bg-white/70 p-2 rounded-full shadow-md hover:bg-white transition-colors"
-            aria-label="Previous slide"
-          >
-            <ChevronLeft className="h-5 w-5" />
-          </button>
-          <button 
-            onClick={nextSlide}
-            className="absolute top-1/2 right-4 -translate-y-1/2 bg-white/70 p-2 rounded-full shadow-md hover:bg-white transition-colors"
-            aria-label="Next slide"
-          >
-            <ChevronRight className="h-5 w-5" />
-          </button>
-        </div>
-      )}
-      
-      {/* Stylish pagination dots with light green color */}
-      {slides.length > 1 && (
-        <div className="absolute bottom-0 top-0 right-4 flex flex-col justify-center items-center gap-1.5">
+        <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-2">
           {slides.map((_, index) => (
             <button
               key={index}
-              onClick={() => goToSlide(index)}
-              className={cn(
-                "w-2 h-2 rounded-full transition-all duration-300 relative",
-                currentSlide === index 
-                  ? "bg-veggie-secondary scale-125 shadow-glow" 
-                  : "bg-veggie-light/80 hover:bg-veggie-light"
-              )}
-              style={{ 
-                boxShadow: currentSlide === index ? '0 0 5px 1px rgba(139, 195, 74, 0.6)' : 'none',
-                transform: `scale(${currentSlide === index ? 1.25 : 1})` 
-              }}
+              onClick={() => handleDotClick(index)}
+              className={`w-3 h-3 rounded-full transition-colors ${
+                currentSlide === index ? 'bg-green-500' : 'bg-white bg-opacity-50'
+              }`}
               aria-label={`Go to slide ${index + 1}`}
             />
           ))}

@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Slide } from '@/types/slider';
-import { MediaPreview } from '@/components/admin/MediaPreview';
+import MediaPreview from '@/components/admin/MediaPreview';
 
 interface SlideFormProps {
   slide: Partial<Slide>;
@@ -68,7 +68,8 @@ export const SlideForm: React.FC<SlideFormProps> = ({
       <div>
         <Label htmlFor="image">Image</Label>
         <MediaPreview 
-          url={imageUrl} 
+          mediaType="image"
+          imageUrl={imageUrl}
           onSelect={handleImageChange} 
           className="mt-1 h-32 rounded-md"
         />

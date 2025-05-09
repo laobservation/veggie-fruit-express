@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ShoppingBag } from 'lucide-react';
 
 interface ProductActionsProps {
   handleAddToCart: () => void;

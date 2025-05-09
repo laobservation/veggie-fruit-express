@@ -4,6 +4,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase, getCategoriesTable } from '@/integrations/supabase/client';
 import NewCategoryForm from './categories/NewCategoryForm';
 import CategoryList from './categories/CategoryList';
+import { toast } from 'sonner';
 
 // Define the Category interface
 export interface Category {
@@ -25,7 +26,7 @@ const CategoryManager: React.FC = () => {
     icon: '🍎',
     bg: 'bg-red-100'
   });
-  const { toast } = useToast();
+  const { toast: uiToast } = useToast();
 
   // Fetch categories on component mount
   useEffect(() => {
@@ -81,7 +82,7 @@ const CategoryManager: React.FC = () => {
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
-      toast({
+      uiToast({
         title: 'Error',
         description: 'Failed to load categories',
         variant: 'destructive'
@@ -158,8 +159,36 @@ const CategoryManager: React.FC = () => {
           } : cat
         )
       );
+
+      // Also update any products that reference this category
+      // This ensures product filtering still works correctly
+      const oldName = categories.find(c => c.id === editForm.id)?.name;
+      if (oldName && oldName !== editForm.name) {
+        // Find all products with the old category name and update them
+        const { data: productsToUpdate } = await supabase
+          .from('Products')
+          .select('id')
+          .eq('category', oldName);
+
+        if (productsToUpdate && productsToUpdate.length > 0) {
+          const productIds = productsToUpdate.map(p => p.id);
+          
+          // Update all products with the new category name
+          await supabase
+            .from('Products')
+            .update({ category: editForm.name })
+            .in('id', productIds);
+            
+          console.log(`Updated ${productIds.length} products to new category: ${editForm.name}`);
+          toast.success(`Catégorie et ${productIds.length} produits mis à jour`);
+        } else {
+          toast.success("Catégorie mise à jour");
+        }
+      } else {
+        toast.success("Catégorie mise à jour");
+      }
       
-      toast({
+      uiToast({
         title: 'Success',
         description: 'Category updated successfully'
       });
@@ -169,7 +198,7 @@ const CategoryManager: React.FC = () => {
       
     } catch (error: any) {
       console.error('Error updating category:', error);
-      toast({
+      uiToast({
         title: 'Error',
         description: `Failed to update category: ${error.message || 'Unknown error'}`,
         variant: 'destructive'
@@ -189,7 +218,7 @@ const CategoryManager: React.FC = () => {
   // Add a new category
   const handleAddCategory = async () => {
     if (!newCategory.name) {
-      toast({
+      uiToast({
         title: 'Error',
         description: 'Category name is required',
         variant: 'destructive'
@@ -207,6 +236,17 @@ const CategoryManager: React.FC = () => {
         image_icon: newCategory.imageIcon || null,
         background_color: newCategory.bg || 'bg-gray-100'
       };
+      
+      // Check if a category with this name already exists
+      const { data: existingCategories } = await supabase
+        .from('categories')
+        .select('id')
+        .ilike('name', newCategory.name);
+        
+      if (existingCategories && existingCategories.length > 0) {
+        toast.error(`Une catégorie avec le nom "${newCategory.name}" existe déjà`);
+        return;
+      }
       
       // Use direct Supabase client instead of helper function to bypass RLS
       const { data, error } = await supabase
@@ -243,14 +283,15 @@ const CategoryManager: React.FC = () => {
         bg: 'bg-red-100'
       });
       
-      toast({
+      toast.success("Nouvelle catégorie ajoutée");
+      uiToast({
         title: 'Success',
         description: 'Category added successfully'
       });
       
     } catch (error: any) {
       console.error('Error adding category:', error);
-      toast({
+      uiToast({
         title: 'Error',
         description: `Failed to add category: ${error.message || 'Unknown error'}`,
         variant: 'destructive'
@@ -265,7 +306,31 @@ const CategoryManager: React.FC = () => {
     }
     
     try {
+      // Find the category to be deleted for potential product updates
+      const categoryToDelete = categories.find(cat => cat.id === id);
+      if (!categoryToDelete) {
+        throw new Error('Category not found');
+      }
+      
       console.log('Deleting category:', id);
+      
+      // Update products in this category to a default category or null
+      const { data: productsToUpdate } = await supabase
+        .from('Products')
+        .select('id')
+        .eq('category', categoryToDelete.name);
+        
+      if (productsToUpdate && productsToUpdate.length > 0) {
+        const productIds = productsToUpdate.map(p => p.id);
+        
+        // Update products to have no category
+        await supabase
+          .from('Products')
+          .update({ category: null })
+          .in('id', productIds);
+          
+        console.log(`Updated ${productIds.length} products to remove the deleted category`);
+      }
       
       // Delete the category from the database
       const { error } = await supabase
@@ -278,13 +343,14 @@ const CategoryManager: React.FC = () => {
       // Update local state immediately
       setCategories(categories.filter(cat => cat.id !== id));
       
-      toast({
+      toast.success(`Catégorie "${categoryToDelete.name}" supprimée`);
+      uiToast({
         title: 'Success',
         description: 'Category deleted successfully'
       });
     } catch (error) {
       console.error('Error deleting category:', error);
-      toast({
+      uiToast({
         title: 'Error',
         description: 'Failed to delete category',
         variant: 'destructive'

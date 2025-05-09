@@ -30,6 +30,12 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
   });
 
   const onSubmit = async (data: FormValues) => {
+    // Verify that we have items in the cart
+    if (!items || items.length === 0) {
+      toast.error("Votre panier est vide. Veuillez ajouter des produits avant de finaliser la commande.");
+      return;
+    }
+    
     try {
       // Process the order and get order details for thank you page
       const orderDetails = await processOrder(data, items, getTotalPrice, getShippingCost);
@@ -40,7 +46,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
       // Close the form/cart panel
       onClose();
       
-      // Navigate directly to thank you page with order details
+      // Always navigate to thank you page with order details
       navigate('/thank-you', { 
         state: { orderDetails },
         replace: true // Use replace to prevent going back to cart
