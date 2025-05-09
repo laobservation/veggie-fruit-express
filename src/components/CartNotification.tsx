@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { ShoppingCart, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatPrice } from '@/lib/formatPrice';
-import { Product } from '@/data/products';
+import { Product } from '@/types/product';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useCart } from '@/hooks/use-cart';
 

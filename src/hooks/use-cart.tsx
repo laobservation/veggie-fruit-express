@@ -1,7 +1,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Product } from '@/data/products';
+import { Product } from '@/types/product';
 import { ReactNode, useState, useEffect } from 'react';
 import CartNotification from '@/components/CartNotification';
 import { ServiceOption } from '@/types/product';
