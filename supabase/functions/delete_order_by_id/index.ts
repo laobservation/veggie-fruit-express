@@ -40,31 +40,30 @@ serve(async (req) => {
 
     console.log(`Edge function: Deleting order ${orderIdNumber}`)
 
-    // First try to use the direct database RPC function for absolute deletion
-    const { error: rpcError, data: rpcData } = await supabaseClient.rpc(
-      'delete_order_by_id',
-      { order_id: orderIdNumber }
-    )
-    
-    if (rpcError) {
-      console.error('Edge function: Error using RPC to delete order:', rpcError)
+    // Execute a direct DELETE operation with service role privileges
+    const { error } = await supabaseClient
+      .from('Orders')
+      .delete()
+      .eq('id', orderIdNumber)
+
+    if (error) {
+      console.error('Edge function: Error deleting order:', error)
       
-      // If RPC fails, try a direct DELETE with service role privileges
-      const { error } = await supabaseClient
-        .from('Orders')
-        .delete()
-        .eq('id', orderIdNumber)
-    
-      if (error) {
-        console.error('Edge function: Error deleting order:', error)
+      // Try a raw SQL delete as a fallback
+      const { error: sqlError } = await supabaseClient.rpc(
+        'delete_order_by_id',
+        { order_id: orderIdNumber }
+      )
+      
+      if (sqlError) {
         return new Response(
-          JSON.stringify({ error: error.message }),
+          JSON.stringify({ error: sqlError.message }),
           { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
         )
       }
     }
 
-    // Verify deletion - careful checking
+    // Verify deletion
     const { data: checkData } = await supabaseClient
       .from('Orders')
       .select('id')
@@ -72,22 +71,10 @@ serve(async (req) => {
       .maybeSingle()
 
     if (checkData) {
-      // One more attempt to force delete if still exists
-      await supabaseClient.from('Orders').delete().eq('id', orderIdNumber)
-      
-      // Check again
-      const { data: finalCheck } = await supabaseClient
-        .from('Orders')
-        .select('id')
-        .eq('id', orderIdNumber)
-        .maybeSingle()
-        
-      if (finalCheck) {
-        return new Response(
-          JSON.stringify({ error: "Order still exists after multiple deletion attempts" }),
-          { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
-        )
-      }
+      return new Response(
+        JSON.stringify({ error: "Order still exists after deletion attempt" }),
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
+      )
     }
 
     // Return a success response

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, getCategoriesTable } from '@/integrations/supabase/client';
 import NewCategoryForm from './categories/NewCategoryForm';
 import CategoryList from './categories/CategoryList';
 
@@ -57,8 +57,7 @@ const CategoryManager: React.FC = () => {
   const fetchCategories = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase
-        .from('categories')
+      const { data, error } = await getCategoriesTable()
         .select('*')
         .order('name', { ascending: true });
       
@@ -133,7 +132,7 @@ const CategoryManager: React.FC = () => {
       
       console.log('Update data being sent to Supabase:', updateData);
       
-      // Update the category in the database using service role if available
+      // Update the category in the database
       const { error } = await supabase
         .from('categories')
         .update(updateData)
@@ -174,7 +173,7 @@ const CategoryManager: React.FC = () => {
     });
   };
 
-  // Add a new category - Fixed to use service role for bypassing RLS
+  // Add a new category
   const handleAddCategory = async () => {
     if (!newCategory.name) {
       toast({
@@ -188,20 +187,16 @@ const CategoryManager: React.FC = () => {
     try {
       console.log('Adding new category:', newCategory);
       
-      // Creating a category directly in the database using direct API call
-      // This bypasses RLS by using a server-side function
-      const { data, error } = await fetch('/api/admin/category', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
+      // Use direct Supabase client instead of helper function to bypass RLS
+      const { data, error } = await supabase
+        .from('categories')
+        .insert({
           name: newCategory.name,
           icon: newCategory.icon || null,
           image_icon: newCategory.imageIcon || null,
           background_color: newCategory.bg || 'bg-gray-100'
         })
-      }).then(res => res.json());
+        .select();
       
       if (error) {
         console.error('Database error when adding category:', error);
@@ -244,10 +239,11 @@ const CategoryManager: React.FC = () => {
     try {
       console.log('Deleting category:', id);
       
-      // Delete the category using the same server-side approach
-      const { error } = await fetch(`/api/admin/category/${id}`, {
-        method: 'DELETE'
-      }).then(res => res.json());
+      // Delete the category from the database
+      const { error } = await supabase
+        .from('categories')
+        .delete()
+        .eq('id', id);
       
       if (error) throw error;
       

@@ -38,7 +38,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
       <div className="flex justify-between items-center mb-3">
         <h1 className="text-2xl font-bold">{product.name}</h1>
         <div className="text-right">
-          <span className="text-xl font-bold text-green-600">
+          <span className="text-2xl font-bold text-green-600">
             {formatPrice(totalPrice)}
           </span>
           <span className="text-sm text-gray-500 block">/{product.unit}</span>
@@ -46,7 +46,9 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
       </div>
       <p className="text-gray-500 mb-4">{getCategoryText(product.category)}</p>
       
-      {/* Description removed as requested */}
+      {/* Description - Now positioned above services */}
+      <h2 className="font-semibold text-lg mb-2">Description</h2>
+      <p className="text-gray-600 whitespace-pre-wrap mb-6">{product.description}</p>
       
       {/* Additional Services */}
       <ServiceOptions 
