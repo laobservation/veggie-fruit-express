@@ -76,6 +76,8 @@ const CategoryManager: React.FC = () => {
         
         setCategories(formattedCategories);
         console.log('Categories fetched:', formattedCategories);
+      } else {
+        setCategories([]);
       }
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -143,6 +145,20 @@ const CategoryManager: React.FC = () => {
         throw error;
       }
       
+      // Update local state to reflect changes immediately
+      setCategories(prevCategories => 
+        prevCategories.map(cat => 
+          cat.id === editForm.id ? {
+            ...cat,
+            name: editForm.name,
+            icon: editForm.icon,
+            imageIcon: editForm.imageIcon,
+            bg: editForm.bg,
+            path: `/category/${editForm.name.toLowerCase()}`
+          } : cat
+        )
+      );
+      
       toast({
         title: 'Success',
         description: 'Category updated successfully'
@@ -150,9 +166,6 @@ const CategoryManager: React.FC = () => {
       
       setEditingId(null);
       setEditForm(null);
-      
-      // Fetch updated categories to ensure UI is in sync
-      fetchCategories();
       
     } catch (error: any) {
       console.error('Error updating category:', error);
@@ -187,15 +200,18 @@ const CategoryManager: React.FC = () => {
     try {
       console.log('Adding new category:', newCategory);
       
+      // Prepare data for insertion
+      const insertData = {
+        name: newCategory.name,
+        icon: newCategory.icon || null,
+        image_icon: newCategory.imageIcon || null,
+        background_color: newCategory.bg || 'bg-gray-100'
+      };
+      
       // Use direct Supabase client instead of helper function to bypass RLS
       const { data, error } = await supabase
         .from('categories')
-        .insert({
-          name: newCategory.name,
-          icon: newCategory.icon || null,
-          image_icon: newCategory.imageIcon || null,
-          background_color: newCategory.bg || 'bg-gray-100'
-        })
+        .insert(insertData)
         .select();
       
       if (error) {
@@ -204,6 +220,21 @@ const CategoryManager: React.FC = () => {
       }
       
       console.log('New category added:', data);
+      
+      // Add the new category to local state immediately
+      if (data && data.length > 0) {
+        const newCat = data[0];
+        const formattedCategory: Category = {
+          id: newCat.id,
+          name: newCat.name,
+          icon: newCat.icon || undefined,
+          imageIcon: newCat.image_icon,
+          bg: newCat.background_color || 'bg-gray-100',
+          path: `/category/${newCat.name.toLowerCase()}`
+        };
+        
+        setCategories([...categories, formattedCategory]);
+      }
       
       // Reset the form
       setNewCategory({
@@ -216,9 +247,6 @@ const CategoryManager: React.FC = () => {
         title: 'Success',
         description: 'Category added successfully'
       });
-      
-      // Fetch updated categories to ensure UI is in sync
-      fetchCategories();
       
     } catch (error: any) {
       console.error('Error adding category:', error);
@@ -247,7 +275,7 @@ const CategoryManager: React.FC = () => {
       
       if (error) throw error;
       
-      // Update local state
+      // Update local state immediately
       setCategories(categories.filter(cat => cat.id !== id));
       
       toast({

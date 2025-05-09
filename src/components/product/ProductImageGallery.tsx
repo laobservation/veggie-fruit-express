@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Product } from '@/types/product';
 import MediaDisplay from '@/components/MediaDisplay';
 
@@ -9,9 +9,30 @@ interface ProductImageGalleryProps {
 
 const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ product }) => {
   const [selectedImage, setSelectedImage] = useState<string>(product.image);
+  const [userInteracted, setUserInteracted] = useState<boolean>(false);
   
   // Combine main image with additional images for the gallery
   const allImages = [product.image, ...(product.additionalImages || [])];
+  
+  // Auto-switch images every 3 seconds if there are multiple images
+  // and the user hasn't manually interacted with the gallery yet
+  useEffect(() => {
+    if (allImages.length <= 1 || userInteracted) return;
+    
+    let currentIndex = allImages.indexOf(selectedImage);
+    const timerId = setTimeout(() => {
+      currentIndex = (currentIndex + 1) % allImages.length;
+      setSelectedImage(allImages[currentIndex]);
+    }, 3000);
+    
+    return () => clearTimeout(timerId);
+  }, [selectedImage, allImages, userInteracted]);
+  
+  // Handle manual image selection
+  const handleImageSelect = (img: string) => {
+    setUserInteracted(true);
+    setSelectedImage(img);
+  };
   
   return (
     <div className="bg-white rounded-lg mb-4 overflow-hidden shadow-sm">
@@ -39,7 +60,7 @@ const ProductImageGallery: React.FC<ProductImageGalleryProps> = ({ product }) =>
           {allImages.map((img, index) => (
             <button 
               key={index}
-              onClick={() => setSelectedImage(img)}
+              onClick={() => handleImageSelect(img)}
               className={`flex-shrink-0 w-16 h-16 rounded-md overflow-hidden border-2 ${
                 selectedImage === img ? 'border-green-500' : 'border-transparent'
               }`}

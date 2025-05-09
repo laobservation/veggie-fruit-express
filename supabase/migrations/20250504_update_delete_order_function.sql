@@ -8,6 +8,12 @@ RETURNS boolean AS $$
 DECLARE
   row_count INTEGER;
 BEGIN
+  -- First check if the order exists
+  IF NOT EXISTS (SELECT 1 FROM public."Orders" WHERE id = order_id) THEN
+    RAISE NOTICE 'Order with ID % does not exist', order_id;
+    RETURN FALSE;
+  END IF;
+  
   -- Direct SQL DELETE for maximum compatibility
   DELETE FROM public."Orders" WHERE id = order_id;
   
