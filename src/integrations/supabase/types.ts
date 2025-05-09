@@ -296,10 +296,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      delete_order_by_id: {
-        Args: { order_id: number }
-        Returns: boolean
-      }
+      [_ in never]: never
     }
     Enums: {
       [_ in never]: never

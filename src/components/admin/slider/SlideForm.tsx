@@ -1,152 +1,158 @@
 
-import React, { useState } from 'react';
+import React from 'react';
+import { Slide, SlideFormData } from '@/types/slider';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
-import { Slide } from '@/types/slider';
-import MediaPreview from '@/components/admin/MediaPreview';
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from '@/components/ui/select';
+import { useToast } from '@/hooks/use-toast';
 
 interface SlideFormProps {
-  slide: Partial<Slide>;
-  onChange: (field: string, value: any) => void;
-  onSave: () => void;
-  onCancel?: () => void;
-  isEditing?: boolean;
+  currentSlide: SlideFormData;
+  isEditing: boolean;
+  handleInputChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleSelectChange: (name: string, value: string) => void;
+  handleSubmit: () => void;
+  onCancel: () => void;
 }
 
-export const SlideForm: React.FC<SlideFormProps> = ({ 
-  slide, 
-  onChange, 
-  onSave, 
-  onCancel,
-  isEditing = false
+const SlideForm: React.FC<SlideFormProps> = ({
+  currentSlide,
+  isEditing,
+  handleInputChange,
+  handleSelectChange,
+  handleSubmit,
+  onCancel
 }) => {
-  const [imageUrl, setImageUrl] = useState<string>(slide.image || '');
-  
-  // Update image URL and notify parent component
-  const handleImageChange = (url: string) => {
-    setImageUrl(url);
-    onChange('image', url);
-  };
+  const colorOptions = [
+    { name: 'Emerald Green', value: 'bg-emerald-800' },
+    { name: 'Purple', value: 'bg-purple-700' },
+    { name: 'Teal', value: 'bg-teal-700' },
+    { name: 'Blue', value: 'bg-blue-700' },
+    { name: 'Rose', value: 'bg-rose-700' },
+    { name: 'Amber', value: 'bg-amber-600' },
+    { name: 'Indigo', value: 'bg-indigo-700' }
+  ];
   
   const positionOptions = [
-    { value: 'left', label: 'Left' },
-    { value: 'right', label: 'Right' },
-    { value: 'center', label: 'Center' }
+    { name: 'Left', value: 'left' },
+    { name: 'Center', value: 'center' },
+    { name: 'Right', value: 'right' }
   ];
   
-  const colorOptions = [
-    { value: 'bg-red-700', label: 'Red' },
-    { value: 'bg-blue-700', label: 'Blue' },
-    { value: 'bg-green-700', label: 'Green' },
-    { value: 'bg-yellow-700', label: 'Yellow' },
-    { value: 'bg-purple-700', label: 'Purple' },
-    { value: 'bg-pink-700', label: 'Pink' },
-    { value: 'bg-indigo-700', label: 'Indigo' },
-    { value: 'bg-gray-700', label: 'Gray' },
-    { value: 'bg-black', label: 'Black' },
-    { value: 'bg-emerald-800', label: 'Emerald' },
-    { value: 'bg-teal-700', label: 'Teal' },
-    { value: 'bg-orange-700', label: 'Orange' }
-  ];
-
   return (
-    <div className="space-y-4">
-      <div>
+    <div className="grid gap-4 py-4">
+      <div className="grid gap-2">
         <Label htmlFor="title">Title</Label>
         <Input
           id="title"
-          value={slide.title || ''}
-          onChange={(e) => onChange('title', e.target.value)}
+          name="title"
+          value={currentSlide.title}
+          onChange={handleInputChange}
           placeholder="Slide Title"
-          className="mt-1"
         />
+        <p className="text-xs text-gray-500">Used for admin reference (not displayed on slider)</p>
       </div>
       
-      <div>
-        <Label htmlFor="image">Image</Label>
-        <MediaPreview 
-          mediaType="image"
-          imageUrl={imageUrl}
-          onSelect={handleImageChange} 
-          className="mt-1 h-32 rounded-md"
+      <div className="grid gap-2">
+        <Label htmlFor="image">Image URL</Label>
+        <Input
+          id="image"
+          name="image"
+          value={currentSlide.image}
+          onChange={handleInputChange}
+          placeholder="/images/your-image.jpg"
         />
+        <p className="text-xs text-gray-500">Enter the path to an image (e.g., /images/fruit-banner.jpg)</p>
       </div>
       
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <Label htmlFor="position">Position</Label>
-          <Select
-            value={slide.position || 'left'}
-            onValueChange={(value) => onChange('position', value)}
-          >
-            <SelectTrigger id="position" className="mt-1">
-              <SelectValue placeholder="Select position" />
-            </SelectTrigger>
-            <SelectContent>
-              {positionOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-        
-        <div>
-          <Label htmlFor="color">Button Color</Label>
-          <Select
-            value={slide.color || 'bg-emerald-800'}
-            onValueChange={(value) => onChange('color', value)}
-          >
-            <SelectTrigger id="color" className="mt-1">
-              <SelectValue placeholder="Select color" />
-            </SelectTrigger>
-            <SelectContent>
-              {colorOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  <div className="flex items-center">
-                    <div className={`w-4 h-4 rounded-full mr-2 ${option.value}`}></div>
-                    {option.label}
-                  </div>
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-      
-      <div>
-        <Label htmlFor="callToAction">Call To Action Text</Label>
+      <div className="grid gap-2">
+        <Label htmlFor="callToAction">Call to Action Text</Label>
         <Input
           id="callToAction"
-          value={slide.callToAction || 'Shop Now'}
-          onChange={(e) => onChange('callToAction', e.target.value)}
-          placeholder="Button text"
-          className="mt-1"
+          name="callToAction"
+          value={currentSlide.callToAction}
+          onChange={handleInputChange}
+          placeholder="Shop Now"
         />
+        <p className="text-xs text-gray-500">Text for the button (e.g., 'Shop Now', 'Learn More')</p>
       </div>
       
-      <div className="flex items-center justify-between">
-        <div className="space-y-0.5">
-          <Label htmlFor="showButton">Show Button</Label>
-          <p className="text-sm text-gray-500">Display call-to-action button on this slide</p>
+      <div className="grid gap-2">
+        <Label htmlFor="color">Button Color</Label>
+        <Select
+          value={currentSlide.color}
+          onValueChange={(value) => handleSelectChange('color', value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select a color" />
+          </SelectTrigger>
+          <SelectContent>
+            {colorOptions.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                <div className="flex items-center">
+                  <div 
+                    className="w-4 h-4 rounded-full mr-2"
+                    style={{ backgroundColor: `var(--${option.value.replace('bg-', '')})` }}
+                  ></div>
+                  {option.name}
+                </div>
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <div className="grid gap-2">
+        <Label htmlFor="position">Button Position</Label>
+        <Select
+          value={currentSlide.position}
+          onValueChange={(value) => handleSelectChange('position', value as 'left' | 'right' | 'center')}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select a position" />
+          </SelectTrigger>
+          <SelectContent>
+            {positionOptions.map(option => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      
+      <div className="mt-2">
+        <p className="text-sm font-medium mb-2">Preview:</p>
+        <div 
+          className="rounded-md h-20 relative overflow-hidden"
+          style={{ 
+            backgroundImage: currentSlide.image ? `url(${currentSlide.image})` : undefined,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center',
+            backgroundColor: !currentSlide.image ? 'gray' : undefined
+          }}
+        >
+          <div className="absolute inset-0 flex items-center justify-center">
+            <span className={`${currentSlide.color} text-white font-bold px-3 py-1 rounded border border-white`}>
+              {currentSlide.callToAction || 'Shop Now'}
+            </span>
+          </div>
         </div>
-        <Switch
-          id="showButton"
-          checked={slide.showButton !== false} // Default to true if undefined
-          onCheckedChange={(checked) => onChange('showButton', checked)}
-        />
       </div>
       
-      <div className="flex justify-end space-x-2 pt-4">
-        {onCancel && (
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-        )}
-        <Button type="button" onClick={onSave}>
-          {isEditing ? 'Update Slide' : 'Add Slide'}
+      <div className="flex justify-end gap-2 mt-4">
+        <Button variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button onClick={handleSubmit}>
+          {isEditing ? 'Update' : 'Create'} Slide
         </Button>
       </div>
     </div>

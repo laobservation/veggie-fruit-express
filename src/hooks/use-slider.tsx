@@ -69,7 +69,6 @@ export const useSlider = () => {
           image: newDbSlide.image,
           position: newDbSlide.position as 'left' | 'right' | 'center',
           callToAction: newDbSlide.call_to_action,
-          showButton: newDbSlide.show_button !== false,
           order: newDbSlide.order || 0
         };
         
@@ -105,7 +104,6 @@ export const useSlider = () => {
           image: updatedDbSlide.image,
           position: updatedDbSlide.position as 'left' | 'right' | 'center',
           callToAction: updatedDbSlide.call_to_action,
-          showButton: updatedDbSlide.show_button !== false,
           order: updatedDbSlide.order || 0
         };
         

@@ -23,7 +23,6 @@ export const mapDatabaseSlidesToFrontend = (dbSlides: any[]): Slide[] => {
     image: slide.image,
     position: slide.position as 'left' | 'right' | 'center',
     callToAction: slide.call_to_action || 'Shop Now',
-    showButton: slide.show_button !== undefined ? slide.show_button : true,
     order: slide.order || 0
   }));
 };
@@ -37,7 +36,6 @@ export const getDefaultSlides = (): Slide[] => {
       image: '/images/fruit-banner.jpg',
       position: 'left',
       callToAction: 'Shop Fruits',
-      showButton: true,
       order: 0
     },
     {
@@ -47,7 +45,6 @@ export const getDefaultSlides = (): Slide[] => {
       image: '/images/vegetable-banner.jpg',
       position: 'center',
       callToAction: 'Shop Vegetables',
-      showButton: true,
       order: 1
     },
     {
@@ -57,7 +54,6 @@ export const getDefaultSlides = (): Slide[] => {
       image: '/lovable-uploads/827a5a28-0db3-4c43-90d7-280863c75660.png',
       position: 'right',
       callToAction: 'Shop Now',
-      showButton: true,
       order: 2
     }
   ];
@@ -71,7 +67,6 @@ export const addSlideToSupabase = async (slide: Omit<Slide, 'id'>) => {
     image: slide.image,
     position: slide.position,
     call_to_action: slide.callToAction,
-    show_button: slide.showButton,
     order: slide.order
   };
   
@@ -94,7 +89,6 @@ export const updateSlideInSupabase = async (slide: Slide) => {
     image: slide.image,
     position: slide.position,
     call_to_action: slide.callToAction,
-    show_button: slide.showButton,
     order: slide.order
   };
   

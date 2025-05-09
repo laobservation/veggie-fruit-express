@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useSlider } from '@/hooks/use-slider';
 import { Slide, SlideFormData } from '@/types/slider';
@@ -16,13 +15,12 @@ const SliderManager: React.FC = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
-  const [currentSlide, setCurrentSlide] = useState<Partial<Slide>>({
+  const [currentSlide, setCurrentSlide] = useState<SlideFormData>({
     title: '',
     color: 'bg-emerald-800',
     image: '',
     position: 'left',
-    callToAction: 'Shop Now',
-    showButton: true
+    callToAction: 'Shop Now'
   });
   const { toast } = useToast();
   
@@ -33,8 +31,7 @@ const SliderManager: React.FC = () => {
       color: 'bg-emerald-800',
       image: '',
       position: 'left',
-      callToAction: 'Shop Now',
-      showButton: true
+      callToAction: 'Shop Now'
     });
     setIsDialogOpen(true);
   };
@@ -51,21 +48,21 @@ const SliderManager: React.FC = () => {
     }
   };
   
-  const handleChange = (field: string, value: any) => {
-    setCurrentSlide(prev => ({ ...prev, [field]: value }));
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setCurrentSlide({ ...currentSlide, [name]: value });
+  };
+  
+  const handleSelectChange = (name: string, value: string) => {
+    setCurrentSlide({ ...currentSlide, [name]: value });
   };
   
   const handleSubmit = async () => {
     try {
-      if (isEditing && 'id' in currentSlide) {
+      if (isEditing) {
         await updateSlide(currentSlide as Slide);
       } else {
-        // Add order property for new slides
-        const slideData = {
-          ...currentSlide,
-          order: slides.length // This will be replaced in the service based on the highest order value
-        };
-        await addSlide(slideData as Omit<Slide, 'id'>);
+        await addSlide(currentSlide);
       }
       setIsDialogOpen(false);
     } catch (error) {
@@ -166,11 +163,12 @@ const SliderManager: React.FC = () => {
             <DialogTitle>{isEditing ? 'Edit Slide' : 'Add New Slide'}</DialogTitle>
           </DialogHeader>
           <SlideForm
-            slide={currentSlide}
-            onChange={handleChange}
-            onSave={handleSubmit}
-            onCancel={() => setIsDialogOpen(false)}
+            currentSlide={currentSlide}
             isEditing={isEditing}
+            handleInputChange={handleInputChange}
+            handleSelectChange={handleSelectChange}
+            handleSubmit={handleSubmit}
+            onCancel={() => setIsDialogOpen(false)}
           />
         </DialogContent>
       </Dialog>

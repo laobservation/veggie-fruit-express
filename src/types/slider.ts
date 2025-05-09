@@ -1,20 +1,20 @@
 
 export interface Slide {
   id: string;
-  title: string;
-  color: string;
+  title?: string;
+  color?: string;
   image: string;
-  position: 'left' | 'right' | 'center';
-  callToAction: string;
-  showButton: boolean;
-  order: number;
+  position?: 'left' | 'right' | 'center';
+  callToAction?: string;
+  order?: number;
 }
 
 export interface SlideFormData {
-  title: string;
-  color: string;
+  id?: string;
+  title?: string;
+  color?: string;
   image: string;
-  position: 'left' | 'right' | 'center';
-  callToAction: string;
-  showButton: boolean;
+  position?: 'left' | 'right' | 'center';
+  callToAction?: string;
+  order?: number;
 }

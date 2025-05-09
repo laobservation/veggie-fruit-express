@@ -30,27 +30,18 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
   });
 
   const onSubmit = async (data: FormValues) => {
-    // Verify that we have items in the cart
-    if (!items || items.length === 0) {
-      toast.error("Votre panier est vide. Veuillez ajouter des produits avant de finaliser la commande.");
-      return;
-    }
-    
     try {
+      // Close the form/cart panel immediately to ensure it's not visible
+      onClose();
+      
       // Process the order and get order details for thank you page
       const orderDetails = await processOrder(data, items, getTotalPrice, getShippingCost);
       
+      // First redirect to thank you page for immediate visual feedback
+      navigate('/thank-you', { state: { orderDetails } });
+      
       // Clear the cart after the order is processed
       clearCart();
-      
-      // Close the form/cart panel
-      onClose();
-      
-      // Always navigate to thank you page with order details
-      navigate('/thank-you', { 
-        state: { orderDetails },
-        replace: true // Use replace to prevent going back to cart
-      });
     } catch (err) {
       console.error('Error processing order:', err);
       toast.error("Une erreur s'est produite. Veuillez réessayer.");
