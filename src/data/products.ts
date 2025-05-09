@@ -1,19 +1,5 @@
 import { Product } from '@/types/product';
 
-export interface Product {
-  id: string;
-  name: string;
-  category: 'fruit' | 'vegetable' | 'pack' | 'drink';
-  price: number;
-  image: string;
-  description: string;
-  unit: string;
-  featured: boolean; // Changed from optional to required
-  videoUrl?: string;
-  categoryLink?: boolean;
-  stock?: number;
-}
-
 export const products: Product[] = [
   {
     id: '1',
