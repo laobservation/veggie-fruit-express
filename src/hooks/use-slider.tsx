@@ -68,7 +68,6 @@ export const useSlider = () => {
           color: newDbSlide.color,
           image: newDbSlide.image,
           position: newDbSlide.position as 'left' | 'right' | 'center',
-          callToAction: newDbSlide.call_to_action,
           order: newDbSlide.order || 0
         };
         
@@ -103,7 +102,6 @@ export const useSlider = () => {
           color: updatedDbSlide.color,
           image: updatedDbSlide.image,
           position: updatedDbSlide.position as 'left' | 'right' | 'center',
-          callToAction: updatedDbSlide.call_to_action,
           order: updatedDbSlide.order || 0
         };
         

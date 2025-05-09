@@ -22,7 +22,6 @@ export const mapDatabaseSlidesToFrontend = (dbSlides: any[]): Slide[] => {
     color: slide.color,
     image: slide.image,
     position: slide.position as 'left' | 'right' | 'center',
-    callToAction: slide.call_to_action || 'Shop Now',
     order: slide.order || 0
   }));
 };
@@ -35,7 +34,6 @@ export const getDefaultSlides = (): Slide[] => {
       color: 'bg-emerald-800',
       image: '/images/fruit-banner.jpg',
       position: 'left',
-      callToAction: 'Shop Fruits',
       order: 0
     },
     {
@@ -44,7 +42,6 @@ export const getDefaultSlides = (): Slide[] => {
       color: 'bg-purple-700',
       image: '/images/vegetable-banner.jpg',
       position: 'center',
-      callToAction: 'Shop Vegetables',
       order: 1
     },
     {
@@ -53,7 +50,6 @@ export const getDefaultSlides = (): Slide[] => {
       color: 'bg-teal-700',
       image: '/lovable-uploads/827a5a28-0db3-4c43-90d7-280863c75660.png',
       position: 'right',
-      callToAction: 'Shop Now',
       order: 2
     }
   ];
@@ -66,7 +62,6 @@ export const addSlideToSupabase = async (slide: Omit<Slide, 'id'>) => {
     color: slide.color,
     image: slide.image,
     position: slide.position,
-    call_to_action: slide.callToAction,
     order: slide.order
   };
   
@@ -88,7 +83,6 @@ export const updateSlideInSupabase = async (slide: Slide) => {
     color: slide.color,
     image: slide.image,
     position: slide.position,
-    call_to_action: slide.callToAction,
     order: slide.order
   };
   

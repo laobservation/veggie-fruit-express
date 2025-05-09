@@ -39,12 +39,6 @@ const SlideCard: React.FC<SlideCardProps> = ({
           backgroundColor: !slide.image ? 'gray' : undefined 
         }}
       >
-        {/* Preview of slide with call to action at the bottom */}
-        <div className="absolute inset-0 flex flex-col justify-end items-center pb-4">
-          <span className={`${slide.color} text-white font-bold px-3 py-1 rounded border border-white`}>
-            {slide.callToAction || 'Shop Now'}
-          </span>
-        </div>
         {!slide.image && (
           <div className="absolute bottom-2 right-2 bg-white/70 text-xs px-2 py-1 rounded">
             No image set
@@ -58,12 +52,12 @@ const SlideCard: React.FC<SlideCardProps> = ({
           </span>
           <span 
             className="text-xs px-2 py-1 rounded-full text-white"
-            style={{ backgroundColor: slide.color.includes('bg-') ? 
+            style={{ backgroundColor: slide.color?.includes('bg-') ? 
               `var(--${slide.color.replace('bg-', '')})` : 
               slide.color 
             }}
           >
-            {slide.color.replace('bg-', '')}
+            {slide.color?.replace('bg-', '') || 'default'}
           </span>
         </div>
         <p className="text-sm font-medium mb-1 truncate">{slide.title}</p>

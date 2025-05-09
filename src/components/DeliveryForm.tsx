@@ -31,17 +31,17 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
 
   const onSubmit = async (data: FormValues) => {
     try {
-      // Close the form/cart panel immediately to ensure it's not visible
-      onClose();
-      
       // Process the order and get order details for thank you page
       const orderDetails = await processOrder(data, items, getTotalPrice, getShippingCost);
       
-      // First redirect to thank you page for immediate visual feedback
-      navigate('/thank-you', { state: { orderDetails } });
+      // Close the form/cart panel immediately to ensure it's not visible
+      onClose();
       
       // Clear the cart after the order is processed
       clearCart();
+      
+      // Redirect to thank you page with order details
+      navigate('/thank-you', { state: { orderDetails } });
     } catch (err) {
       console.error('Error processing order:', err);
       toast.error("Une erreur s'est produite. Veuillez réessayer.");

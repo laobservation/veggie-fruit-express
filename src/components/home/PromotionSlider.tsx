@@ -4,9 +4,6 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Slide } from '@/types/slider'; 
 import { useSlider } from '@/hooks/use-slider';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
-import { cn } from '@/lib/utils';
 
 interface PromotionSliderProps {
   customSlides?: Slide[];
@@ -82,20 +79,6 @@ const PromotionSlider: React.FC<PromotionSliderProps> = ({ customSlides }) => {
                 }`}>
                   {slide.title}
                 </div>
-                
-                {/* Enhanced stylish call to action button */}
-                <div className={`w-full flex ${
-                  slide.position === 'center' ? 'justify-center' :
-                  slide.position === 'right' ? 'justify-end' : 'justify-start'
-                }`}>
-                  <Button 
-                    variant="default" 
-                    size="sm"
-                    className={`${slide.color} backdrop-blur-sm bg-opacity-80 border border-white/50 hover:bg-opacity-100 hover:scale-105 text-white font-bold shadow-lg transition-all duration-300 rounded-lg px-4`}
-                  >
-                    {slide.callToAction || 'Shop Now'}
-                  </Button>
-                </div>
               </div>
             </div>
           ))}
@@ -129,12 +112,11 @@ const PromotionSlider: React.FC<PromotionSliderProps> = ({ customSlides }) => {
             <button
               key={index}
               onClick={() => goToSlide(index)}
-              className={cn(
-                "w-2 h-2 rounded-full transition-all duration-300 relative",
+              className={`w-2 h-2 rounded-full transition-all duration-300 relative ${
                 currentSlide === index 
                   ? "bg-veggie-secondary scale-125 shadow-glow" 
                   : "bg-veggie-light/80 hover:bg-veggie-light"
-              )}
+              }`}
               style={{ 
                 boxShadow: currentSlide === index ? '0 0 5px 1px rgba(139, 195, 74, 0.6)' : 'none',
                 transform: `scale(${currentSlide === index ? 1.25 : 1})` 

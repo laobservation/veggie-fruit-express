@@ -1,31 +1,23 @@
 
 import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Link } from 'react-router-dom';
 
 const heroSlides = [
   {
     image: '/images/hero-1.jpg',
     title: 'Fresh Farm Products',
     subtitle: 'Delivered directly from farm to your door',
-    ctaText: 'Shop Now',
-    ctaLink: '/fruits',
     position: 'left',
   },
   {
     image: '/images/hero-2.jpg',
     title: 'Organic Vegetables',
     subtitle: 'Grown naturally without pesticides',
-    ctaText: 'Explore',
-    ctaLink: '/vegetables',
     position: 'right',
   },
   {
     image: '/images/hero-3.jpg',
     title: 'Seasonal Fruits',
     subtitle: 'Enjoy the taste of every season',
-    ctaText: 'Discover',
-    ctaLink: '/fruits',
     position: 'center',
   }
 ];
@@ -64,9 +56,6 @@ const Hero = () => {
                 <div className="max-w-lg text-center md:text-left bg-black/30 p-6 rounded-lg backdrop-blur-sm">
                   <h1 className="text-4xl md:text-5xl font-bold text-white mb-4">{slide.title}</h1>
                   <p className="text-xl text-white mb-6">{slide.subtitle}</p>
-                  <Button asChild className="bg-veggie-primary hover:bg-veggie-dark text-white px-6 py-2 rounded-md">
-                    <Link to={slide.ctaLink}>{slide.ctaText}</Link>
-                  </Button>
                 </div>
               </div>
             </div>
