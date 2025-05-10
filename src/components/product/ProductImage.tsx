@@ -16,6 +16,7 @@ const ProductImage: React.FC<ProductImageProps> = ({ product }) => {
           className="w-full h-full object-contain p-6"
           autoplay={false}
           controls={true}
+          loading="eager" // Eager loading for main product image
         />
       </div>
     </div>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '@/hooks/use-cart';
@@ -6,7 +7,7 @@ import { useProductDetails } from '@/hooks/use-product-details';
 import { ServiceOption } from '@/types/product';
 import Header from '@/components/Header';
 import MobileBottomNav from '@/components/MobileBottomNav';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 // Import the newly created components
 import ProductHeader from '@/components/product/ProductHeader';
@@ -46,6 +47,7 @@ const ProductPage = () => {
   const { isFavorite, toggleFavorite } = useFavorites();
   const [selectedService, setSelectedService] = useState<string | null>(null);
   const [totalPrice, setTotalPrice] = useState<number>(0);
+  const productInfoRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     // Reset scroll position when product changes
@@ -68,6 +70,18 @@ const ProductPage = () => {
       setTotalPrice(product.price + servicePrice);
     }
   }, [product, selectedService]);
+  
+  // Add automatic scroll to product info section
+  useEffect(() => {
+    if (!loading && product && productInfoRef.current) {
+      setTimeout(() => {
+        productInfoRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center'
+        });
+      }, 500);
+    }
+  }, [loading, product]);
   
   const handleAddToCart = () => {
     if (product) {
@@ -158,14 +172,16 @@ const ProductPage = () => {
           )}
           
           {/* Product Info - Now includes description above product actions */}
-          <ProductInfo
-            product={product}
-            totalPrice={totalPrice}
-            isPack={isPack}
-            serviceOptions={serviceOptions}
-            selectedService={selectedService}
-            setSelectedService={setSelectedService}
-          />
+          <div ref={productInfoRef}>
+            <ProductInfo
+              product={product}
+              totalPrice={totalPrice}
+              isPack={isPack}
+              serviceOptions={serviceOptions}
+              selectedService={selectedService}
+              setSelectedService={setSelectedService}
+            />
+          </div>
           
           {/* Related Products */}
           <RelatedProducts 
