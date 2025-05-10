@@ -20,7 +20,6 @@ const SliderManager: React.FC = () => {
     color: 'bg-emerald-800',
     image: '',
     position: 'left',
-    callToAction: 'Shop Now'
   });
   const { toast } = useToast();
   
@@ -31,7 +30,6 @@ const SliderManager: React.FC = () => {
       color: 'bg-emerald-800',
       image: '',
       position: 'left',
-      callToAction: 'Shop Now'
     });
     setIsDialogOpen(true);
   };

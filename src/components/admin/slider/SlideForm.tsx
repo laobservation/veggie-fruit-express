@@ -12,6 +12,7 @@ import {
   SelectValue 
 } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
+import MediaPreview from '../MediaPreview';
 
 interface SlideFormProps {
   currentSlide: SlideFormData;
@@ -73,19 +74,7 @@ const SlideForm: React.FC<SlideFormProps> = ({
       </div>
       
       <div className="grid gap-2">
-        <Label htmlFor="callToAction">Call to Action Text</Label>
-        <Input
-          id="callToAction"
-          name="callToAction"
-          value={currentSlide.callToAction}
-          onChange={handleInputChange}
-          placeholder="Shop Now"
-        />
-        <p className="text-xs text-gray-500">Text for the button (e.g., 'Shop Now', 'Learn More')</p>
-      </div>
-      
-      <div className="grid gap-2">
-        <Label htmlFor="color">Button Color</Label>
+        <Label htmlFor="color">Background Color</Label>
         <Select
           value={currentSlide.color}
           onValueChange={(value) => handleSelectChange('color', value)}
@@ -110,7 +99,7 @@ const SlideForm: React.FC<SlideFormProps> = ({
       </div>
       
       <div className="grid gap-2">
-        <Label htmlFor="position">Button Position</Label>
+        <Label htmlFor="position">Content Position</Label>
         <Select
           value={currentSlide.position}
           onValueChange={(value) => handleSelectChange('position', value as 'left' | 'right' | 'center')}
@@ -141,7 +130,7 @@ const SlideForm: React.FC<SlideFormProps> = ({
         >
           <div className="absolute inset-0 flex items-center justify-center">
             <span className={`${currentSlide.color} text-white font-bold px-3 py-1 rounded border border-white`}>
-              {currentSlide.callToAction || 'Shop Now'}
+              {currentSlide.title || 'Slide Title'}
             </span>
           </div>
         </div>
