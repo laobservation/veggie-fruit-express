@@ -19,19 +19,9 @@ const OrdersManager: React.FC = () => {
     handleUpdateStatus,
     handleGeneratePDF,
     handlePageChange,
-    setViewDialogOpen
+    setViewDialogOpen,
+    refreshOrders
   } = useOrders();
-
-  // Enhanced refresh function with error handling and user feedback
-  const refreshOrders = useCallback(async () => {
-    try {
-      await fetchOrders();
-      toast.success("Liste des commandes mise à jour");
-    } catch (error) {
-      console.error("Error refreshing orders:", error);
-      toast.error("Erreur lors de la mise à jour des commandes");
-    }
-  }, [fetchOrders]);
 
   // Force refresh on component mount and set up polling
   useEffect(() => {
@@ -41,7 +31,7 @@ const OrdersManager: React.FC = () => {
     // Set up more frequent polling for new orders
     const intervalId = setInterval(() => {
       refreshOrders();
-    }, 60000); // Poll every minute instead of two minutes
+    }, 60000); // Poll every minute
     
     return () => clearInterval(intervalId);
   }, [refreshOrders]); // Add refreshOrders to dependency array

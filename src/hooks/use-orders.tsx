@@ -1,199 +1,62 @@
 
-import { useState, useEffect, useCallback } from 'react';
-import { Order, OrderStatus, RawOrder } from '@/types/order';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { 
-  fetchPaginatedOrders, 
-  deleteOrder as deleteOrderService,
-  updateOrderStatus as updateOrderStatusService,
-  transformRawOrder
-} from '@/services/orderService';
-import { generateOrderPDF } from '@/utils/pdfUtils';
+import { useCallback } from 'react';
+import { useOrdersState } from './orders/use-orders-state';
+import { useOrdersFetch } from './orders/use-orders-fetch';
+import { useOrdersOperations } from './orders/use-orders-operations';
+import { useOrdersPagination } from './orders/use-orders-pagination';
+import { toast } from 'sonner';
 
 export const useOrders = () => {
-  const [orders, setOrders] = useState<Order[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
-  const { toast } = useToast();
+  const {
+    orders,
+    setOrders,
+    loading,
+    setLoading,
+    selectedOrder,
+    setSelectedOrder,
+    viewDialogOpen,
+    setViewDialogOpen,
+    page,
+    setPage,
+    totalPages,
+    setTotalPages
+  } = useOrdersState();
 
-  // Pagination state
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const ordersPerPage = 10;
+  const { fetchOrders } = useOrdersFetch({
+    page,
+    setLoading,
+    setOrders,
+    setTotalPages,
+    selectedOrder,
+    setViewDialogOpen,
+    setSelectedOrder,
+  });
 
-  const fetchOrders = useCallback(async () => {
-    setLoading(true);
+  const {
+    handleViewOrder,
+    handleDeleteOrder,
+    handleUpdateStatus,
+    handleGeneratePDF
+  } = useOrdersOperations(
+    orders,
+    setOrders,
+    selectedOrder,
+    setSelectedOrder,
+    setViewDialogOpen
+  );
+
+  const { handlePageChange } = useOrdersPagination(setPage);
+
+  // Enhanced refresh function with error handling and user feedback
+  const refreshOrders = useCallback(async () => {
     try {
-      console.log("Fetching orders for page:", page);
-      const { orders: fetchedOrders, totalPages: calculatedTotalPages } = 
-        await fetchPaginatedOrders(page, ordersPerPage);
-      
-      console.log("Fetched orders count:", fetchedOrders.length);
-      
-      // Transform raw orders to Order type
-      const transformedOrders = fetchedOrders.map(transformRawOrder);
-      
-      setOrders(transformedOrders);
-      setTotalPages(calculatedTotalPages);
-      console.log("Updated state with orders and total pages:", transformedOrders.length, calculatedTotalPages);
-      return transformedOrders; // Return orders for chaining
-    } catch (err) {
-      console.error("Error fetching orders:", err);
-      toast({
-        title: "Erreur",
-        description: "Une erreur s'est produite lors du chargement des commandes.",
-        variant: "destructive",
-      });
-      throw err; // Re-throw for better error handling upstream
-    } finally {
-      setLoading(false);
-    }
-  }, [page, toast]);
-
-  useEffect(() => {
-    console.log("Orders hook initialized, fetching initial data");
-    fetchOrders();
-    
-    // Set up a subscription to listen for changes to orders with improved error handling
-    const ordersChannel = supabase
-      .channel('orders-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: '*', // Listen for all events (INSERT, UPDATE, DELETE)
-          schema: 'public',
-          table: 'Orders'
-        },
-        (payload) => {
-          console.log('Orders table changed:', payload);
-          
-          // If a delete event is received, update the UI
-          if (payload.eventType === 'DELETE' && payload.old && payload.old.id) {
-            const deletedOrderId = payload.old.id;
-            setOrders(prevOrders => prevOrders.filter(order => order.id !== deletedOrderId));
-            
-            // Close the dialog if the deleted order was being viewed
-            if (selectedOrder && selectedOrder.id === deletedOrderId) {
-              setViewDialogOpen(false);
-              setSelectedOrder(null);
-            }
-          } else if (payload.eventType === 'INSERT') {
-            console.log('New order inserted, refreshing order list');
-            fetchOrders(); // Refresh orders on insert
-          } else {
-            // For other events, refresh the order list to keep UI in sync
-            fetchOrders();
-          }
-        }
-      )
-      .subscribe();
-      
-    return () => {
-      // Unsubscribe when component unmounts
-      console.log("Cleaning up supabase channel subscription");
-      supabase.removeChannel(ordersChannel);
-    };
-  }, [fetchOrders, selectedOrder]); // Include selectedOrder in dependency array
-
-  const handleDeleteOrder = async (orderId: number) => {
-    if (!window.confirm('Êtes-vous sûr de vouloir supprimer cette commande ?')) {
-      return;
-    }
-    
-    try {
-      setLoading(true);
-      
-      // Delete from the database first
-      const success = await deleteOrderService(orderId);
-      
-      if (!success) {
-        throw new Error('Failed to delete order');
-      }
-      
-      // Then update the UI after confirmation of deletion
-      setOrders(prevOrders => prevOrders.filter(order => order.id !== orderId));
-      
-      // Close the dialog if the deleted order was being viewed
-      if (selectedOrder && selectedOrder.id === orderId) {
-        setViewDialogOpen(false);
-        setSelectedOrder(null);
-      }
-      
-      toast({
-        title: "Succès",
-        description: "La commande a été supprimée avec succès.",
-      });
-    } catch (err) {
-      console.error("Error deleting order:", err);
-      toast({
-        title: "Erreur",
-        description: "Une erreur s'est produite lors de la suppression de la commande.",
-        variant: "destructive",
-      });
-      // Refresh to ensure UI accuracy
-      fetchOrders();
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleViewOrder = (order: Order) => {
-    setSelectedOrder(order);
-    setViewDialogOpen(true);
-  };
-
-  const handleUpdateStatus = async (orderId: number, status: string) => {
-    try {
-      await updateOrderStatusService(orderId, status as OrderStatus);
-
-      toast({
-        title: "Succès",
-        description: `Le statut de la commande a été mis à jour.`,
-      });
-      
-      // Update the order in the local state
-      setOrders(orders.map(order => 
-        order.id === orderId ? { ...order, status: status as OrderStatus } : order
-      ));
-      
-      // Update the selected order if it's the one being viewed
-      if (selectedOrder && selectedOrder.id === orderId) {
-        setSelectedOrder({ ...selectedOrder, status: status as OrderStatus });
-      }
-    } catch (err) {
-      console.error("Error updating status:", err);
-      toast({
-        title: "Erreur",
-        description: "Une erreur s'est produite lors de la mise à jour du statut.",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleGeneratePDF = (order: Order) => {
-    try {
-      generateOrderPDF(order);
-      
-      toast({
-        title: "PDF généré",
-        description: `La commande #${order.id} a été téléchargée en PDF.`
-      });
+      await fetchOrders();
+      toast.success("Liste des commandes mise à jour");
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      toast({
-        title: "Erreur",
-        description: "Une erreur s'est produite lors de la génération du PDF.",
-        variant: "destructive",
-      });
+      console.error("Error refreshing orders:", error);
+      toast.error("Erreur lors de la mise à jour des commandes");
     }
-  };
-
-  const handlePageChange = (newPage: number) => {
-    console.log("Changing to page:", newPage);
-    setPage(newPage);
-  };
+  }, [fetchOrders]);
 
   return {
     orders,
@@ -208,6 +71,7 @@ export const useOrders = () => {
     handleUpdateStatus,
     handleGeneratePDF,
     handlePageChange,
-    setViewDialogOpen
+    setViewDialogOpen,
+    refreshOrders
   };
 };
