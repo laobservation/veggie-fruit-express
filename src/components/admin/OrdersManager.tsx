@@ -1,5 +1,5 @@
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect } from 'react';
 import { OrdersList } from './orders/OrdersList';
 import { OrderDetailsDialog } from './orders/OrderDetailsDialog';
 import { useOrders } from '@/hooks/use-orders';
@@ -23,9 +23,9 @@ const OrdersManager: React.FC = () => {
   } = useOrders();
 
   // Enhanced refresh function with error handling and user feedback
-  const refreshOrders = useCallback(() => {
+  const refreshOrders = useCallback(async () => {
     try {
-      fetchOrders();
+      await fetchOrders();
       toast.success("Liste des commandes mise à jour");
     } catch (error) {
       console.error("Error refreshing orders:", error);
@@ -33,18 +33,18 @@ const OrdersManager: React.FC = () => {
     }
   }, [fetchOrders]);
 
-  // Force refresh on component mount with improved error handling
-  React.useEffect(() => {
+  // Force refresh on component mount and set up polling
+  useEffect(() => {
+    // Immediate refresh when component mounts
     refreshOrders();
     
-    // Set up polling for new orders every 2 minutes
+    // Set up more frequent polling for new orders
     const intervalId = setInterval(() => {
       refreshOrders();
-    }, 120000); // 2 minutes
+    }, 60000); // Poll every minute instead of two minutes
     
     return () => clearInterval(intervalId);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [refreshOrders]); // Add refreshOrders to dependency array
 
   return (
     <div>

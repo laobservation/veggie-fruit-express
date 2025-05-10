@@ -28,7 +28,7 @@ export const processOrder = async (
   };
 
   try {
-    // Prepare items data for Supabase
+    // Prepare items data for Supabase with additional validation
     const itemsData = items.map(item => ({
       productId: item.product.id,
       productName: item.product.name,
@@ -41,19 +41,22 @@ export const processOrder = async (
       })) : []
     }));
     
-    // Add retry logic for better reliability
-    let retries = 3;
+    // Improved retry logic with exponential backoff
+    let retries = 5; // Increase max retries
     let orderData = null;
     let error = null;
+    let backoffDelay = 500; // Start with 500ms delay
     
     while (retries > 0 && !orderData) {
-      // Store order in Supabase
+      console.log(`Attempting to store order, retry ${6 - retries}/5`);
+      
+      // Store order in Supabase with validation
       const result = await supabase
         .from('Orders')
         .insert({
-          'Client Name': data.name,
-          'Adresse': data.address,
-          'Phone': parseInt(data.phone, 10) || null,
+          'Client Name': data.name.trim(),
+          'Adresse': data.address.trim(),
+          'Phone': parseInt(data.phone.replace(/\D/g, ''), 10) || null,
           'order_items': itemsData,
           'total_amount': totalAmount,
           'shipping_cost': shippingCost,
@@ -67,29 +70,34 @@ export const processOrder = async (
         
       if (!result.error && result.data) {
         orderData = result.data;
+        console.log(`Order successfully created with ID: ${orderData.id}`);
         break;
       } else {
         error = result.error;
+        console.error(`Error attempt ${6 - retries}: `, error);
         retries--;
+        
         if (retries > 0) {
-          // Wait before retrying (exponential backoff)
-          await new Promise(resolve => setTimeout(resolve, (4 - retries) * 500));
+          // Wait before retrying with exponential backoff
+          await new Promise(resolve => setTimeout(resolve, backoffDelay));
+          backoffDelay *= 2; // Double the delay for next retry
         }
       }
     }
 
     if (error || !orderData) {
-      console.error('Error storing order:', error);
-      toast.error("Une erreur s'est produite lors de l'enregistrement de la commande.");
+      console.error('Error storing order after all retries:', error);
+      toast.error("Une erreur s'est produite lors de l'enregistrement de la commande. Veuillez réessayer.");
+      throw new Error('Failed to store order');
     } else if (orderData?.id) {
       // Update orderDetails with the order ID if available
       orderDetails.orderId = orderData.id;
-      console.log(`Order successfully created with ID: ${orderData.id}`);
       toast.success("Commande enregistrée avec succès");
     }
   } catch (err) {
     console.error('Error processing order:', err);
-    toast.error("Une erreur s'est produite lors du traitement de la commande.");
+    toast.error("Une erreur s'est produite lors du traitement de la commande. Veuillez réessayer.");
+    throw err; // Re-throw to allow handling in calling component
   }
 
   return orderDetails;
