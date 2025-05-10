@@ -44,11 +44,9 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
           <span className="text-sm text-gray-500 block">/{product.unit}</span>
         </div>
       </div>
-      <p className="text-gray-500 mb-4">{getCategoryText(product.category)}</p>
+      <p className="text-gray-500 mb-3">{getCategoryText(product.category)}</p>
       
-      {/* Description section removed as requested */}
-      
-      {/* Additional Services */}
+      {/* Additional Services - Moved up to appear without scrolling */}
       <ServiceOptions 
         serviceOptions={serviceOptions}
         selectedService={selectedService}

@@ -16,12 +16,12 @@ const ServiceOptions: React.FC<ServiceOptionsProps> = ({
   setSelectedService 
 }) => {
   return (
-    <div className="mb-5 border-t border-b py-4">
-      <h2 className="font-semibold text-lg mb-3">Services additionnels</h2>
+    <div className="mb-3">
+      <h2 className="font-semibold text-md mb-2">Services additionnels</h2>
       <RadioGroup 
         value={selectedService || ""}
         onValueChange={setSelectedService}
-        className="gap-3"
+        className="gap-2"
       >
         <div className="flex items-center space-x-2">
           <RadioGroupItem value="" id="no-service" />
