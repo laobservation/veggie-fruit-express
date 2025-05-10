@@ -7,13 +7,15 @@ interface MediaDisplayProps {
   className?: string;
   autoplay?: boolean;
   controls?: boolean;
+  loading?: "lazy" | "eager"; // Add loading property
 }
 
 const MediaDisplay: React.FC<MediaDisplayProps> = ({ 
   product, 
   className = "", 
   autoplay = true,
-  controls = true
+  controls = true,
+  loading = "lazy" // Default to lazy loading
 }) => {
   const [videoId, setVideoId] = useState<string | null>(null);
   
@@ -48,7 +50,7 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({
       src={product.image}
       alt={product.name}
       className={`${className} object-contain`}
-      loading="lazy"
+      loading={loading}
       onError={(e) => {
         (e.target as HTMLImageElement).src = '/images/placeholder.svg';
       }}
