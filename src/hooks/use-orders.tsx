@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Order, OrderStatus, RawOrder } from '@/types/order';
 import { useToast } from '@/hooks/use-toast';
@@ -34,6 +35,7 @@ export const useOrders = () => {
       setOrders(transformedOrders);
       setTotalPages(calculatedTotalPages);
     } catch (err) {
+      console.error("Error fetching orders:", err);
       toast({
         title: "Erreur",
         description: "Une erreur s'est produite lors du chargement des commandes.",
@@ -93,7 +95,11 @@ export const useOrders = () => {
       setLoading(true);
       
       // Delete from the database first
-      await deleteOrderService(orderId);
+      const success = await deleteOrderService(orderId);
+      
+      if (!success) {
+        throw new Error('Failed to delete order');
+      }
       
       // Then update the UI after confirmation of deletion
       setOrders(prevOrders => prevOrders.filter(order => order.id !== orderId));
@@ -109,6 +115,7 @@ export const useOrders = () => {
         description: "La commande a été supprimée avec succès.",
       });
     } catch (err) {
+      console.error("Error deleting order:", err);
       toast({
         title: "Erreur",
         description: "Une erreur s'est produite lors de la suppression de la commande.",
@@ -145,6 +152,7 @@ export const useOrders = () => {
         setSelectedOrder({ ...selectedOrder, status: status as OrderStatus });
       }
     } catch (err) {
+      console.error("Error updating status:", err);
       toast({
         title: "Erreur",
         description: "Une erreur s'est produite lors de la mise à jour du statut.",

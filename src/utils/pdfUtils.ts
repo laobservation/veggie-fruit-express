@@ -4,6 +4,7 @@ import autoTable from 'jspdf-autotable';
 import { Order } from '@/types/order';
 import { formatPrice } from '@/lib/formatPrice';
 import { formatDate } from './formatUtils';
+import { supabase } from '@/integrations/supabase/client';
 
 export const generateOrderPDF = (order: Order) => {
   const doc = new jsPDF();
@@ -35,7 +36,26 @@ export const generateOrderPDF = (order: Order) => {
     }
   }, 1500);
   
-  function finishPDFGeneration() {
+  async function finishPDFGeneration() {
+    // Fetch settings to get currency
+    const { data: settingsData } = await supabase
+      .from('settings')
+      .select('currency')
+      .single();
+    
+    const currency = settingsData?.currency || 'DH';
+    
+    // Calculate subtotal and shipping cost
+    let subtotal = 0;
+    if (order.order_items && order.order_items.length > 0) {
+      subtotal = order.order_items.reduce((total, item) => {
+        return total + (item.price * item.quantity);
+      }, 0);
+    }
+    
+    // Estimate shipping cost (typical 30 DH)
+    const shippingCost = order.total_amount ? (order.total_amount - subtotal) : 30;
+    
     // Add header text
     doc.setFontSize(20);
     doc.setTextColor(39, 174, 96);
@@ -88,14 +108,20 @@ export const generateOrderPDF = (order: Order) => {
       headStyles: { fillColor: [39, 174, 96] }
     });
     
-    // Total
+    // Totals
     const finalY = (doc as any).lastAutoTable.finalY || 160;
+    doc.setFontSize(10);
+    doc.text(`Sous-total: ${formatPrice(subtotal)}`, 150, finalY + 10, { align: 'right' });
+    doc.text(`Frais de livraison: ${formatPrice(shippingCost)}`, 150, finalY + 15, { align: 'right' });
+    
     doc.setFontSize(12);
-    doc.text(`Total: ${formatPrice(order.total_amount || 0)}`, 150, finalY + 15);
+    doc.text(`Total: ${formatPrice(order.total_amount || 0)}`, 150, finalY + 25, { align: 'right' });
+    doc.setFontSize(8);
+    doc.text(`(Tous les prix sont en ${currency})`, 150, finalY + 30, { align: 'right' });
     
     // Footer
     doc.setFontSize(10);
-    doc.text("Document généré le " + new Date().toLocaleString('fr-FR'), 20, finalY + 30);
+    doc.text("Document généré le " + new Date().toLocaleString('fr-FR'), 20, finalY + 40);
     
     // Save PDF
     doc.save(`commande-${order.id}.pdf`);
@@ -135,7 +161,15 @@ export const generateThankYouPDF = (orderDetails: any) => {
     }
   }, 1500);
   
-  function finishPDFGeneration() {
+  async function finishPDFGeneration() {
+    // Fetch settings to get currency
+    const { data: settingsData } = await supabase
+      .from('settings')
+      .select('currency')
+      .single();
+    
+    const currency = settingsData?.currency || 'DH';
+    
     // Add header text
     doc.setFontSize(20);
     doc.setTextColor(39, 174, 96);
@@ -181,15 +215,21 @@ export const generateThankYouPDF = (orderDetails: any) => {
       headStyles: { fillColor: [39, 174, 96] }
     });
     
-    // Total
+    // Totals
     const finalY = (doc as any).lastAutoTable.finalY || 150;
+    doc.setFontSize(10);
+    doc.text(`Sous-total: ${formatPrice(orderDetails.subtotal || 0)}`, 150, finalY + 10, { align: 'right' });
+    doc.text(`Frais de livraison: ${formatPrice(orderDetails.shippingCost || 0)}`, 150, finalY + 15, { align: 'right' });
+    
     doc.setFontSize(12);
-    doc.text(`Total: ${formatPrice(orderDetails.totalAmount)}`, 150, finalY + 15);
+    doc.text(`Total: ${formatPrice(orderDetails.totalAmount || 0)}`, 150, finalY + 25, { align: 'right' });
+    doc.setFontSize(8);
+    doc.text(`(Tous les prix sont en ${currency})`, 150, finalY + 30, { align: 'right' });
     
     // Thank you note
     doc.setFontSize(10);
-    doc.text("Merci pour votre commande!", 105, finalY + 30, { align: 'center' });
-    doc.text("Notre équipe prépare vos produits avec soin.", 105, finalY + 35, { align: 'center' });
+    doc.text("Merci pour votre commande!", 105, finalY + 40, { align: 'center' });
+    doc.text("Notre équipe prépare vos produits avec soin.", 105, finalY + 45, { align: 'center' });
     
     // Save PDF
     doc.save(`commande-${new Date().toISOString().split('T')[0]}.pdf`);

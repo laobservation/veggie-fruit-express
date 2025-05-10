@@ -8,11 +8,13 @@ import { useToast } from '@/hooks/use-toast';
 import { generateThankYouPDF } from '@/utils/pdfUtils';
 import OrderConfirmation from '@/components/thankyou/OrderConfirmation';
 import { Howl } from 'howler';
+import { useSettings } from '@/hooks/use-settings';
 
 const ThankYouPage = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { settings } = useSettings();
   
   const { orderDetails } = location.state || { 
     orderDetails: {
@@ -21,6 +23,8 @@ const ThankYouPage = () => {
       phone: '',
       preferredTime: '',
       totalAmount: 0,
+      subtotal: 0,
+      shippingCost: 0,
       items: []
     } 
   };
@@ -109,6 +113,7 @@ const ThankYouPage = () => {
         <OrderConfirmation 
           orderDetails={orderDetails}
           onGeneratePDF={generatePDF}
+          currency={settings.currency}
         />
       </main>
       <Footer />

@@ -20,6 +20,8 @@ export interface Order {
   'Phone': number | null;
   order_items: OrderItem[];
   total_amount?: number;
+  subtotal?: number;
+  shipping_cost?: number;
   preferred_time?: string | null;
   status: OrderStatus;
   notified: boolean;
@@ -34,6 +36,8 @@ export interface RawOrder {
   'Phone': number | null;
   order_items?: Json;
   total_amount?: number | null;
+  subtotal?: number | null;
+  shipping_cost?: number | null;
   preferred_time?: string | null;
   status?: string | null;
   notified?: boolean | null;

@@ -21,6 +21,12 @@ const OrdersManager: React.FC = () => {
     setViewDialogOpen
   } = useOrders();
 
+  // Force refresh on component mount
+  React.useEffect(() => {
+    fetchOrders();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div>
       <OrdersList

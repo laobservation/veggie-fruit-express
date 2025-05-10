@@ -12,10 +12,19 @@ interface OrderItem {
 
 interface OrderSummaryProps {
   items: OrderItem[];
+  subtotal: number;
+  shippingCost: number;
   totalAmount: number;
+  currency?: string;
 }
 
-const OrderSummary: React.FC<OrderSummaryProps> = ({ items, totalAmount }) => {
+const OrderSummary: React.FC<OrderSummaryProps> = ({ 
+  items, 
+  subtotal,
+  shippingCost,
+  totalAmount,
+  currency = 'DH'
+}) => {
   return (
     <div className="mb-6">
       <h2 className="font-semibold mb-3">Résumé de la commande :</h2>
@@ -25,9 +34,24 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({ items, totalAmount }) => {
           <span>{formatPrice(item.product.price * item.quantity)}</span>
         </div>
       ))}
-      <div className="flex justify-between font-bold mt-2">
+      
+      <div className="flex justify-between mt-2 text-gray-600">
+        <span>Sous-total :</span>
+        <span>{formatPrice(subtotal)}</span>
+      </div>
+      
+      <div className="flex justify-between mt-1 text-gray-600">
+        <span>Frais de livraison :</span>
+        <span>{formatPrice(shippingCost)}</span>
+      </div>
+      
+      <div className="flex justify-between font-bold mt-2 pt-2 border-t">
         <span>Total :</span>
         <span>{formatPrice(totalAmount)}</span>
+      </div>
+      
+      <div className="text-right text-xs text-gray-500 mt-1">
+        (Tous les prix sont en {currency})
       </div>
     </div>
   );

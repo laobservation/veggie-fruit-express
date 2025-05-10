@@ -1,9 +1,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 import { Order, OrderItem, OrderStatus, RawOrder } from '@/types/order';
 import { Json } from '@/integrations/supabase/types';
-import { Product } from '@/types/product';
 
 // Helper function to convert OrderItem[] to Json for Supabase storage
 const convertOrderItemsToJson = (items: OrderItem[]): Json => {
@@ -23,43 +21,6 @@ const convertJsonToOrderItems = (json: Json | null): OrderItem[] => {
     quantity: Number(item?.quantity || 0),
     price: Number(item?.price || 0)
   }));
-};
-
-// Helper function to fix product type imports for HomePage
-// Note: This function has been moved to productService.ts
-
-export const createOrder = async (orderData: Partial<Order>): Promise<number | null> => {
-  try {
-    // Transform order items to raw JSON for storage
-    const rawOrderData = {
-      'Client Name': orderData['Client Name'],
-      'Adresse': orderData['Adresse'],
-      'Phone': orderData['Phone'],
-      order_items: convertOrderItemsToJson(orderData.order_items || []),
-      total_amount: orderData.total_amount,
-      preferred_time: orderData.preferred_time,
-      status: orderData.status || 'new',
-      notified: orderData.notified || false
-    };
-
-    // Insert the order into Supabase
-    const { data, error } = await supabase
-      .from('Orders')
-      .insert(rawOrderData)
-      .select('id')
-      .single();
-
-    if (error) {
-      console.error('Error creating order:', error);
-      throw error;
-    }
-
-    // Return the new order ID
-    return data?.id || null;
-  } catch (error) {
-    console.error('Order creation failed:', error);
-    return null;
-  }
 };
 
 // Transform raw order data from Supabase to our application's Order type
@@ -99,27 +60,30 @@ export const getOrderById = async (orderId: number): Promise<Order | null> => {
   }
 };
 
-// Delete an order 
+// Delete an order - Using Edge Function
 export const deleteOrder = async (orderId: number): Promise<boolean> => {
   try {
     console.log('Attempting to delete order:', orderId);
     
-    // First attempt: Try direct deletion
-    const { error } = await supabase
-      .from('Orders')
-      .delete()
-      .eq('id', orderId);
+    const { data, error } = await supabase.functions.invoke('delete_order_by_id', {
+      body: { order_id: orderId }
+    });
 
-    if (!error) {
-      console.log('Order deleted successfully');
-      return true;
+    if (error) {
+      console.error('Error invoking delete_order_by_id function:', error);
+      return false;
     }
 
-    console.error('Error deleting order on first attempt:', error);
+    console.log('Edge function response:', data);
     
-    // If we have an error, log the detailed error info
-    console.error('Error deleting order:', error);
-    return false;
+    // Check if the edge function was successful
+    if (data && data.success) {
+      console.log('Order deleted successfully');
+      return true;
+    } else {
+      console.error('Edge function did not return success:', data);
+      return false;
+    }
   } catch (error) {
     console.error('Order deletion failed:', error);
     return false;
@@ -146,26 +110,7 @@ export const updateOrderStatus = async (orderId: number, status: OrderStatus): P
   }
 };
 
-// Get all orders
-export const getOrders = async (): Promise<Order[]> => {
-  try {
-    const { data: orders, error } = await supabase
-      .from('Orders')
-      .select('*')
-      .order('created_at', { ascending: false });
-
-    if (error) {
-      console.error('Error fetching orders:', error);
-      return [];
-    }
-
-    return (orders as RawOrder[]).map(transformRawOrder);
-  } catch (error) {
-    console.error('Orders fetch failed:', error);
-    return [];
-  }
-};
-
+// Fetch paginated orders
 export const fetchPaginatedOrders = async (page: number, pageSize: number): Promise<{ orders: RawOrder[], totalPages: number }> => {
   try {
     // Calculate start and end indices for pagination

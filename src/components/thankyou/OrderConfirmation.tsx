@@ -11,6 +11,8 @@ interface OrderDetails {
   phone: string;
   preferredTime?: string;
   totalAmount: number;
+  subtotal: number;
+  shippingCost: number;
   items: any[];
   orderId?: string;
 }
@@ -18,11 +20,13 @@ interface OrderDetails {
 interface OrderConfirmationProps {
   orderDetails: OrderDetails;
   onGeneratePDF: () => void;
+  currency: string;
 }
 
 const OrderConfirmation: React.FC<OrderConfirmationProps> = ({ 
   orderDetails, 
-  onGeneratePDF 
+  onGeneratePDF,
+  currency
 }) => {
   const orderContentRef = useRef<HTMLDivElement>(null);
   const [pdfGenerated, setPdfGenerated] = useState(false);
@@ -64,7 +68,10 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({
         
         <OrderSummary 
           items={orderDetails.items}
+          subtotal={orderDetails.subtotal}
+          shippingCost={orderDetails.shippingCost}
           totalAmount={orderDetails.totalAmount}
+          currency={currency}
         />
       </div>
       
