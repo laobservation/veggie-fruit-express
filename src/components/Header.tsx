@@ -53,7 +53,7 @@ const Header = () => {
             <SearchBar />
           </div>
           
-          <button onClick={handleCartClick} className="relative bg-green-50 rounded-full p-2 flex items-center">
+          <button onClick={handleCartClick} className="relative rounded-full p-2 flex items-center bg-transparent">
             <ShoppingCart className="h-5 w-5 text-green-600" />
             <span className="text-green-600 font-semibold ml-2">
               {getTotalItems() < 10 ? `0${getTotalItems()}` : getTotalItems()}
