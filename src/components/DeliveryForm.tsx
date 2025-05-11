@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useForm, FormProvider } from 'react-hook-form';
 import { Form } from '@/components/ui/form';
@@ -11,62 +10,66 @@ import { processOrder } from '@/utils/orderUtils';
 import CustomerInfoFields from './delivery/CustomerInfoFields';
 import DeliveryTimeSelector from './delivery/DeliveryTimeSelector';
 import { useSettings } from '@/hooks/use-settings';
-
 interface DeliveryFormProps {
   onClose: () => void;
 }
-
-const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
+const DeliveryForm: React.FC<DeliveryFormProps> = ({
+  onClose
+}) => {
   const navigate = useNavigate();
-  const { items, getTotalPrice, getShippingCost, clearCart } = useCart();
-  const { settings } = useSettings();
-  
+  const {
+    items,
+    getTotalPrice,
+    getShippingCost,
+    clearCart
+  } = useCart();
+  const {
+    settings
+  } = useSettings();
   const form = useForm<FormValues>({
     defaultValues: {
       name: '',
       address: '',
       phone: '',
       preferDeliveryTime: false,
-      deliveryTime: 'matin',
-    },
+      deliveryTime: 'matin'
+    }
   });
-
   const onSubmit = async (data: FormValues) => {
     if (items.length === 0) {
       toast.error("Votre panier est vide. Ajoutez des produits avant de finaliser.");
       return;
     }
-    
     try {
       // Show processing toast
       const loadingToast = toast.loading("Traitement de votre commande...");
-      
+
       // Process the order and get order details for thank you page
       const orderDetails = await processOrder(data, items, getTotalPrice, getShippingCost);
-      
+
       // Clear the loading toast
       toast.dismiss(loadingToast);
-      
+
       // Success toast
       toast.success("Commande enregistrée avec succès!");
-      
+
       // Close the form/cart panel
       onClose();
-      
+
       // Clear the cart after the order is processed
       clearCart();
-      
       console.log("Redirecting to thank-you page with order details:", orderDetails);
-      
+
       // Make sure navigation happens after state updates complete
       setTimeout(() => {
         // Redirect to thank you page with order details
-        navigate('/thank-you', { 
-          state: { orderDetails },
+        navigate('/thank-you', {
+          state: {
+            orderDetails
+          },
           replace: true // Replace current history entry to prevent back navigation
         });
       }, 100);
-      
     } catch (err) {
       console.error('Error processing order:', err);
       toast.error("Une erreur s'est produite. Veuillez réessayer.");
@@ -77,9 +80,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
   const subtotal = getTotalPrice();
   const shippingCost = getShippingCost();
   const totalAmount = subtotal + shippingCost;
-
-  return (
-    <FormProvider {...form}>
+  return <FormProvider {...form}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <CustomerInfoFields />
@@ -105,23 +106,15 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
           </div>
           
           <div className="pt-4">
-            <Button 
-              type="submit" 
-              className="w-full bg-veggie-primary hover:bg-veggie-dark text-white"
-              disabled={items.length === 0}
-            >
+            <Button type="submit" disabled={items.length === 0} className="w-full text-white bg-green-600 hover:bg-green-500">
               Finaliser la commande
             </Button>
-            {items.length === 0 && (
-              <p className="text-sm text-red-500 mt-2 text-center">
+            {items.length === 0 && <p className="text-sm text-red-500 mt-2 text-center">
                 Votre panier est vide
-              </p>
-            )}
+              </p>}
           </div>
         </form>
       </Form>
-    </FormProvider>
-  );
+    </FormProvider>;
 };
-
 export default DeliveryForm;
