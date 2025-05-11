@@ -22,7 +22,7 @@ const MobileBottomNav = () => {
         <div className="bg-green-50 rounded-full p-3">
           <Home className="h-5 w-5 text-green-600 stroke-[2.5px]" />
         </div>
-        <span className="text-xs font-medium text-gray-800 mt-1">Home</span>
+        <span className="text-xs font-medium text-gray-800 mt-1">Accueil</span>
       </Link>
       
       <Link to="/favorites" className="flex flex-col items-center relative">
