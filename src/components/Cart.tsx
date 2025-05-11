@@ -104,7 +104,7 @@ const Cart: React.FC<CartProps> = ({
                         <Minus className="h-3 w-3" />
                       </Button>
                       <span className="mx-2 w-8 text-center">{item.quantity}</span>
-                      <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => updateQuantity(item.product.id, item.quantity + 1)}>
+                      <Button variant="outline" size="icon" onClick={() => updateQuantity(item.product.id, item.quantity + 1)} className="h-7 w-7 bg-lime-500 hover:bg-lime-400 text-slate-800">
                         <Plus className="h-3 w-3" />
                       </Button>
                       <div className="ml-auto font-medium">
