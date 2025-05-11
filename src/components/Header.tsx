@@ -36,7 +36,7 @@ const Header = () => {
           <div className="hidden md:block">
             <div className="flex flex-col">
               <h3 className="font-semibold text-gray-800">Meknès, Maroc</h3>
-              <p className="text-sm text-gray-500">Your address</p>
+              <p className="text-sm text-gray-500">Livraison et Préparation  20DH</p>
             </div>
           </div>
         </div>
