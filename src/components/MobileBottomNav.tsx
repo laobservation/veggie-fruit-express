@@ -49,7 +49,7 @@ const MobileBottomNav = () => {
               {getTotalItems()}
             </span>}
         </div>
-        <span className="text-xs font-medium text-gray-800 mt-1">Cart</span>
+        <span className="text-xs font-medium text-gray-800 mt-1">Panier</span>
       </button>
     </div>;
 };
