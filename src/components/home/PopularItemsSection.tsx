@@ -67,7 +67,7 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
                 <span className="text-lg font-bold text-green-600">{formatPrice(product.price)}</span>
               </div>
               <button className="bg-green-500 rounded-full py-1 px-3 flex items-center" onClick={e => handleAddToCart(e, product)} aria-label="Ajouter au panier">
-                <span className="text-white text-sm">Ajouter</span>
+                <span className="text-white text-sm font-bold">Commander</span>
                 
               </button>
             </div>
