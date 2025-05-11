@@ -25,7 +25,7 @@ const Header = () => {
   const handleCartClick = () => {
     openCart();
   };
-  return <header className="py-4 bg-green-50">
+  return <header className="py-4 bg-transparent">
       <div className="container mx-auto px-4 flex items-center justify-between relative">
         <div className="flex items-center gap-6">
           {isMobile && <Button variant="ghost" size="icon" className="mr-2 relative z-50" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
