@@ -44,7 +44,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
           
         </div>
       </div>
-      <p className="text-gray-500 mb-3">{getCategoryText(product.category)}</p>
+      
       
       {/* Additional Services - Moved up to appear without scrolling */}
       <ServiceOptions serviceOptions={serviceOptions} selectedService={selectedService} setSelectedService={setSelectedService} />
