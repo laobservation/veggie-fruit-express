@@ -11,20 +11,29 @@ const convertOrderItemsToJson = (items: OrderItem[]): Json => {
 // Helper function to convert Json to OrderItem[] from Supabase retrieval
 const convertJsonToOrderItems = (json: Json | null): OrderItem[] => {
   if (!json || !Array.isArray(json)) {
+    console.warn("Invalid order items data:", json);
     return [];
   }
   
-  // Type assertion to handle Json elements as record objects
-  return json.map((item: any) => ({
-    productId: Number(item?.productId || 0),
-    productName: String(item?.productName || ''),
-    quantity: Number(item?.quantity || 0),
-    price: Number(item?.price || 0)
-  }));
+  try {
+    // Type assertion to handle Json elements as record objects
+    return json.map((item: any) => ({
+      productId: Number(item?.productId || 0),
+      productName: String(item?.productName || ''),
+      quantity: Number(item?.quantity || 0),
+      price: Number(item?.price || 0),
+      services: Array.isArray(item?.services) ? item.services : []
+    }));
+  } catch (error) {
+    console.error("Error converting JSON to order items:", error, json);
+    return [];
+  }
 };
 
 // Transform raw order data from Supabase to our application's Order type
 export const transformRawOrder = (rawOrder: RawOrder): Order => {
+  console.log("Transforming raw order:", rawOrder);
+  
   return {
     id: rawOrder.id,
     'Client Name': rawOrder['Client Name'] || '',
@@ -32,6 +41,8 @@ export const transformRawOrder = (rawOrder: RawOrder): Order => {
     'Phone': rawOrder.Phone,
     order_items: convertJsonToOrderItems(rawOrder.order_items),
     total_amount: rawOrder.total_amount || 0,
+    subtotal: rawOrder.subtotal || 0,
+    shipping_cost: rawOrder.shipping_cost || 0,
     preferred_time: rawOrder.preferred_time,
     status: (rawOrder.status as OrderStatus) || 'new',
     notified: rawOrder.notified || false,
@@ -138,6 +149,8 @@ export const fetchPaginatedOrders = async (page: number, pageSize: number): Prom
       console.error('Error fetching paginated orders:', error);
       return { orders: [], totalPages: 0 };
     }
+
+    console.log('Raw orders from database:', orders);
 
     // Calculate total pages
     const totalPages = Math.ceil((count || 0) / pageSize);

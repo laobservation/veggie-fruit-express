@@ -32,6 +32,11 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
   });
 
   const onSubmit = async (data: FormValues) => {
+    if (items.length === 0) {
+      toast.error("Votre panier est vide. Ajoutez des produits avant de finaliser.");
+      return;
+    }
+    
     try {
       // Show processing toast
       const loadingToast = toast.loading("Traitement de votre commande...");
@@ -53,7 +58,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
       
       console.log("Redirecting to thank-you page with order details:", orderDetails);
       
-      // Use setTimeout to ensure state updates complete before navigation
+      // Make sure navigation happens after state updates complete
       setTimeout(() => {
         // Redirect to thank you page with order details
         navigate('/thank-you', { 
@@ -103,9 +108,15 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
             <Button 
               type="submit" 
               className="w-full bg-veggie-primary hover:bg-veggie-dark text-white"
+              disabled={items.length === 0}
             >
               Finaliser la commande
             </Button>
+            {items.length === 0 && (
+              <p className="text-sm text-red-500 mt-2 text-center">
+                Votre panier est vide
+              </p>
+            )}
           </div>
         </form>
       </Form>

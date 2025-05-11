@@ -49,7 +49,7 @@ export const processOrder = async (
       totals: { subtotal, shippingCost, totalAmount }
     });
     
-    // Direct insert with proper validation
+    // Insert order into database with explicit column names to avoid any mismatch issues
     const { data: orderData, error } = await supabase
       .from('Orders')
       .insert({
@@ -76,6 +76,8 @@ export const processOrder = async (
       console.log(`Order successfully created with ID: ${orderData.id}`);
       // Update orderDetails with the order ID
       orderDetails.orderId = orderData.id;
+    } else {
+      console.warn('Order created but no ID was returned');
     }
     
   } catch (err) {

@@ -106,7 +106,9 @@ export type Database = {
           order_items: Json | null
           Phone: number | null
           preferred_time: string | null
+          shipping_cost: number | null
           status: string | null
+          subtotal: number | null
           total_amount: number | null
         }
         Insert: {
@@ -118,7 +120,9 @@ export type Database = {
           order_items?: Json | null
           Phone?: number | null
           preferred_time?: string | null
+          shipping_cost?: number | null
           status?: string | null
+          subtotal?: number | null
           total_amount?: number | null
         }
         Update: {
@@ -130,7 +134,9 @@ export type Database = {
           order_items?: Json | null
           Phone?: number | null
           preferred_time?: string | null
+          shipping_cost?: number | null
           status?: string | null
+          subtotal?: number | null
           total_amount?: number | null
         }
         Relationships: []

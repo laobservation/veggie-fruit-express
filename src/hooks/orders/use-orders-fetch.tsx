@@ -35,6 +35,7 @@ export const useOrdersFetch = ({
         await fetchPaginatedOrders(page, ordersPerPage);
       
       console.log("Fetched orders count:", fetchedOrders.length);
+      console.log("Raw orders data:", fetchedOrders);
       
       // Transform raw orders to Order type
       const transformedOrders = fetchedOrders.map(transformRawOrder);
@@ -93,7 +94,12 @@ export const useOrdersFetch = ({
           }
         }
       )
-      .subscribe();
+      .subscribe((status, err) => {
+        console.log('Subscription status:', status, err);
+        if (err) {
+          console.error('Supabase subscription error:', err);
+        }
+      });
       
     return () => {
       // Unsubscribe when component unmounts
