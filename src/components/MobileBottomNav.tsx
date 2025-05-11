@@ -26,7 +26,7 @@ const MobileBottomNav = () => {
       </Link>
       
       <Link to="/favorites" className="flex flex-col items-center relative">
-        <div className="bg-red-50 rounded-full p-3">
+        <div className="rounded-full p-3 bg-green-100">
           <Heart className="h-5 w-5 text-red-500 stroke-[2.5px]" />
           {favorites.length > 0 && <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center font-bold">
               {favorites.length}
