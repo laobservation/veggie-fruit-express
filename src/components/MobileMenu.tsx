@@ -20,7 +20,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             
           </div>
           
-          <nav className="flex-grow p-4 rounded-lg bg-lime-400 py-[6px] px-[21px]">
+          <nav className="flex-grow p-4 rounded-lg py-[6px] px-[21px] bg-lime-200">
             <ul className="space-y-4">
               <li>
                 <Link to="/" className="flex items-center p-2 text-gray-700 hover:bg-veggie-light rounded-lg hover:text-veggie-primary transition-colors" onClick={onClose}>
