@@ -10,7 +10,7 @@ import { generateOrderPDF } from '@/utils/pdfUtils';
 
 export const useOrdersOperations = (
   orders: Order[],
-  setOrders: (orders: Order[]) => void,
+  setOrders: (orders: Order[] | ((prevOrders: Order[]) => Order[])) => void,
   selectedOrder: Order | null,
   setSelectedOrder: (order: Order | null) => void,
   setViewDialogOpen: (open: boolean) => void,
@@ -30,7 +30,7 @@ export const useOrdersOperations = (
       }
       
       // Update the UI after confirmation of deletion
-      setOrders(prevOrders => prevOrders.filter(order => order.id !== orderId));
+      setOrders((prevOrders: Order[]) => prevOrders.filter(order => order.id !== orderId));
       
       // Close the dialog if the deleted order was being viewed
       if (selectedOrder && selectedOrder.id === orderId) {
@@ -67,7 +67,7 @@ export const useOrdersOperations = (
       });
       
       // Update the order in the local state
-      setOrders(orders.map(order => 
+      setOrders((prevOrders: Order[]) => prevOrders.map(order => 
         order.id === orderId ? { ...order, status: status as OrderStatus } : order
       ));
       

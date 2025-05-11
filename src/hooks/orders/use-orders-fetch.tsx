@@ -1,3 +1,4 @@
+
 import { useCallback, useEffect } from 'react';
 import { Order, RawOrder } from '@/types/order';
 import { useToast } from '@/hooks/use-toast';
@@ -7,7 +8,7 @@ import { supabase } from '@/integrations/supabase/client';
 export interface FetchOrdersOptions {
   page: number;
   setLoading: (loading: boolean) => void;
-  setOrders: (orders: Order[]) => void;
+  setOrders: (orders: Order[] | ((prevOrders: Order[]) => Order[])) => void;
   setTotalPages: (totalPages: number) => void;
   selectedOrder: Order | null;
   setViewDialogOpen: (open: boolean) => void;
@@ -76,7 +77,7 @@ export const useOrdersFetch = ({
           // If a delete event is received, update the UI
           if (payload.eventType === 'DELETE' && payload.old && payload.old.id) {
             const deletedOrderId = payload.old.id;
-            setOrders(prevOrders => prevOrders.filter(order => order.id !== deletedOrderId));
+            setOrders((prevOrders: Order[]) => prevOrders.filter(order => order.id !== deletedOrderId));
             
             // Close the dialog if the deleted order was being viewed
             if (selectedOrder && selectedOrder.id === deletedOrderId) {
