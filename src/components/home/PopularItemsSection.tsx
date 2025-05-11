@@ -63,10 +63,10 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
               <h3 className="text-sm font-medium mb-1 text-center">{product.name}</h3>
               <div className="flex items-baseline justify-center mb-2">
                 <span className="text-sm text-gray-500 mr-1">{product.unit}</span>
-                <span className="text-sm text-gray-500 mr-1">•</span>
+                <span className="text-sm text-gray-500 mr-1">/</span>
                 <span className="text-lg font-bold text-green-600">{formatPrice(product.price)}</span>
               </div>
-              <button className="bg-green-500 rounded-full py-1 px-3 flex items-center" onClick={e => handleAddToCart(e, product)} aria-label="Ajouter au panier">
+              <button onClick={e => handleAddToCart(e, product)} aria-label="Ajouter au panier" className="bg-green-500 rounded-full flex items-center px-[15px] mx-0 my-0 py-[5px]">
                 <span className="text-white text-sm font-bold">Commander</span>
                 
               </button>
