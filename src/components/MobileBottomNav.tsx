@@ -36,7 +36,7 @@ const MobileBottomNav = () => {
       </Link>
       
       <a href="https://wa.me/+212600000000?text=Je souhaite commander des produits" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center">
-        <div className="bg-green-400 rounded-full p-3">
+        <div className="rounded-full p-3 bg-green-500">
           <MessageSquare className="h-5 w-5 text-white stroke-[2.5px]" />
         </div>
         <span className="text-xs font-medium text-gray-800 mt-1">WhatsApp</span>
