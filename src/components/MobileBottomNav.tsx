@@ -39,7 +39,7 @@ const MobileBottomNav = () => {
         <div className="rounded-full p-3 bg-green-500">
           <MessageSquare className="h-5 w-5 text-white stroke-[2.5px]" />
         </div>
-        <span className="text-xs font-medium text-gray-800 mt-1">WhatsApp</span>
+        <span className="font-medium text-gray-800 mt-1 text-xs">Commander</span>
       </a>
       
       <button onClick={openCart} className="flex flex-col items-center relative">
