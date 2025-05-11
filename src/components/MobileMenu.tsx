@@ -16,11 +16,11 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   return <div className={cn("fixed inset-0 bg-black/50 z-40 transition-opacity duration-300", isOpen ? "opacity-100" : "opacity-0 pointer-events-none")} onClick={onClose}>
       <div className={cn("fixed top-0 left-0 h-full w-4/5 max-w-xs bg-white z-50 shadow-xl transition-transform duration-300 ease-in-out transform", isOpen ? "translate-x-0" : "-translate-x-full")} onClick={e => e.stopPropagation()}>
         <div className="flex flex-col h-full">
-          <div className="p-6 border-b">
+          <div className="p-6 border-b px-[24px] mx-0 rounded-none bg-lime-200">
             
           </div>
           
-          <nav className="flex-grow p-4 rounded-lg py-[6px] px-[21px] bg-lime-200">
+          <nav className="flex-grow p-4 py-[6px] px-[21px] bg-lime-200 rounded-none">
             <ul className="space-y-4">
               <li>
                 <Link to="/" className="flex items-center p-2 text-gray-700 hover:bg-veggie-light rounded-lg hover:text-veggie-primary transition-colors" onClick={onClose}>
