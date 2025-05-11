@@ -52,7 +52,7 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
             <div className="w-full h-28 bg-gray-200 rounded mb-3"></div>
             <div className="h-4 bg-gray-200 rounded mb-2"></div>
             <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-          </div>) : products.slice(0, 6).map(product => <Link key={product.id} to={`/product/${product.id}`} className="bg-white p-4 rounded-lg shadow-sm relative">
+          </div>) : products.slice(0, 6).map(product => <Link key={product.id} to={`/product/${product.id}`} className="bg-white p-4 rounded-lg shadow-sm relative mx-0 my-0 px-[8px] py-[8px]">
             <button onClick={e => handleFavoriteClick(e, product)} className="absolute top-2 right-2 p-1 rounded-full bg-white/80 z-10">
               <Heart className={`h-4 w-4 ${isFavorite(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
             </button>
