@@ -16,22 +16,22 @@ const ThankYouPage = () => {
   const { toast } = useToast();
   const { settings } = useSettings();
   
-  const { orderDetails } = location.state || { 
-    orderDetails: {
-      name: '',
-      address: '',
-      phone: '',
-      preferredTime: '',
-      totalAmount: 0,
-      subtotal: 0,
-      shippingCost: 0,
-      items: []
-    } 
+  // Get order details from location state with proper fallback
+  const orderDetails = location.state?.orderDetails || { 
+    name: '',
+    address: '',
+    phone: '',
+    preferredTime: '',
+    totalAmount: 0,
+    subtotal: 0,
+    shippingCost: 0,
+    items: []
   };
 
   // Play success sound when the page loads
   useEffect(() => {
     if (orderDetails.name) {
+      console.log("Playing success sound for completed order");
       const successSound = new Howl({
         src: ['/success-sound.mp3'],
         volume: 0.5,
@@ -43,10 +43,11 @@ const ThankYouPage = () => {
   // Redirect to homepage if no order details
   useEffect(() => {
     if (!orderDetails.name) {
-      navigate('/');
+      console.log("No order details found, redirecting to home");
+      navigate('/', { replace: true });
     } else {
+      console.log("Order details received:", orderDetails);
       // Auto-generate and download PDF for the user with a slight delay
-      // to ensure the page is fully loaded and success sound plays first
       setTimeout(() => {
         generatePDF();
       }, 1000);
@@ -57,8 +58,7 @@ const ThankYouPage = () => {
   useEffect(() => {
     const notifyStoreOwner = async () => {
       try {
-        // Send notification email using Supabase function would go here
-        console.log('Order notification would be sent to store owner', orderDetails);
+        console.log('Marking order as notified:', orderDetails.orderId);
         
         // Only update if we have an orderId
         if (orderDetails.orderId) {
@@ -69,6 +69,8 @@ const ThankYouPage = () => {
             
           if (error) {
             console.error('Failed to update order notification status:', error);
+          } else {
+            console.log('Order notification status updated successfully');
           }
         }
       } catch (err) {
@@ -76,7 +78,7 @@ const ThankYouPage = () => {
       }
     };
     
-    if (orderDetails.name) {
+    if (orderDetails.name && orderDetails.orderId) {
       notifyStoreOwner();
     }
   }, [orderDetails]);

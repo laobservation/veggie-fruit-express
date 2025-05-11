@@ -124,11 +124,13 @@ const CategoryManager: React.FC = () => {
       console.log('Updating category:', editForm);
       
       // Map the form fields to database column names
+      const { id, name, icon, imageIcon, bg } = editForm;
+      
       const updateData = {
-        name: editForm.name,
-        icon: editForm.icon,
-        image_icon: editForm.imageIcon,
-        background_color: editForm.bg,
+        name,
+        icon,
+        image_icon: imageIcon,
+        background_color: bg,
         updated_at: new Date().toISOString()
       };
       
@@ -138,34 +140,24 @@ const CategoryManager: React.FC = () => {
       const { error } = await supabase
         .from('categories')
         .update(updateData)
-        .eq('id', editForm.id);
+        .eq('id', id);
       
       if (error) {
         console.error('Database error when updating category:', error);
         throw error;
       }
       
-      // Update local state to reflect changes immediately
-      setCategories(prevCategories => 
-        prevCategories.map(cat => 
-          cat.id === editForm.id ? {
-            ...cat,
-            name: editForm.name,
-            icon: editForm.icon,
-            imageIcon: editForm.imageIcon,
-            bg: editForm.bg,
-            path: `/category/${editForm.name.toLowerCase()}`
-          } : cat
-        )
-      );
-      
       toast({
         title: 'Success',
         description: 'Category updated successfully'
       });
       
+      // Reset form state
       setEditingId(null);
       setEditForm(null);
+      
+      // Refresh categories to show updated data
+      fetchCategories();
       
     } catch (error: any) {
       console.error('Error updating category:', error);
@@ -221,21 +213,6 @@ const CategoryManager: React.FC = () => {
       
       console.log('New category added:', data);
       
-      // Add the new category to local state immediately
-      if (data && data.length > 0) {
-        const newCat = data[0];
-        const formattedCategory: Category = {
-          id: newCat.id,
-          name: newCat.name,
-          icon: newCat.icon || undefined,
-          imageIcon: newCat.image_icon,
-          bg: newCat.background_color || 'bg-gray-100',
-          path: `/category/${newCat.name.toLowerCase()}`
-        };
-        
-        setCategories([...categories, formattedCategory]);
-      }
-      
       // Reset the form
       setNewCategory({
         name: '',
@@ -247,6 +224,9 @@ const CategoryManager: React.FC = () => {
         title: 'Success',
         description: 'Category added successfully'
       });
+      
+      // Refresh categories
+      fetchCategories();
       
     } catch (error: any) {
       console.error('Error adding category:', error);

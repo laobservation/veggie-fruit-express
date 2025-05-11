@@ -33,17 +33,35 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({ onClose }) => {
 
   const onSubmit = async (data: FormValues) => {
     try {
+      // Show processing toast
+      const loadingToast = toast.loading("Traitement de votre commande...");
+      
       // Process the order and get order details for thank you page
       const orderDetails = await processOrder(data, items, getTotalPrice, getShippingCost);
       
-      // Close the form/cart panel immediately to ensure it's not visible
+      // Clear the loading toast
+      toast.dismiss(loadingToast);
+      
+      // Success toast
+      toast.success("Commande enregistrée avec succès!");
+      
+      // Close the form/cart panel
       onClose();
       
       // Clear the cart after the order is processed
       clearCart();
       
-      // Redirect to thank you page with order details
-      navigate('/thank-you', { state: { orderDetails } });
+      console.log("Redirecting to thank-you page with order details:", orderDetails);
+      
+      // Use setTimeout to ensure state updates complete before navigation
+      setTimeout(() => {
+        // Redirect to thank you page with order details
+        navigate('/thank-you', { 
+          state: { orderDetails },
+          replace: true // Replace current history entry to prevent back navigation
+        });
+      }, 100);
+      
     } catch (err) {
       console.error('Error processing order:', err);
       toast.error("Une erreur s'est produite. Veuillez réessayer.");
