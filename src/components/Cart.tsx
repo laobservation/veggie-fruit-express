@@ -104,7 +104,7 @@ const Cart: React.FC<CartProps> = ({
                         <Minus className="h-3 w-3" />
                       </Button>
                       <span className="mx-2 w-8 text-center">{item.quantity}</span>
-                      <Button variant="outline" size="icon" onClick={() => updateQuantity(item.product.id, item.quantity + 1)} className="h-7 w-7 bg-lime-500 hover:bg-lime-400 text-slate-800">
+                      <Button variant="outline" size="icon" onClick={() => updateQuantity(item.product.id, item.quantity + 1)} className="h-7 w-7 bg-green-600 hover:bg-green-500 text-white">
                         <Plus className="h-3 w-3" />
                       </Button>
                       <div className="ml-auto font-medium">
@@ -130,7 +130,7 @@ const Cart: React.FC<CartProps> = ({
                 <span className="text-lg font-semibold">{formatPrice(total)}</span>
               </div>
               
-              <Button className="w-full bg-veggie-primary hover:bg-veggie-dark text-white mb-2" onClick={handleShowDeliveryForm}>
+              <Button onClick={handleShowDeliveryForm} className="w-full text-white mb-2 bg-green-600 hover:bg-green-500">
                 <Truck className="mr-2 h-5 w-5" />
                 Procéder à la livraison
               </Button>
