@@ -20,24 +20,24 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
             
           </div>
           
-          <nav className="flex-grow p-4">
+          <nav className="flex-grow p-4 rounded-lg bg-lime-400 py-[6px] px-[21px]">
             <ul className="space-y-4">
               <li>
                 <Link to="/" className="flex items-center p-2 text-gray-700 hover:bg-veggie-light rounded-lg hover:text-veggie-primary transition-colors" onClick={onClose}>
                   <Home className="w-5 h-5 mr-3" />
-                  <span>Accueil</span>
+                  <span className="text-base font-bold text-neutral-600">Accueil</span>
                 </Link>
               </li>
               <li>
                 <Link to="/fruits" className="flex items-center p-2 text-gray-700 hover:bg-veggie-light rounded-lg hover:text-veggie-primary transition-colors" onClick={onClose}>
                   <Apple className="w-5 h-5 mr-3" />
-                  <span>Fruits</span>
+                  <span className="font-bold text-neutral-600">Fruits</span>
                 </Link>
               </li>
               <li>
                 <Link to="/vegetables" className="flex items-center p-2 text-gray-700 hover:bg-veggie-light rounded-lg hover:text-veggie-primary transition-colors" onClick={onClose}>
-                  <Carrot className="w-5 h-5 mr-3" />
-                  <span>Légumes</span>
+                  <Carrot className="w-5 h-5 mr-3 bg-transparent" />
+                  <span className="font-bold text-neutral-600">Légumes</span>
                 </Link>
               </li>
               <li>
