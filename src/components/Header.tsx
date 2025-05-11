@@ -28,7 +28,7 @@ const Header = () => {
   return <header className="py-4 bg-transparent">
       <div className="container mx-auto px-4 flex items-center justify-between relative">
         <div className="flex items-center gap-6">
-          {isMobile && <Button variant="ghost" size="icon" className="mr-2 relative z-50" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+          {isMobile && <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="mr-2 relative z-50 bg-lime-400 hover:bg-lime-300 px-0 py-0 mx-[4px] my-0">
               {!isMobileMenuOpen ? <Menu className="h-6 w-6 text-gray-700 mx-0 my-0 px-0 py-0 text-base font-semibold" /> : <span className="h-6 w-6 text-gray-700">✕</span>}
               <span className="sr-only">Menu</span>
             </Button>}
