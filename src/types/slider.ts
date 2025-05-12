@@ -6,6 +6,9 @@ export interface Slide {
   image: string;
   position?: 'left' | 'right' | 'center';
   order?: number;
+  show_button?: boolean;
+  call_to_action?: string;
+  action_url?: string;
 }
 
 export interface SlideFormData {
@@ -15,4 +18,7 @@ export interface SlideFormData {
   image: string;
   position?: 'left' | 'right' | 'center';
   order?: number;
+  show_button?: boolean;
+  call_to_action?: string;
+  action_url?: string;
 }

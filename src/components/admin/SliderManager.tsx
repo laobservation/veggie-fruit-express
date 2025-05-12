@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useSlider } from '@/hooks/use-slider';
 import { Slide, SlideFormData } from '@/types/slider';
@@ -20,6 +21,9 @@ const SliderManager: React.FC = () => {
     color: 'bg-emerald-800',
     image: '',
     position: 'left',
+    show_button: true,
+    call_to_action: 'Shop Now',
+    action_url: ''
   });
   const { toast } = useToast();
   
@@ -30,6 +34,9 @@ const SliderManager: React.FC = () => {
       color: 'bg-emerald-800',
       image: '',
       position: 'left',
+      show_button: true,
+      call_to_action: 'Shop Now',
+      action_url: ''
     });
     setIsDialogOpen(true);
   };
@@ -53,6 +60,10 @@ const SliderManager: React.FC = () => {
   
   const handleSelectChange = (name: string, value: string) => {
     setCurrentSlide({ ...currentSlide, [name]: value });
+  };
+
+  const handleCheckboxChange = (name: string, checked: boolean) => {
+    setCurrentSlide({ ...currentSlide, [name]: checked });
   };
   
   const handleSubmit = async () => {
@@ -165,6 +176,7 @@ const SliderManager: React.FC = () => {
             isEditing={isEditing}
             handleInputChange={handleInputChange}
             handleSelectChange={handleSelectChange}
+            handleCheckboxChange={handleCheckboxChange}
             handleSubmit={handleSubmit}
             onCancel={() => setIsDialogOpen(false)}
           />

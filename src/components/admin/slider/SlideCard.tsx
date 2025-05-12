@@ -7,7 +7,8 @@ import {
   CardContent, 
   CardFooter 
 } from '@/components/ui/card';
-import { Edit, Trash, MoveHorizontal } from 'lucide-react';
+import { Edit, Trash, MoveHorizontal, Link } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
 
 interface SlideCardProps {
   slide: Slide;
@@ -44,6 +45,11 @@ const SlideCard: React.FC<SlideCardProps> = ({
             No image set
           </div>
         )}
+        {slide.show_button !== false && (
+          <div className="absolute bottom-2 left-2 bg-white/70 text-xs px-2 py-1 rounded flex items-center gap-1">
+            <Link className="w-3 h-3" /> {slide.call_to_action || 'Button'}
+          </div>
+        )}
       </div>
       <CardContent className="pt-4">
         <div className="flex gap-2 mb-2 flex-wrap">
@@ -59,9 +65,23 @@ const SlideCard: React.FC<SlideCardProps> = ({
           >
             {slide.color?.replace('bg-', '') || 'default'}
           </span>
+          {slide.action_url && (
+            <Badge variant="outline" className="text-xs flex items-center gap-1">
+              <Link className="w-3 h-3" /> {slide.action_url.substring(0, 15)}{slide.action_url.length > 15 ? '...' : ''}
+            </Badge>
+          )}
         </div>
         <p className="text-sm font-medium mb-1 truncate">{slide.title}</p>
         <p className="text-sm text-gray-500 truncate">{slide.image || 'No image URL'}</p>
+        
+        {/* CTA info */}
+        {slide.show_button !== false ? (
+          <p className="text-xs text-gray-500 mt-2 flex items-center gap-1">
+            <span className="bg-green-100 text-green-700 px-1 rounded-sm">CTA:</span> {slide.call_to_action || 'Shop Now'}
+          </p>
+        ) : (
+          <p className="text-xs text-gray-500 mt-2">No call-to-action button</p>
+        )}
         
         {/* Reorder buttons */}
         {(onMoveLeft || onMoveRight) && (
