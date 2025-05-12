@@ -4,8 +4,6 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { Slide } from '@/types/slider'; 
 import { useSlider } from '@/hooks/use-slider';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 
 interface PromotionSliderProps {
   customSlides?: Slide[];
@@ -58,74 +56,32 @@ const PromotionSlider: React.FC<PromotionSliderProps> = ({ customSlides }) => {
           className="flex transition-transform duration-500 ease-in-out"
           style={{ transform: `translateX(-${currentSlide * 100}%)` }}
         >
-          {slides.map((slide) => {
-            // Create the slide content
-            const SlideContent = () => (
-              <div 
-                key={slide.id} 
-                className={`flex-shrink-0 w-full md:w-1/3 h-48 relative rounded-xl overflow-hidden`}
-                style={{ 
-                  minWidth: isMobile ? '100%' : '33.333%',
-                }}
-              >
-                {/* Image background */}
-                <img 
-                  src={slide.image} 
-                  alt={slide.title} 
-                  className="w-full h-full object-cover"
-                />
-                
-                {/* Title and CTA overlay */}
-                <div className="absolute inset-0 flex flex-col justify-between p-4">
-                  <div className={`text-white font-semibold text-sm md:text-base max-w-[80%] drop-shadow-md ${
-                    slide.position === 'center' ? 'mx-auto text-center' :
-                    slide.position === 'right' ? 'ml-auto text-right' : 'text-left'
-                  }`}>
-                    {slide.title}
-                  </div>
-                  
-                  {/* Call to Action Button */}
-                  {slide.show_button !== false && slide.action_url && (
-                    <div className={`mt-2 ${
-                      slide.position === 'center' ? 'text-center mx-auto' :
-                      slide.position === 'right' ? 'text-right ml-auto' : 'text-left'
-                    }`}>
-                      <Button 
-                        size="sm" 
-                        variant="default" 
-                        className="text-xs bg-white text-black hover:bg-gray-100 shadow-md"
-                        asChild
-                      >
-                        <Link to={slide.action_url}>
-                          {slide.call_to_action || 'Shop Now'}
-                        </Link>
-                      </Button>
-                    </div>
-                  )}
+          {slides.map((slide) => (
+            <div 
+              key={slide.id} 
+              className={`flex-shrink-0 w-full md:w-1/3 h-48 relative rounded-xl overflow-hidden`}
+              style={{ 
+                minWidth: isMobile ? '100%' : '33.333%',
+              }}
+            >
+              {/* Image background - Removed black fade overlay */}
+              <img 
+                src={slide.image} 
+                alt={slide.title} 
+                className="w-full h-full object-cover"
+              />
+              
+              {/* Title overlay - Now without dark background */}
+              <div className="absolute inset-0 flex flex-col justify-between p-4">
+                <div className={`text-white font-semibold text-sm md:text-base max-w-[80%] drop-shadow-md ${
+                  slide.position === 'center' ? 'mx-auto text-center' :
+                  slide.position === 'right' ? 'ml-auto text-right' : 'text-left'
+                }`}>
+                  {slide.title}
                 </div>
               </div>
-            );
-
-            // If there's an action_url, wrap the content in a Link
-            return slide.action_url ? (
-              <Link 
-                to={slide.action_url} 
-                key={slide.id}
-                className="block flex-shrink-0"
-                style={{ minWidth: isMobile ? '100%' : '33.333%' }}
-              >
-                <SlideContent />
-              </Link>
-            ) : (
-              <div 
-                key={slide.id} 
-                className="block flex-shrink-0" 
-                style={{ minWidth: isMobile ? '100%' : '33.333%' }}
-              >
-                <SlideContent />
-              </div>
-            );
-          })}
+            </div>
+          ))}
         </div>
       </div>
       

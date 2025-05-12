@@ -68,10 +68,7 @@ export const useSlider = () => {
           color: newDbSlide.color,
           image: newDbSlide.image,
           position: newDbSlide.position as 'left' | 'right' | 'center',
-          order: newDbSlide.order || 0,
-          show_button: newDbSlide.show_button,
-          call_to_action: newDbSlide.call_to_action,
-          action_url: newDbSlide.action_url
+          order: newDbSlide.order || 0
         };
         
         setSlides([...slides, newSlide]);
@@ -105,10 +102,7 @@ export const useSlider = () => {
           color: updatedDbSlide.color,
           image: updatedDbSlide.image,
           position: updatedDbSlide.position as 'left' | 'right' | 'center',
-          order: updatedDbSlide.order || 0,
-          show_button: updatedDbSlide.show_button,
-          call_to_action: updatedDbSlide.call_to_action,
-          action_url: updatedDbSlide.action_url
+          order: updatedDbSlide.order || 0
         };
         
         setSlides(slides.map(s => s.id === slide.id ? updatedSlide : s));

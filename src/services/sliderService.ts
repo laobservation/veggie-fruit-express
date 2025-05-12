@@ -22,10 +22,7 @@ export const mapDatabaseSlidesToFrontend = (dbSlides: any[]): Slide[] => {
     color: slide.color,
     image: slide.image,
     position: slide.position as 'left' | 'right' | 'center',
-    order: slide.order || 0,
-    show_button: slide.show_button,
-    call_to_action: slide.call_to_action,
-    action_url: slide.action_url
+    order: slide.order || 0
   }));
 };
 
@@ -37,10 +34,7 @@ export const getDefaultSlides = (): Slide[] => {
       color: 'bg-emerald-800',
       image: '/images/fruit-banner.jpg',
       position: 'left',
-      order: 0,
-      show_button: true,
-      call_to_action: 'Shop Now',
-      action_url: '/fruits'
+      order: 0
     },
     {
       id: '2',
@@ -48,10 +42,7 @@ export const getDefaultSlides = (): Slide[] => {
       color: 'bg-purple-700',
       image: '/images/vegetable-banner.jpg',
       position: 'center',
-      order: 1,
-      show_button: true,
-      call_to_action: 'Browse',
-      action_url: '/vegetables'
+      order: 1
     },
     {
       id: '3',
@@ -59,10 +50,7 @@ export const getDefaultSlides = (): Slide[] => {
       color: 'bg-teal-700',
       image: '/lovable-uploads/827a5a28-0db3-4c43-90d7-280863c75660.png',
       position: 'right',
-      order: 2,
-      show_button: true,
-      call_to_action: 'Discover',
-      action_url: '/products'
+      order: 2
     }
   ];
 };
@@ -74,10 +62,7 @@ export const addSlideToSupabase = async (slide: Omit<Slide, 'id'>) => {
     color: slide.color,
     image: slide.image,
     position: slide.position,
-    order: slide.order,
-    show_button: slide.show_button,
-    call_to_action: slide.call_to_action,
-    action_url: slide.action_url
+    order: slide.order
   };
   
   const { data, error } = await supabase
@@ -98,10 +83,7 @@ export const updateSlideInSupabase = async (slide: Slide) => {
     color: slide.color,
     image: slide.image,
     position: slide.position,
-    order: slide.order,
-    show_button: slide.show_button,
-    call_to_action: slide.call_to_action,
-    action_url: slide.action_url
+    order: slide.order
   };
   
   const { data, error } = await supabase
