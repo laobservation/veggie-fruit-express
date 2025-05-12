@@ -200,7 +200,7 @@ const CategoryManager: React.FC = () => {
         background_color: newCategory.bg || 'bg-gray-100'
       };
       
-      // Use direct Supabase client instead of helper function to bypass RLS
+      // Insert the new category
       const { data, error } = await supabase
         .from('categories')
         .insert(insertData)
