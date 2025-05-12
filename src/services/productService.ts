@@ -34,7 +34,7 @@ export const transformProductForSupabase = (product: ExtendedProduct): Omit<Supa
     image_url: product.videoUrl && product.videoUrl.trim() !== '' ? product.videoUrl : product.image,
     description: product.description,
     unit: product.unit,
-    link_to_category: product.categoryLink || false,
+    link_to_category: true, // Always set to true - this is the key fix
     media_type: product.videoUrl && product.videoUrl.trim() !== '' ? 'video' : 'image',
     stock: product.stock || 0,
     additional_images: product.additionalImages || null
@@ -69,7 +69,7 @@ export const transformProductFromSupabase = (product: SupabaseProduct): Extended
     image: product.image_url || '',
     description: product.description || '',
     unit: product.unit || 'kg',
-    categoryLink: product.link_to_category || false,
+    categoryLink: true, // Always set to true - this is the key fix
     videoUrl: product.media_type === 'video' ? product.image_url : undefined,
     featured: true, // Always default to true since it doesn't exist in DB
     stock: product.stock || 0,

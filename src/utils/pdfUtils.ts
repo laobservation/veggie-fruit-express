@@ -9,7 +9,7 @@ import { supabase } from '@/integrations/supabase/client';
 export const generateOrderPDF = (order: Order) => {
   const doc = new jsPDF();
   
-  // Add company logo
+  // Add company logo with white background
   const logoPath = "/lovable-uploads/4c234092-7248-4896-9d9b-9da5909ffbfb.png";
   
   // Create a new Image to load the logo
@@ -18,6 +18,10 @@ export const generateOrderPDF = (order: Order) => {
   
   // Once image is loaded, add it to the PDF
   img.onload = function() {
+    // Draw white background rectangle first
+    doc.setFillColor(255, 255, 255);
+    doc.rect(105 - 25, 5, 50, 50, 'F');
+    // Then add the logo
     doc.addImage(img, 'PNG', 105 - 20, 10, 40, 40, undefined, 'FAST');
     finishPDFGeneration();
   };
@@ -49,7 +53,15 @@ export const generateOrderPDF = (order: Order) => {
     let subtotal = 0;
     if (order.order_items && order.order_items.length > 0) {
       subtotal = order.order_items.reduce((total, item) => {
-        return total + (item.price * item.quantity);
+        let itemTotal = item.price * item.quantity;
+        
+        // Add service costs if present
+        if (item.services && item.services.length > 0) {
+          const servicesCost = item.services.reduce((sTotal, service) => sTotal + service.price, 0);
+          itemTotal += servicesCost * item.quantity;
+        }
+        
+        return total + itemTotal;
       }, 0);
     }
     
@@ -89,11 +101,28 @@ export const generateOrderPDF = (order: Order) => {
     
     if (order.order_items && order.order_items.length > 0) {
       order.order_items.forEach(item => {
+        // Calculate total item price including services
+        let itemUnitPrice = item.price;
+        let itemName = item.productName;
+        
+        // Add service information to the item name if services exist
+        if (item.services && item.services.length > 0) {
+          itemName += "\n" + item.services.map(service => 
+            `+ ${service.name} (${formatPrice(service.price)})`
+          ).join("\n");
+          
+          // Add service costs to the unit price
+          const servicesCost = item.services.reduce((total, service) => 
+            total + service.price, 0
+          );
+          itemUnitPrice += servicesCost;
+        }
+        
         const itemData = [
-          item.productName,
+          itemName,
           item.quantity,
-          formatPrice(item.price),
-          formatPrice(item.price * item.quantity)
+          formatPrice(itemUnitPrice),
+          formatPrice(itemUnitPrice * item.quantity)
         ];
         tableRows.push(itemData);
       });
@@ -134,7 +163,7 @@ export const generateOrderPDF = (order: Order) => {
 export const generateThankYouPDF = (orderDetails: any) => {
   const doc = new jsPDF();
   
-  // Add company logo
+  // Add company logo with white background
   const logoPath = "/lovable-uploads/4c234092-7248-4896-9d9b-9da5909ffbfb.png";
   
   // Create a new Image to load the logo
@@ -143,6 +172,10 @@ export const generateThankYouPDF = (orderDetails: any) => {
   
   // Once image is loaded, add it to the PDF
   img.onload = function() {
+    // Draw white background rectangle first
+    doc.setFillColor(255, 255, 255);
+    doc.rect(105 - 25, 5, 50, 50, 'F');
+    // Then add the logo
     doc.addImage(img, 'PNG', 105 - 20, 10, 40, 40, undefined, 'FAST');
     finishPDFGeneration();
   };
@@ -196,11 +229,28 @@ export const generateThankYouPDF = (orderDetails: any) => {
     
     if (orderDetails.items && orderDetails.items.length > 0) {
       orderDetails.items.forEach((item: any) => {
+        // Start with basic product info
+        let itemName = item.product.name;
+        let itemUnitPrice = item.product.price;
+        
+        // Add service information to the item name if services exist
+        if (item.selectedServices && item.selectedServices.length > 0) {
+          itemName += "\n" + item.selectedServices.map((service: any) => 
+            `+ ${service.name} (${formatPrice(service.price)})`
+          ).join("\n");
+          
+          // Add service costs to the unit price
+          const servicesCost = item.selectedServices.reduce((total: number, service: any) => 
+            total + service.price, 0
+          );
+          itemUnitPrice += servicesCost;
+        }
+        
         const itemData = [
-          item.product.name,
+          itemName,
           item.quantity,
-          formatPrice(item.product.price),
-          formatPrice(item.product.price * item.quantity)
+          formatPrice(itemUnitPrice),
+          formatPrice(itemUnitPrice * item.quantity)
         ];
         tableRows.push(itemData);
       });

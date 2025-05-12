@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Header from '@/components/Header';
@@ -120,12 +119,11 @@ const CategoryPage = () => {
       if (categoryId === 'packs') dbCategory = 'pack';
       if (categoryId === 'drinks') dbCategory = 'drink';
       
-      // Fetch products linked to this category
+      // Fetch products linked to this category - removed link_to_category filter since we want all products
       const { data, error } = await supabase
         .from('Products')
         .select('*')
-        .eq('category', dbCategory)
-        .eq('link_to_category', true);
+        .eq('category', dbCategory);
       
       if (error) {
         throw error;
