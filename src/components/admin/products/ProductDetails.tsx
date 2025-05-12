@@ -2,7 +2,6 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Loader2 } from 'lucide-react';
@@ -129,17 +128,6 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
         </Select>
       </div>
       
-      <div className="grid gap-2">
-        <Label htmlFor="description">Description</Label>
-        <Textarea 
-          id="description" 
-          name="description" 
-          value={description} 
-          onChange={onInputChange} 
-          rows={3} 
-        />
-      </div>
-      
       <div className="flex items-center space-x-2">
         <Checkbox 
           id="featured" 
@@ -154,7 +142,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
       <div className="flex items-center space-x-2">
         <Checkbox 
           id="categoryLink" 
-          checked={categoryLink} 
+          checked={true} 
           onCheckedChange={(checked) => 
             onCheckboxChange(Boolean(checked), 'categoryLink')
           } 

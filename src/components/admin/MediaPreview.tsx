@@ -30,7 +30,7 @@ const MediaPreview: React.FC<MediaPreviewProps> = ({
     
     if (videoId) {
       return (
-        <div className={`aspect-video w-full rounded overflow-hidden bg-gray-100 mb-4 ${className}`}>
+        <div className={`aspect-video w-full max-h-36 rounded overflow-hidden bg-gray-100 mb-4 ${className}`}>
           <iframe 
             width="100%" 
             height="100%" 
@@ -46,7 +46,7 @@ const MediaPreview: React.FC<MediaPreviewProps> = ({
   } else if (mediaType === 'image' && imageUrl) {
     return (
       <div 
-        className={`aspect-square w-full rounded overflow-hidden bg-gray-100 mb-4 ${className} ${onSelect ? 'cursor-pointer' : ''}`} 
+        className={`h-32 w-32 rounded overflow-hidden bg-gray-100 mb-4 ${className} ${onSelect ? 'cursor-pointer' : ''}`} 
         onClick={() => onSelect && onSelect(imageUrl)}
       >
         <img 

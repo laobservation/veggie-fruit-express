@@ -10,7 +10,13 @@ interface Category {
 }
 
 export const useProductForm = (product: Product) => {
-  const [formData, setFormData] = useState<Product>(product);
+  // Make sure categoryLink is always set to true
+  const initialProduct = {
+    ...product,
+    categoryLink: true
+  };
+  
+  const [formData, setFormData] = useState<Product>(initialProduct);
   const [mediaType, setMediaType] = useState<'image' | 'video'>(product.videoUrl ? 'video' : 'image');
   const [categories, setCategories] = useState<Category[]>([]);
   const [loadingCategories, setLoadingCategories] = useState(true);
@@ -86,15 +92,25 @@ export const useProductForm = (product: Product) => {
   const handleSelectChange = (value: string, field: string) => {
     setFormData({
       ...formData,
-      [field]: value
+      [field]: value,
+      // Ensure categoryLink is always true when category is changed
+      ...(field === 'category' ? { categoryLink: true } : {})
     });
   };
   
   const handleCheckboxChange = (checked: boolean, field: string) => {
-    setFormData({
-      ...formData,
-      [field]: checked
-    });
+    // If it's the categoryLink field, always set to true regardless of user action
+    if (field === 'categoryLink') {
+      setFormData({
+        ...formData,
+        categoryLink: true
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [field]: checked
+      });
+    }
   };
 
   const handleAddAdditionalImage = () => {
