@@ -151,7 +151,7 @@ const NewCategoryForm: React.FC<NewCategoryFormProps> = ({
                   toast({
                     title: "Warning",
                     description: "Unable to load image preview",
-                    variant: "warning"
+                    variant: "default" // Changed from "warning" to "default" since "warning" isn't a valid variant
                   });
                 }}
               />
