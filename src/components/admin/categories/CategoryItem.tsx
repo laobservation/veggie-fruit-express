@@ -1,152 +1,133 @@
 
 import React from 'react';
-import { Edit, Save, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { TableRow, TableCell } from '@/components/ui/table';
 import { Category } from '@/types/category';
+import { Pencil, Trash2, Check, X } from 'lucide-react';
+import CategoryIconPreview from './CategoryIconPreview';
 
 interface CategoryItemProps {
   category: Category;
-  editingId: string | null;
+  isEditing: boolean;
   editForm: Category | null;
   onEdit: (category: Category) => void;
   onCancelEdit: () => void;
-  onEditChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSaveEdit: () => void;
   onDelete: (id: string) => void;
+  onEditChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
 }
 
 const CategoryItem: React.FC<CategoryItemProps> = ({
   category,
-  editingId,
+  isEditing,
   editForm,
   onEdit,
   onCancelEdit,
-  onEditChange,
   onSaveEdit,
-  onDelete
+  onDelete,
+  onEditChange
 }) => {
-  const isEditing = editingId === category.id;
-  
-  return (
-    <TableRow key={category.id}>
-      {isEditing && editForm ? (
-        // Edit mode row
-        <>
-          <TableCell>
-            <div className="space-y-2">
+  if (isEditing && editForm) {
+    return (
+      <div className="border rounded-md p-4 mb-2 bg-gray-50">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <div className="mb-2">
+              <label className="block text-sm font-medium mb-1">Name</label>
               <Input
+                type="text"
+                name="name"
+                value={editForm.name}
+                onChange={onEditChange}
+              />
+            </div>
+            
+            <div className="mb-2">
+              <label className="block text-sm font-medium mb-1">Emoji Icon</label>
+              <Input
+                type="text"
                 name="icon"
                 value={editForm.icon || ''}
                 onChange={onEditChange}
-                className="w-full mb-2"
-                placeholder="Emoji Icon (e.g. 🍎)"
               />
+              <p className="text-xs text-gray-500 mt-1">Leave empty if using image icon</p>
+            </div>
+            
+            <div className="mb-2">
+              <label className="block text-sm font-medium mb-1">Image Icon URL</label>
               <Input
+                type="text"
                 name="imageIcon"
                 value={editForm.imageIcon || ''}
                 onChange={onEditChange}
-                className="w-full"
-                placeholder="Image URL"
               />
-              {editForm.imageIcon && (
-                <div className="mt-1">
-                  <img 
-                    src={editForm.imageIcon} 
-                    alt="Preview" 
-                    className="h-6 w-6 object-contain"
-                    onError={(e) => {
-                      e.currentTarget.src = 'https://placehold.co/24x24?text=Err';
-                    }}
-                  />
-                </div>
-              )}
+              <p className="text-xs text-gray-500 mt-1">Leave empty to use emoji icon</p>
             </div>
-          </TableCell>
-          <TableCell>
-            <Input
-              name="name"
-              value={editForm.name || ''}
-              onChange={onEditChange}
-              required
-            />
-          </TableCell>
-          <TableCell>
-            <Input
-              name="bg"
-              value={editForm.bg || ''}
-              onChange={onEditChange}
-            />
-            <div className={`w-6 h-6 mt-1 rounded ${editForm.bg}`}></div>
-          </TableCell>
-          <TableCell>
-            <div className="flex items-center space-x-2">
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={onSaveEdit}
-                type="button"
-              >
-                <Save className="h-4 w-4" />
-              </Button>
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={onCancelEdit}
-                type="button"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
-          </TableCell>
-        </>
-      ) : (
-        // View mode row
-        <>
-          <TableCell>
-            {category.imageIcon ? (
-              <img 
-                src={category.imageIcon} 
-                alt={category.name} 
-                className="w-8 h-8 object-contain"
+            
+            <div className="mb-2">
+              <label className="block text-sm font-medium mb-1">Background Color</label>
+              <Input
+                type="text"
+                name="bg"
+                value={editForm.bg}
+                onChange={onEditChange}
               />
-            ) : (
-              <span className="text-2xl">{category.icon}</span>
-            )}
-          </TableCell>
-          <TableCell>
-            {category.name}
-            <div className="text-xs text-gray-500 mt-1">
-              URL: <code>/category/{category.name.toLowerCase()}</code>
+              <p className="text-xs text-gray-500 mt-1">Enter Tailwind CSS color class (e.g. bg-red-100)</p>
             </div>
-          </TableCell>
-          <TableCell>
-            <div className={`w-6 h-6 rounded ${category.bg}`}></div>
-          </TableCell>
-          <TableCell>
-            <div className="flex items-center space-x-2">
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={() => onEdit(category)}
-                type="button"
-              >
-                <Edit className="h-4 w-4" />
-              </Button>
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={() => onDelete(category.id)}
-                type="button"
-              >
-                <Trash2 className="h-4 w-4" />
-              </Button>
+          </div>
+          
+          <div>
+            <div className="mb-4">
+              <h3 className="text-sm font-medium mb-2">Preview</h3>
+              <div className="border p-4 rounded-md">
+                <CategoryIconPreview 
+                  name={editForm.name} 
+                  icon={editForm.icon} 
+                  imageIcon={editForm.imageIcon}
+                  bg={editForm.bg}
+                />
+              </div>
             </div>
-          </TableCell>
-        </>
-      )}
-    </TableRow>
+          </div>
+        </div>
+        
+        <div className="mt-4 flex justify-end space-x-2">
+          <Button variant="outline" size="sm" onClick={onCancelEdit}>
+            <X className="h-4 w-4 mr-1" /> Cancel
+          </Button>
+          <Button size="sm" onClick={onSaveEdit}>
+            <Check className="h-4 w-4 mr-1" /> Save
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="border rounded-md p-4 mb-2 flex justify-between items-center">
+      <div className="flex items-center">
+        <CategoryIconPreview 
+          name={category.name} 
+          icon={category.icon} 
+          imageIcon={category.imageIcon}
+          bg={category.bg}
+        />
+      </div>
+      
+      <div className="flex space-x-2">
+        <Button variant="ghost" size="sm" onClick={() => onEdit(category)}>
+          <Pencil className="h-4 w-4 mr-1" /> Edit
+        </Button>
+        <Button 
+          variant="ghost" 
+          size="sm" 
+          className="text-red-500 hover:text-red-700 hover:bg-red-50"
+          onClick={() => onDelete(category.id)}
+        >
+          <Trash2 className="h-4 w-4 mr-1" /> Delete
+        </Button>
+      </div>
+    </div>
   );
 };
 

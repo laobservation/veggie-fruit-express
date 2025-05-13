@@ -24,9 +24,9 @@ export const useCategories = () => {
           id: cat.id,
           name: cat.name,
           icon: cat.icon || undefined,
-          imageIcon: cat.image_icon,
+          imageIcon: cat.image_icon || undefined,
           bg: cat.background_color || 'bg-gray-100',
-          path: `/category/${cat.name.toLowerCase()}`
+          path: `/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}` // Format path with proper slug
         }));
         
         setCategories(formattedCategories);

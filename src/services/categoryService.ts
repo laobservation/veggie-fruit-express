@@ -66,8 +66,8 @@ export const updateCategory = async (category: Category): Promise<boolean> => {
     
     const updateData = {
       name,
-      icon,
-      image_icon: imageIcon,
+      icon: icon || null,
+      image_icon: imageIcon || null,
       background_color: bg,
       updated_at: new Date().toISOString()
     };
