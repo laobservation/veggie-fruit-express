@@ -8,7 +8,7 @@ import CategoryIconPreview from './CategoryIconPreview';
 
 interface CategoryItemProps {
   category: Category;
-  isEditing: boolean;
+  editingId: string | null;
   editForm: Category | null;
   onEdit: (category: Category) => void;
   onCancelEdit: () => void;
@@ -19,7 +19,7 @@ interface CategoryItemProps {
 
 const CategoryItem: React.FC<CategoryItemProps> = ({
   category,
-  isEditing,
+  editingId,
   editForm,
   onEdit,
   onCancelEdit,
@@ -27,6 +27,8 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
   onDelete,
   onEditChange
 }) => {
+  const isEditing = editingId === category.id;
+  
   if (isEditing && editForm) {
     return (
       <div className="border rounded-md p-4 mb-2 bg-gray-50">

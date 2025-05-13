@@ -53,17 +53,20 @@ const CategoryList: React.FC<CategoryListProps> = ({
         <TableBody>
           {categories.length > 0 ? (
             categories.map((category) => (
-              <CategoryItem
-                key={category.id}
-                category={category}
-                editingId={editingId}
-                editForm={editForm}
-                onEdit={onEdit}
-                onCancelEdit={onCancelEdit}
-                onEditChange={onEditChange}
-                onSaveEdit={onSaveEdit}
-                onDelete={onDelete}
-              />
+              <TableRow key={category.id}>
+                <TableCell colSpan={4} className="p-0">
+                  <CategoryItem
+                    category={category}
+                    editingId={editingId}
+                    editForm={editForm}
+                    onEdit={onEdit}
+                    onCancelEdit={onCancelEdit}
+                    onEditChange={onEditChange}
+                    onSaveEdit={onSaveEdit}
+                    onDelete={onDelete}
+                  />
+                </TableCell>
+              </TableRow>
             ))
           ) : (
             <TableRow>
