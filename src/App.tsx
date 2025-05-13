@@ -10,7 +10,7 @@ import AdminPage from '@/pages/AdminPage';
 import AdminSliderPage from '@/pages/AdminSliderPage';
 import AdminSettingsPage from '@/pages/AdminSettingsPage';
 import { CartNotificationProvider } from '@/hooks/use-cart';
-import { Toaster } from "sonner";
+import { Toaster } from "@/components/ui/sonner";
 import FavoritesPage from '@/pages/FavoritesPage';
 import Cart from '@/components/Cart';
 

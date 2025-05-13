@@ -1,10 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/components/ui/use-toast';
+import { toast } from '@/hooks/use-toast';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 type ContentSection = {
@@ -21,7 +20,6 @@ type ContentElement = {
 };
 
 const ContentEditor: React.FC = () => {
-  const { toast } = useToast();
   
   const initialSections: ContentSection[] = [
     {
@@ -129,9 +127,8 @@ const ContentEditor: React.FC = () => {
     setSections(updatedSections);
     setEditedElement(null);
     
-    toast({
-      title: "Modification enregistrée",
-      description: "Le contenu a été mis à jour avec succès.",
+    toast.success("Modification enregistrée", {
+      description: "Le contenu a été mis à jour avec succès."
     });
   };
   
