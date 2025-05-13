@@ -24,7 +24,7 @@ const FavoritesPage: React.FC = () => {
     toast({
       title: "Favorites cleared",
       description: "All items have been removed from your favorites",
-      duration: 3000,
+      duration: 3000
     });
   };
   

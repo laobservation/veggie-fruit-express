@@ -135,7 +135,7 @@ export const useFavorites = () => {
     toast({
       title: isFav ? "Removed from favorites" : "Added to favorites",
       description: isFav ? `${product.name} has been removed from your favorites` : `${product.name} has been added to your favorites`,
-      duration: 3000,
+      duration: 3000
     });
   };
   

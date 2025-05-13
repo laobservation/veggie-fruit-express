@@ -7,6 +7,8 @@ type ToastProps = {
   description?: string;
   action?: React.ReactNode;
   variant?: "default" | "destructive";
+  duration?: number;
+  className?: string;
 };
 
 // Create combined function to handle both approaches
@@ -15,19 +17,27 @@ function toastFunction(title: string, props?: ToastProps): void;
 function toastFunction(titleOrProps: string | ToastProps, maybeProps?: ToastProps): void {
   // If first argument is an object, it's props
   if (typeof titleOrProps === 'object') {
-    const { title, description, variant } = titleOrProps;
+    const { title, description, variant, duration, className } = titleOrProps;
     if (variant === 'destructive') {
-      sonnerToast.error(title || '', { description });
+      sonnerToast.error(title || '', { description, duration, className });
     } else {
-      sonnerToast.success(title || '', { description });
+      sonnerToast.success(title || '', { description, duration, className });
     }
   } 
   // If first argument is a string, it's the title
   else if (typeof titleOrProps === 'string') {
     if (maybeProps?.variant === 'destructive') {
-      sonnerToast.error(titleOrProps, { description: maybeProps?.description });
+      sonnerToast.error(titleOrProps, { 
+        description: maybeProps?.description,
+        duration: maybeProps?.duration,
+        className: maybeProps?.className
+      });
     } else {
-      sonnerToast.success(titleOrProps, { description: maybeProps?.description });
+      sonnerToast.success(titleOrProps, { 
+        description: maybeProps?.description,
+        duration: maybeProps?.duration,
+        className: maybeProps?.className
+      });
     }
   }
 }
