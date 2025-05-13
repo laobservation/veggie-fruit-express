@@ -1,5 +1,5 @@
 
-import jsPDF from 'jspdf';
+import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { Order } from '@/types/order';
 import { formatPrice } from '@/lib/formatPrice';
