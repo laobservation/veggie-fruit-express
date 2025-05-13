@@ -11,6 +11,11 @@ export interface OrderItem {
   id?: number;
   order_id?: number;
   Products?: any; // For joins with the Products table
+  services?: Array<{
+    id: string;
+    name: string;
+    price: number;
+  }>;
 }
 
 export interface Order {
