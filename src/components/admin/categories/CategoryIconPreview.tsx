@@ -25,7 +25,14 @@ const CategoryIconPreview: React.FC<CategoryIconPreviewProps> = ({
             onError={(e) => {
               // If image fails to load, fallback to icon or text
               (e.target as HTMLImageElement).style.display = 'none';
-              console.log("Image failed to load");
+              const parent = (e.target as HTMLImageElement).parentNode;
+              if (parent) {
+                const fallbackText = document.createElement('span');
+                fallbackText.className = 'text-2xl';
+                fallbackText.textContent = icon || name.charAt(0).toUpperCase();
+                parent.appendChild(fallbackText);
+              }
+              console.log("Image failed to load, falling back to text icon");
             }}
           />
         ) : (

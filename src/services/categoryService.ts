@@ -25,6 +25,8 @@ export const addCategory = async (newCategory: NewCategoryFormData): Promise<boo
       background_color: newCategory.bg || 'bg-gray-100'
     };
     
+    console.log('Insert data being sent to Supabase:', insertData);
+    
     // Insert the new category
     const { data, error } = await supabase
       .from('categories')

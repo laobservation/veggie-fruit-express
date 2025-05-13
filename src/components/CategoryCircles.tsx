@@ -8,8 +8,8 @@ import { supabase, getCategoriesTable } from '@/integrations/supabase/client';
 interface Category {
   id: string;
   name: string;
-  icon?: string;
-  imageIcon?: string;
+  icon?: string | null;
+  imageIcon?: string | null;
   bg: string;
   path: string;
 }
@@ -76,10 +76,10 @@ const CategoryCircles: React.FC = () => {
           return {
             id: cat.id,
             name: cat.name,
-            icon: cat.icon || '📦',
-            imageIcon: cat.image_icon,
+            icon: cat.icon || null,
+            imageIcon: cat.image_icon || null,
             bg: bgColor,
-            path: `/category/${cat.name.toLowerCase()}`
+            path: `/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`
           };
         });
         
@@ -131,9 +131,16 @@ const CategoryCircles: React.FC = () => {
                       src={category.imageIcon} 
                       alt={category.name} 
                       className="w-10 h-10 object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = 'none';
+                        const parent = (e.target as HTMLImageElement).parentNode;
+                        if (parent instanceof HTMLElement) {
+                          parent.innerHTML = `<span class="text-3xl text-white">${category.icon || category.name.charAt(0)}</span>`;
+                        }
+                      }}
                     />
                   ) : (
-                    <span className="text-3xl text-white">{category.icon}</span>
+                    <span className="text-3xl text-white">{category.icon || category.name.charAt(0)}</span>
                   )}
                 </div>
                 <span className="text-sm font-medium text-gray-700">{category.name}</span>

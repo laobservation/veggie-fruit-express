@@ -6,8 +6,8 @@ import { supabase, getCategoriesTable } from '@/integrations/supabase/client';
 interface Category {
   id: string;
   name: string;
-  icon?: string;
-  imageIcon?: string;
+  icon?: string | null;
+  imageIcon?: string | null;
   bg: string;
   path: string;
 }
@@ -69,10 +69,10 @@ export const CategoryNavigation: React.FC = () => {
         const formattedCategories: Category[] = data.map(cat => ({
           id: cat.id,
           name: cat.name,
-          icon: cat.icon || '📦',
-          imageIcon: cat.image_icon,
+          icon: cat.icon || null,
+          imageIcon: cat.image_icon || null,
           bg: cat.background_color || 'bg-gray-100',
-          path: `/category/${cat.name.toLowerCase()}`
+          path: `/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`
         }));
         
         setCategories(formattedCategories);
@@ -111,9 +111,20 @@ export const CategoryNavigation: React.FC = () => {
         >
           <div className={`${category.bg} w-16 h-16 rounded-lg flex items-center justify-center mb-2`}>
             {category.imageIcon ? (
-              <img src={category.imageIcon} alt={category.name} className="w-10 h-10 object-contain" />
+              <img 
+                src={category.imageIcon} 
+                alt={category.name} 
+                className="w-10 h-10 object-contain"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).style.display = 'none';
+                  const parent = (e.target as HTMLImageElement).parentNode;
+                  if (parent instanceof HTMLElement) {
+                    parent.innerHTML = `<span class="text-3xl">${category.icon || category.name.charAt(0)}</span>`;
+                  }
+                }}
+              />
             ) : (
-              <span className="text-3xl">{category.icon}</span>
+              <span className="text-3xl">{category.icon || category.name.charAt(0)}</span>
             )}
           </div>
           <p className="text-sm text-center text-gray-700">{category.name}</p>
