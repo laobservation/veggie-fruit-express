@@ -90,6 +90,9 @@ const NewCategoryForm: React.FC<NewCategoryFormProps> = ({
               required
               aria-required="true"
             />
+            <div className="text-xs text-gray-500 mt-1">
+              URL will be: /category/{newCategory.name.toLowerCase() || 'example'}
+            </div>
           </div>
           <div>
             <label htmlFor="icon" className="block text-sm font-medium text-gray-700 mb-1">
@@ -150,8 +153,7 @@ const NewCategoryForm: React.FC<NewCategoryFormProps> = ({
                   e.currentTarget.src = 'https://placehold.co/32x32?text=Error';
                   toast({
                     title: "Warning",
-                    description: "Unable to load image preview",
-                    variant: "default" // Changed from "warning" to "default" since "warning" isn't a valid variant
+                    description: "Unable to load image preview"
                   });
                 }}
               />

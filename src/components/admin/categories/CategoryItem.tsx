@@ -35,12 +35,34 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
         // Edit mode row
         <>
           <TableCell>
-            <Input
-              name="icon"
-              value={editForm.icon || ''}
-              onChange={onEditChange}
-              className="w-24"
-            />
+            <div className="space-y-2">
+              <Input
+                name="icon"
+                value={editForm.icon || ''}
+                onChange={onEditChange}
+                className="w-full mb-2"
+                placeholder="Emoji Icon (e.g. 🍎)"
+              />
+              <Input
+                name="imageIcon"
+                value={editForm.imageIcon || ''}
+                onChange={onEditChange}
+                className="w-full"
+                placeholder="Image URL"
+              />
+              {editForm.imageIcon && (
+                <div className="mt-1">
+                  <img 
+                    src={editForm.imageIcon} 
+                    alt="Preview" 
+                    className="h-6 w-6 object-contain"
+                    onError={(e) => {
+                      e.currentTarget.src = 'https://placehold.co/24x24?text=Err';
+                    }}
+                  />
+                </div>
+              )}
+            </div>
           </TableCell>
           <TableCell>
             <Input
@@ -56,6 +78,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
               value={editForm.bg || ''}
               onChange={onEditChange}
             />
+            <div className={`w-6 h-6 mt-1 rounded ${editForm.bg}`}></div>
           </TableCell>
           <TableCell>
             <div className="flex items-center space-x-2">
@@ -92,7 +115,12 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
               <span className="text-2xl">{category.icon}</span>
             )}
           </TableCell>
-          <TableCell>{category.name}</TableCell>
+          <TableCell>
+            {category.name}
+            <div className="text-xs text-gray-500 mt-1">
+              URL: <code>/category/{category.name.toLowerCase()}</code>
+            </div>
+          </TableCell>
           <TableCell>
             <div className={`w-6 h-6 rounded ${category.bg}`}></div>
           </TableCell>

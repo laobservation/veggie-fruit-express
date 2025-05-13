@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
 import { Json } from "@/integrations/supabase/types";
@@ -26,7 +25,6 @@ export interface ExtendedProduct extends Product {
 
 // Transform local product data format to Supabase format
 export const transformProductForSupabase = (product: ExtendedProduct): Omit<SupabaseProduct, 'id' | 'created_at'> => {
-  // Create a product object without the featured property since it doesn't exist in the database
   return {
     name: product.name,
     category: product.category,
@@ -34,11 +32,10 @@ export const transformProductForSupabase = (product: ExtendedProduct): Omit<Supa
     image_url: product.videoUrl && product.videoUrl.trim() !== '' ? product.videoUrl : product.image,
     description: product.description,
     unit: product.unit,
-    link_to_category: true, // Always set to true - this is the key fix
+    link_to_category: product.categoryLink, // Use the actual value instead of forcing it to true
     media_type: product.videoUrl && product.videoUrl.trim() !== '' ? 'video' : 'image',
     stock: product.stock || 0,
     additional_images: product.additionalImages || null
-    // Remove featured from here - don't send it to Supabase
   };
 };
 
@@ -69,7 +66,7 @@ export const transformProductFromSupabase = (product: SupabaseProduct): Extended
     image: product.image_url || '',
     description: product.description || '',
     unit: product.unit || 'kg',
-    categoryLink: true, // Always set to true - this is the key fix
+    categoryLink: product.link_to_category || false, // Use the actual value from DB
     videoUrl: product.media_type === 'video' ? product.image_url : undefined,
     featured: true, // Always default to true since it doesn't exist in DB
     stock: product.stock || 0,

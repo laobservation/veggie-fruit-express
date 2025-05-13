@@ -23,6 +23,7 @@ const CategoryManager: React.FC = () => {
   const [newCategory, setNewCategory] = useState<Omit<Category, 'id'>>({
     name: '',
     icon: '🍎',
+    imageIcon: '',
     bg: 'bg-red-100'
   });
   const { toast } = useToast();
@@ -217,6 +218,7 @@ const CategoryManager: React.FC = () => {
       setNewCategory({
         name: '',
         icon: '🍎',
+        imageIcon: '',
         bg: 'bg-red-100'
       });
       

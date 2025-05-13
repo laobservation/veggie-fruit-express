@@ -39,12 +39,8 @@ const ProductForm: React.FC<ProductFormProps> = ({
   } = useProductForm(product);
 
   const handleSubmit = () => {
-    // Make sure categoryLink is set to true before saving
-    const finalFormData = {
-      ...formData,
-      categoryLink: true
-    };
-    onSave(finalFormData, mediaType);
+    // No longer forcing categoryLink to true, using the value from the form
+    onSave(formData, mediaType);
   };
 
   return (
@@ -64,7 +60,7 @@ const ProductForm: React.FC<ProductFormProps> = ({
           unit={formData.unit}
           description={formData.description}
           featured={formData.featured}
-          categoryLink={true}
+          categoryLink={formData.categoryLink}
           categories={categories}
           loadingCategories={loadingCategories}
           onInputChange={handleInputChange}
