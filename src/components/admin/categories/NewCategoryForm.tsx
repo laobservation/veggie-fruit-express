@@ -1,17 +1,12 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { ArrowRight } from 'lucide-react';
+import { NewCategoryFormData } from '@/types/category';
 
 interface NewCategoryFormProps {
-  newCategory: {
-    name: string;
-    icon?: string;
-    imageIcon?: string;
-    bg: string;
-  };
+  newCategory: NewCategoryFormData;
   onNewCategoryChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onAddCategory: () => void;
 }

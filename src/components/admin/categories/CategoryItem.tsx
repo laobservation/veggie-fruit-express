@@ -4,7 +4,7 @@ import { Edit, Save, Trash2, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { TableRow, TableCell } from '@/components/ui/table';
-import { Category } from '../CategoryManager';
+import { Category } from '@/types/category';
 
 interface CategoryItemProps {
   category: Category;

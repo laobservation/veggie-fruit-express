@@ -5,7 +5,7 @@ import {
   Table, TableHeader, TableBody, TableHead, 
   TableRow, TableCell 
 } from '@/components/ui/table';
-import { Category } from '../CategoryManager';
+import { Category } from '@/types/category';
 import CategoryItem from './CategoryItem';
 
 interface CategoryListProps {
