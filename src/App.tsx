@@ -10,7 +10,7 @@ import AdminPage from '@/pages/AdminPage';
 import AdminSliderPage from '@/pages/AdminSliderPage';
 import AdminSettingsPage from '@/pages/AdminSettingsPage';
 import { CartNotificationProvider } from '@/hooks/use-cart';
-import { Toaster } from "@/components/ui/toaster";
+import { Toaster } from "sonner";
 import FavoritesPage from '@/pages/FavoritesPage';
 import Cart from '@/components/Cart';
 
@@ -18,7 +18,7 @@ function App() {
   return (
     <CartNotificationProvider>
       <div className="flex flex-col min-h-screen">
-        <Toaster />
+        <Toaster position="bottom-right" />
         <div className="flex-grow">
           <Routes>
             <Route path="/" element={<Index />} />
