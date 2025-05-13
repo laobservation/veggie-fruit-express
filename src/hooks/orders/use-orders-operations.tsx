@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { Order, OrderStatus } from '@/types/order';
 import { useToast } from '@/hooks/use-toast';
@@ -6,7 +5,7 @@ import {
   deleteOrder as deleteOrderService,
   updateOrderStatus as updateOrderStatusService
 } from '@/services/orderService';
-import { generateOrderPDF } from '@/utils/pdfUtils';
+import { generateOrderPDF } from '@/utils/pdf';
 
 export const useOrdersOperations = (
   orders: Order[],
