@@ -1,8 +1,9 @@
 
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Heart } from 'lucide-react';
+import { Heart } from 'lucide-react';
 import { Product } from '@/types/product';
+import { cn } from '@/lib/utils';
+import SocialShareButtons from './SocialShareButtons';
 
 interface ProductHeaderProps {
   product: Product;
@@ -10,31 +11,41 @@ interface ProductHeaderProps {
   handleFavoriteClick: () => void;
 }
 
-const ProductHeader: React.FC<ProductHeaderProps> = ({ 
-  product, 
-  favoriteStatus, 
-  handleFavoriteClick 
+const ProductHeader: React.FC<ProductHeaderProps> = ({
+  product,
+  favoriteStatus,
+  handleFavoriteClick
 }) => {
-  const navigate = useNavigate();
-  
   return (
-    <div className="flex justify-between items-center pt-4 pb-2">
-      <button 
-        onClick={() => navigate(-1)} 
-        className="p-2"
-      >
-        <ArrowLeft className="h-6 w-6" />
-      </button>
-      <h1 className="text-xl font-semibold">{product.name}</h1>
-      <button 
-        onClick={handleFavoriteClick} 
-        className="p-2"
-        aria-label={favoriteStatus ? "Retirer des favoris" : "Ajouter aux favoris"}
-      >
-        <Heart 
-          className={`h-6 w-6 transition-colors ${favoriteStatus ? 'fill-red-500 text-red-500' : ''}`}
-        />
-      </button>
+    <div className="relative pb-4">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-xl font-bold text-gray-800">{product.name}</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
+          </p>
+        </div>
+        
+        <div className="flex items-center gap-2">
+          <SocialShareButtons product={product} />
+          
+          <button 
+            onClick={handleFavoriteClick}
+            aria-label={favoriteStatus ? "Remove from favorites" : "Add to favorites"}
+            className={cn(
+              "h-10 w-10 rounded-full flex items-center justify-center transition-all duration-300",
+              favoriteStatus ? "bg-red-50" : "bg-gray-100"
+            )}
+          >
+            <Heart 
+              className={cn(
+                "h-5 w-5 transition-colors duration-300",
+                favoriteStatus ? "fill-red-500 text-red-500" : "text-gray-500"
+              )} 
+            />
+          </button>
+        </div>
+      </div>
     </div>
   );
 };

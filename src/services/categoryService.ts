@@ -20,7 +20,6 @@ export const addCategory = async (newCategory: NewCategoryFormData): Promise<boo
     // Prepare data for insertion
     const insertData = {
       name: newCategory.name,
-      icon: newCategory.icon || null,
       image_icon: newCategory.imageIcon || null,
       background_color: newCategory.bg || 'bg-gray-100'
     };
@@ -64,11 +63,10 @@ export const updateCategory = async (category: Category): Promise<boolean> => {
     console.log('Updating category:', category);
     
     // Map the form fields to database column names
-    const { id, name, icon, imageIcon, bg } = category;
+    const { id, name, imageIcon, bg } = category;
     
     const updateData = {
       name,
-      icon: icon || null,
       image_icon: imageIcon || null,
       background_color: bg,
       updated_at: new Date().toISOString()

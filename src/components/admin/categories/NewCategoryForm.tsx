@@ -39,22 +39,6 @@ const NewCategoryForm: React.FC<NewCategoryFormProps> = ({
             </div>
 
             <div className="mb-4">
-              <label htmlFor="icon" className="block text-sm font-medium mb-1">
-                Emoji Icon
-              </label>
-              <Input
-                id="icon"
-                name="icon"
-                placeholder="🍎"
-                value={newCategory.icon || ''}
-                onChange={onNewCategoryChange}
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Enter an emoji icon or leave empty if using image icon
-              </p>
-            </div>
-
-            <div className="mb-4">
               <label htmlFor="imageIcon" className="block text-sm font-medium mb-1">
                 Image Icon URL
               </label>
@@ -66,7 +50,7 @@ const NewCategoryForm: React.FC<NewCategoryFormProps> = ({
                 onChange={onNewCategoryChange}
               />
               <p className="text-xs text-gray-500 mt-1">
-                Enter image URL or leave empty to use emoji
+                Enter image URL for the category icon
               </p>
             </div>
 
@@ -97,7 +81,6 @@ const NewCategoryForm: React.FC<NewCategoryFormProps> = ({
               <div className="border p-4 rounded-md">
                 <CategoryIconPreview 
                   name={newCategory.name} 
-                  icon={newCategory.icon} 
                   imageIcon={newCategory.imageIcon}
                   bg={newCategory.bg}
                 />

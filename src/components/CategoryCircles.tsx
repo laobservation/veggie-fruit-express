@@ -8,7 +8,6 @@ import { supabase, getCategoriesTable } from '@/integrations/supabase/client';
 interface Category {
   id: string;
   name: string;
-  icon?: string | null;
   imageIcon?: string | null;
   bg: string;
   path: string;
@@ -21,8 +20,20 @@ const CategoryCircles: React.FC = () => {
   
   // Default fallback categories
   const defaultCategories = [
-    { id: 'fruits', name: 'Fruits', icon: '🍎', bg: 'bg-red-500', path: '/category/fruits' },
-    { id: 'vegetables', name: 'Légumes', icon: '🥦', bg: 'bg-green-500', path: '/category/vegetables' },
+    { 
+      id: 'fruits', 
+      name: 'Fruits', 
+      imageIcon: '/lovable-uploads/7eb3dccd-9b4a-4f2b-afbe-ca6658b17929.png', 
+      bg: 'bg-red-500', 
+      path: '/category/fruits' 
+    },
+    { 
+      id: 'vegetables', 
+      name: 'Légumes', 
+      imageIcon: '/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png', 
+      bg: 'bg-green-500', 
+      path: '/category/vegetables' 
+    },
     { 
       id: 'packs', 
       name: 'Packs', 
@@ -30,7 +41,13 @@ const CategoryCircles: React.FC = () => {
       bg: 'bg-amber-500', 
       path: '/category/packs' 
     },
-    { id: 'drinks', name: 'Boissons', icon: '🥤', bg: 'bg-blue-500', path: '/category/drinks' },
+    { 
+      id: 'drinks', 
+      name: 'Boissons', 
+      imageIcon: '/lovable-uploads/6f3cacf5-5377-47c9-8cba-3837c17f4d36.png', 
+      bg: 'bg-blue-500', 
+      path: '/category/drinks' 
+    },
   ];
   
   useEffect(() => {
@@ -76,7 +93,6 @@ const CategoryCircles: React.FC = () => {
           return {
             id: cat.id,
             name: cat.name,
-            icon: cat.icon || null,
             imageIcon: cat.image_icon || null,
             bg: bgColor,
             path: `/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`
@@ -135,12 +151,12 @@ const CategoryCircles: React.FC = () => {
                         (e.target as HTMLImageElement).style.display = 'none';
                         const parent = (e.target as HTMLImageElement).parentNode;
                         if (parent instanceof HTMLElement) {
-                          parent.innerHTML = `<span class="text-3xl text-white">${category.icon || category.name.charAt(0)}</span>`;
+                          parent.innerHTML = `<span class="text-3xl text-white">${category.name.charAt(0)}</span>`;
                         }
                       }}
                     />
                   ) : (
-                    <span className="text-3xl text-white">{category.icon || category.name.charAt(0)}</span>
+                    <span className="text-3xl text-white">{category.name.charAt(0)}</span>
                   )}
                 </div>
                 <span className="text-sm font-medium text-gray-700">{category.name}</span>

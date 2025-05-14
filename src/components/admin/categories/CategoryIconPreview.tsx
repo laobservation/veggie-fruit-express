@@ -3,14 +3,12 @@ import React from 'react';
 
 interface CategoryIconPreviewProps {
   name: string;
-  icon?: string | null;
-  imageIcon?: string | null;
+  imageIcon: string | null;
   bg: string;
 }
 
 const CategoryIconPreview: React.FC<CategoryIconPreviewProps> = ({
   name,
-  icon,
   imageIcon,
   bg
 }) => {
@@ -23,20 +21,20 @@ const CategoryIconPreview: React.FC<CategoryIconPreviewProps> = ({
             alt={name} 
             className="w-8 h-8 object-contain"
             onError={(e) => {
-              // If image fails to load, fallback to icon or text
+              // If image fails to load, fallback to text
               (e.target as HTMLImageElement).style.display = 'none';
               const parent = (e.target as HTMLImageElement).parentNode;
               if (parent) {
                 const fallbackText = document.createElement('span');
                 fallbackText.className = 'text-2xl';
-                fallbackText.textContent = icon || name.charAt(0).toUpperCase();
+                fallbackText.textContent = name.charAt(0).toUpperCase();
                 parent.appendChild(fallbackText);
               }
               console.log("Image failed to load, falling back to text icon");
             }}
           />
         ) : (
-          <span className="text-2xl">{icon || name.charAt(0).toUpperCase()}</span>
+          <span className="text-2xl">{name.charAt(0).toUpperCase()}</span>
         )}
       </div>
       <span className="ml-3 font-medium">{name || 'Category Name'}</span>

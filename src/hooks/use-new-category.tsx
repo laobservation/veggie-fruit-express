@@ -6,7 +6,6 @@ import { addCategory } from '@/services/categoryService';
 export const useNewCategory = () => {
   const [newCategory, setNewCategory] = useState<NewCategoryFormData>({
     name: '',
-    icon: '🍎',
     imageIcon: '',
     bg: 'bg-red-100'
   });
@@ -28,7 +27,6 @@ export const useNewCategory = () => {
       // Reset the form
       setNewCategory({
         name: '',
-        icon: '🍎',
         imageIcon: '',
         bg: 'bg-red-100'
       });
