@@ -50,7 +50,7 @@ const NewCategoryForm: React.FC<NewCategoryFormProps> = ({
                 onChange={onNewCategoryChange}
               />
               <p className="text-xs text-gray-500 mt-1">
-                Enter image URL for the category icon
+                Enter any direct URL to an image for the category icon
               </p>
             </div>
 

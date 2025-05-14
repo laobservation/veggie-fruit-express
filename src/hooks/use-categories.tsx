@@ -23,7 +23,7 @@ export const useCategories = () => {
         const formattedCategories: Category[] = data.map(cat => ({
           id: cat.id,
           name: cat.name,
-          imageIcon: cat.image_icon || null,
+          imageIcon: cat.image_icon, // Don't manipulate the URL
           bg: cat.background_color || 'bg-gray-100',
           path: `/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}` // Format path with proper slug
         }));

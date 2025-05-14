@@ -51,8 +51,11 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
                 name="imageIcon"
                 value={editForm.imageIcon || ''}
                 onChange={onEditChange}
+                placeholder="https://example.com/image.png"
               />
-              <p className="text-xs text-gray-500 mt-1">Enter image URL for category icon</p>
+              <p className="text-xs text-gray-500 mt-1">
+                Enter any image URL for category icon (direct link to image)
+              </p>
             </div>
             
             <div className="mb-2">

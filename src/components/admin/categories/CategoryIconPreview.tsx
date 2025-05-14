@@ -21,6 +21,7 @@ const CategoryIconPreview: React.FC<CategoryIconPreviewProps> = ({
             alt={name} 
             className="w-8 h-8 object-contain"
             onError={(e) => {
+              console.error("Image failed to load:", imageIcon);
               // If image fails to load, fallback to text
               (e.target as HTMLImageElement).style.display = 'none';
               const parent = (e.target as HTMLImageElement).parentNode;

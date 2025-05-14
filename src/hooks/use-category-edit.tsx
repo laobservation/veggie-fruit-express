@@ -1,5 +1,6 @@
 
 import { useState } from 'react';
+import { toast } from '@/hooks/use-toast';
 import { Category } from '@/types/category';
 import { updateCategory } from '@/services/categoryService';
 
@@ -36,12 +37,35 @@ export const useCategoryEdit = () => {
   const handleSaveEdit = async () => {
     if (!editForm) return;
     
+    if (!editForm.name) {
+      toast({
+        title: 'Error',
+        description: 'Category name is required',
+        variant: 'destructive'
+      });
+      return;
+    }
+    
+    console.log('Saving category with data:', editForm);
     const success = await updateCategory(editForm);
     
     if (success) {
+      // Play success sound
+      try {
+        const audio = new Audio('/success-sound.mp3');
+        audio.play();
+      } catch (error) {
+        console.error('Error playing sound:', error);
+      }
+      
       // Reset form state
       setEditingId(null);
       setEditForm(null);
+      
+      toast({
+        title: 'Success',
+        description: 'Category updated successfully'
+      });
     }
   };
   

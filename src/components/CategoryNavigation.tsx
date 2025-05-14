@@ -86,11 +86,12 @@ export const CategoryNavigation: React.FC = () => {
         const formattedCategories: Category[] = data.map(cat => ({
           id: cat.id,
           name: cat.name,
-          imageIcon: cat.image_icon || null,
+          imageIcon: cat.image_icon || null, // Don't manipulate the URL
           bg: cat.background_color || 'bg-gray-100',
           path: `/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`
         }));
         
+        console.log('Formatted categories:', formattedCategories);
         setCategories(formattedCategories);
       } else {
         // Use default categories if none found in DB
@@ -132,6 +133,7 @@ export const CategoryNavigation: React.FC = () => {
                 alt={category.name} 
                 className="w-10 h-10 object-contain"
                 onError={(e) => {
+                  console.error("Image failed to load:", category.imageIcon);
                   (e.target as HTMLImageElement).style.display = 'none';
                   const parent = (e.target as HTMLImageElement).parentNode;
                   if (parent instanceof HTMLElement) {

@@ -20,7 +20,7 @@ export const addCategory = async (newCategory: NewCategoryFormData): Promise<boo
     // Prepare data for insertion
     const insertData = {
       name: newCategory.name,
-      image_icon: newCategory.imageIcon || null,
+      image_icon: newCategory.imageIcon || null, // Ensure we keep the full URL
       background_color: newCategory.bg || 'bg-gray-100'
     };
     
@@ -67,7 +67,7 @@ export const updateCategory = async (category: Category): Promise<boolean> => {
     
     const updateData = {
       name,
-      image_icon: imageIcon, // Don't convert to null if empty string, allow direct URL inputs
+      image_icon: imageIcon, // Don't manipulate the URL - keep it as provided
       background_color: bg,
       updated_at: new Date().toISOString()
     };
