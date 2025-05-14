@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Home, Apple, Carrot, LogOut } from 'lucide-react';
+import { Home, Apple, Carrot } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useCategories } from '@/hooks/use-categories';
 
@@ -15,11 +15,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   onClose
 }) => {
   const { categories, loading } = useCategories();
-  const [adminMode, setAdminMode] = useState(false);
   
-  // TODO: Add proper admin check here
-  const isAdmin = true; // Placeholder for admin check
-
   return (
     <div 
       className={cn(
@@ -54,28 +50,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                 >
                   <Home className="w-5 h-5 mr-3" />
                   <span className="text-base font-bold text-neutral-600">Accueil</span>
-                </Link>
-              </li>
-              
-              <li>
-                <Link 
-                  to="/fruits" 
-                  className="flex items-center p-2 text-gray-700 hover:bg-lime-100 rounded-lg hover:text-green-600 transition-colors" 
-                  onClick={onClose}
-                >
-                  <Apple className="w-5 h-5 mr-3" />
-                  <span className="font-bold text-neutral-600">Fruits</span>
-                </Link>
-              </li>
-              
-              <li>
-                <Link 
-                  to="/vegetables" 
-                  className="flex items-center p-2 text-gray-700 hover:bg-lime-100 rounded-lg hover:text-green-600 transition-colors" 
-                  onClick={onClose}
-                >
-                  <Carrot className="w-5 h-5 mr-3 bg-transparent" />
-                  <span className="font-bold text-neutral-600">Légumes</span>
                 </Link>
               </li>
               
@@ -114,19 +88,6 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                   )}
                 </ul>
               </li>
-              
-              {isAdmin && (
-                <li>
-                  <Link 
-                    to="/admin" 
-                    className="flex items-center p-2 text-gray-700 hover:bg-lime-100 rounded-lg hover:text-green-600 transition-colors" 
-                    onClick={onClose}
-                  >
-                    <LogOut className="w-5 h-5 mr-3" />
-                    <span className="font-bold text-neutral-600">Admin</span>
-                  </Link>
-                </li>
-              )}
             </ul>
           </nav>
           

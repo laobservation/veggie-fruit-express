@@ -18,14 +18,14 @@ const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({ product }) => {
   const baseUrl = window.location.origin;
   const productUrl = `${baseUrl}/product/${product.id}`;
   
+  // Create a simplified sharing data object with just title and URL
   const shareData = {
     title: product.name,
-    text: product.description?.substring(0, 100) || `Check out this ${product.name}!`,
     url: productUrl
   };
   
-  // WhatsApp sharing URL
-  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${shareData.title}: ${shareData.text} ${productUrl}`)}`;
+  // WhatsApp sharing URL - only include product title and link, no description
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${shareData.title} ${productUrl}`)}`;
   
   const handleNativeShare = async () => {
     if (navigator.share) {
