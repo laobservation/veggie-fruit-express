@@ -45,17 +45,6 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
             </div>
             
             <div className="mb-2">
-              <label className="block text-sm font-medium mb-1">Emoji Icon</label>
-              <Input
-                type="text"
-                name="icon"
-                value={editForm.icon || ''}
-                onChange={onEditChange}
-              />
-              <p className="text-xs text-gray-500 mt-1">Leave empty if using image icon</p>
-            </div>
-            
-            <div className="mb-2">
               <label className="block text-sm font-medium mb-1">Image Icon URL</label>
               <Input
                 type="text"
@@ -63,7 +52,7 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
                 value={editForm.imageIcon || ''}
                 onChange={onEditChange}
               />
-              <p className="text-xs text-gray-500 mt-1">Leave empty to use emoji icon</p>
+              <p className="text-xs text-gray-500 mt-1">Enter image URL for category icon</p>
             </div>
             
             <div className="mb-2">
@@ -84,7 +73,6 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
               <div className="border p-4 rounded-md">
                 <CategoryIconPreview 
                   name={editForm.name} 
-                  icon={editForm.icon} 
                   imageIcon={editForm.imageIcon}
                   bg={editForm.bg}
                 />
@@ -110,7 +98,6 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
       <div className="flex items-center">
         <CategoryIconPreview 
           name={category.name} 
-          icon={category.icon} 
           imageIcon={category.imageIcon}
           bg={category.bg}
         />
