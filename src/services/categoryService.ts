@@ -67,7 +67,7 @@ export const updateCategory = async (category: Category): Promise<boolean> => {
     
     const updateData = {
       name,
-      image_icon: imageIcon || null,
+      image_icon: imageIcon, // Don't convert to null if empty string, allow direct URL inputs
       background_color: bg,
       updated_at: new Date().toISOString()
     };

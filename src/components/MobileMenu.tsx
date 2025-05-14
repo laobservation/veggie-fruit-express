@@ -67,18 +67,18 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                           className="flex items-center p-2 text-gray-700 hover:bg-lime-100 rounded-lg hover:text-green-600 transition-colors"
                           onClick={onClose}
                         >
-                          <div className={`w-5 h-5 rounded-full mr-3 flex items-center justify-center ${category.bg.replace("-100", "-200")}`}>
+                          <div className={`w-6 h-6 rounded-full mr-3 flex items-center justify-center ${category.bg.replace("-100", "-200")}`}>
                             {category.imageIcon ? (
                               <img 
                                 src={category.imageIcon} 
                                 alt={category.name} 
-                                className="w-3 h-3 object-contain"
+                                className="w-4 h-4 object-contain" /* Increased from w-3 h-3 to w-4 h-4 */
                                 onError={(e) => {
                                   (e.target as HTMLImageElement).style.display = 'none';
                                 }}
                               />
                             ) : (
-                              <span className="text-xs">{category.name.charAt(0)}</span>
+                              <span className="text-sm">{category.name.charAt(0)}</span> /* Increased from text-xs to text-sm */
                             )}
                           </div>
                           <span className="font-medium text-neutral-600">{category.name}</span>

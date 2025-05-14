@@ -18,22 +18,27 @@ const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({ product }) => {
   const baseUrl = window.location.origin;
   const productUrl = `${baseUrl}/product/${product.id}`;
   
-  // Create a simplified sharing data object with just title and URL
-  const shareData = {
-    title: product.name,
-    url: productUrl
-  };
+  // Create a better sharing message that includes the product name, price, and URL
+  const shareText = `${product.name} - ${product.price.toFixed(2)} DH`;
   
-  // WhatsApp sharing URL - only include product title and link, no description
-  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${shareData.title} ${productUrl}`)}`;
+  // Create WhatsApp sharing URL that includes the product image directly
+  // Note: WhatsApp will automatically show the image preview from Open Graph meta tags
+  // To ensure it works, we need to include the full URL to the product
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText} ${productUrl}`)}`;
   
   const handleNativeShare = async () => {
     if (navigator.share) {
       try {
-        await navigator.share(shareData);
+        await navigator.share({
+          title: product.name,
+          text: shareText,
+          url: productUrl
+        });
         console.log('Shared successfully');
       } catch (err) {
         console.error('Share error:', err);
+        // Fallback - open WhatsApp directly
+        openShareLink(whatsappUrl);
       }
     } else {
       // Fallback - open WhatsApp directly
@@ -70,15 +75,6 @@ const SocialShareButtons: React.FC<SocialShareButtonsProps> = ({ product }) => {
           </svg>
           <span>WhatsApp</span>
         </DropdownMenuItem>
-        {navigator.share && (
-          <DropdownMenuItem 
-            className="cursor-pointer flex items-center gap-2 p-2"
-            onClick={handleNativeShare}
-          >
-            <Share className="h-4 w-4 text-gray-600" />
-            <span>Share...</span>
-          </DropdownMenuItem>
-        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
