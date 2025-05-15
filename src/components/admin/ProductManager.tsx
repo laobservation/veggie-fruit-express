@@ -4,8 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/types/product';
 import ProductList from './ProductList';
 import { createProduct, updateProduct, fetchProducts, deleteProduct } from '@/services/productService';
-// import { validateProductForm, prepareProductData } from '@/services/productServiceUtils';
-import { prepareProductData } from '@/services/productServiceUtils'; // only keep prepareProductData
+import { prepareProductData } from '@/services/productServiceUtils';
 import ProductManagerActions from './ProductManagerActions';
 import ProductDialogManager from './ProductDialogManager';
 
@@ -85,9 +84,8 @@ const ProductManager: React.FC = () => {
     setIsDialogOpen(true);
   };
 
-  // 🔧 CHANGED SECTION: Allow comma in price input
   const handleSaveProduct = async (formData: Product, mediaType: 'image' | 'video') => {
-    // ✅ Convert price from "14,55" to 14.55
+    // Convert price string with comma to float
     if (typeof formData.price === 'string') {
       formData.price = parseFloat(formData.price.replace(',', '.'));
     }
@@ -112,7 +110,6 @@ const ProductManager: React.FC = () => {
 
       setIsDialogOpen(false);
       loadProducts();
-
     } catch (error) {
       console.error('Error saving product:', error);
       toast({
@@ -124,53 +121,6 @@ const ProductManager: React.FC = () => {
       setIsSaving(false);
     }
   };
-
-  /*
-  // 🛑 OLD VERSION WITH VALIDATION
-  const handleSaveProduct = async (formData: Product, mediaType: 'image' | 'video') => {
-    const validation = validateProductForm(formData, mediaType);
-    if (!validation.isValid) {
-      toast({
-        title: "Erreur",
-        description: validation.errorMessage,
-        variant: "destructive",
-      });
-      return;
-    }
-
-    const finalFormData = prepareProductData(formData, mediaType);
-
-    setIsSaving(true);
-    try {
-      if (isEditing && selectedProduct) {
-        await updateProduct(selectedProduct.id, finalFormData);
-        toast({
-          title: "Succès",
-          description: "Le produit a été mis à jour avec succès.",
-        });
-      } else {
-        await createProduct(finalFormData);
-        toast({
-          title: "Succès",
-          description: "Le nouveau produit a été ajouté avec succès.",
-        });
-      }
-
-      setIsDialogOpen(false);
-      loadProducts();
-
-    } catch (error) {
-      console.error('Error saving product:', error);
-      toast({
-        title: "Erreur",
-        description: "Une erreur s'est produite lors de l'enregistrement du produit.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-  */
 
   const handleDeleteProduct = async (productId: string) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
@@ -197,7 +147,7 @@ const ProductManager: React.FC = () => {
     <div>
       <ProductManagerActions onAddProduct={handleAddNewProduct} />
 
-      <ProductList
+      <ProductList 
         products={allProducts}
         isLoading={isLoading}
         onAddProduct={handleAddNewProduct}
@@ -205,7 +155,7 @@ const ProductManager: React.FC = () => {
         onDeleteProduct={handleDeleteProduct}
       />
 
-      <ProductDialogManager
+      <ProductDialogManager 
         isOpen={isDialogOpen}
         onOpenChange={setIsDialogOpen}
         selectedProduct={selectedProduct}
