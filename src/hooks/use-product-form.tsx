@@ -92,9 +92,14 @@ export const useProductForm = (product: Product) => {
   const handleSelectChange = (value: string, field: string) => {
     // If changing category, also set categoryLink to true
     if (field === 'category') {
+      // Fix: Ensure value is a valid category type
+      const validCategory = (value === 'fruit' || value === 'vegetable' || value === 'pack' || value === 'drink') 
+        ? value as 'fruit' | 'vegetable' | 'pack' | 'drink'
+        : 'vegetable'; // Default to vegetable if invalid
+      
       setFormData({
         ...formData,
-        [field]: value,
+        [field]: validCategory,
         categoryLink: true
       });
     } else {
