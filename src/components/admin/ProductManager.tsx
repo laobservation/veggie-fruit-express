@@ -4,8 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/types/product';
 import ProductList from './ProductList';
 import { createProduct, updateProduct, fetchProducts, deleteProduct } from '@/services/productService';
-// import { validateProductForm, prepareProductData } from '@/services/productServiceUtils';
-import { prepareProductData } from '@/services/productServiceUtils'; // only keep prepareProductData
+import { validateProductForm, prepareProductData } from '@/services/productServiceUtils';
 import ProductManagerActions from './ProductManagerActions';
 import ProductDialogManager from './ProductDialogManager';
 
@@ -34,6 +33,7 @@ const ProductManager: React.FC = () => {
   
   useEffect(() => {
     loadProducts();
+
     const productsChannel = supabase
       .channel('products-changes')
       .on(
@@ -84,45 +84,11 @@ const ProductManager: React.FC = () => {
     setSelectedProduct(product);
     setIsDialogOpen(true);
   };
-
-  // 🔧 CHANGED SECTION: Removed validation to allow incomplete product forms
+  
   const handleSaveProduct = async (formData: Product, mediaType: 'image' | 'video') => {
-    const finalFormData = prepareProductData(formData, mediaType);
+    // Fix: Ensure price is parsed as float to accept values like 14.55
+    formData.price = parseFloat(String(formData.price));
 
-    setIsSaving(true);
-    try {
-      if (isEditing && selectedProduct) {
-        await updateProduct(selectedProduct.id, finalFormData);
-        toast({
-          title: "Succès",
-          description: "Le produit a été mis à jour avec succès.",
-        });
-      } else {
-        await createProduct(finalFormData);
-        toast({
-          title: "Succès",
-          description: "Le nouveau produit a été ajouté avec succès.",
-        });
-      }
-
-      setIsDialogOpen(false);
-      loadProducts();
-
-    } catch (error) {
-      console.error('Error saving product:', error);
-      toast({
-        title: "Erreur",
-        description: "Une erreur s'est produite lors de l'enregistrement du produit.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  /*
-  // 🛑 OLD VERSION WITH VALIDATION
-  const handleSaveProduct = async (formData: Product, mediaType: 'image' | 'video') => {
     const validation = validateProductForm(formData, mediaType);
     if (!validation.isValid) {
       toast({
@@ -134,7 +100,7 @@ const ProductManager: React.FC = () => {
     }
 
     const finalFormData = prepareProductData(formData, mediaType);
-
+    
     setIsSaving(true);
     try {
       if (isEditing && selectedProduct) {
@@ -165,7 +131,6 @@ const ProductManager: React.FC = () => {
       setIsSaving(false);
     }
   };
-  */
 
   const handleDeleteProduct = async (productId: string) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
@@ -191,7 +156,6 @@ const ProductManager: React.FC = () => {
   return (
     <div>
       <ProductManagerActions onAddProduct={handleAddNewProduct} />
-      
       <ProductList 
         products={allProducts}
         isLoading={isLoading}
@@ -199,7 +163,6 @@ const ProductManager: React.FC = () => {
         onEditProduct={handleEditProduct}
         onDeleteProduct={handleDeleteProduct}
       />
-      
       <ProductDialogManager 
         isOpen={isDialogOpen}
         onOpenChange={setIsDialogOpen}
