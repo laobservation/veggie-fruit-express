@@ -44,8 +44,9 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({
   // Function to send email notification in the background
   const sendEmailNotification = async (orderDetails) => {
     try {
+      console.log('Attempting to send email notification for order');
       // Call the Supabase Edge Function to send the email
-      const { error } = await supabase.functions.invoke('send-order-notification', {
+      const { data, error } = await supabase.functions.invoke('send-order-notification', {
         body: { orderDetails }
       });
 
@@ -53,6 +54,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({
         // Log the error but don't show it to the user
         console.error('Email notification error:', error);
       } else {
+        console.log('Email notification response:', data);
         console.log('Email notification sent successfully');
       }
     } catch (err) {

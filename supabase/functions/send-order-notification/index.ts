@@ -12,6 +12,9 @@ const emailConfig = {
     user: "ayoub.iqrae@gmail.com",
     pass: "vizpnvicomcjcwyx",
   },
+  // Add debug option to get more information
+  debug: true,
+  logger: true
 };
 
 // CORS headers for the function
@@ -26,6 +29,8 @@ const transporter = createTransport(emailConfig);
 
 // Handler function for Supabase Edge Function
 serve(async (req) => {
+  console.log("Email notification function called");
+  
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, {
@@ -37,6 +42,7 @@ serve(async (req) => {
   try {
     // Parse the request body
     const { orderDetails }: { orderDetails: OrderDetails } = await req.json();
+    console.log("Order details received:", JSON.stringify(orderDetails));
     
     // Format the delivery time text
     let deliveryTime = "Pas spécifiée";
@@ -108,11 +114,14 @@ serve(async (req) => {
     `;
 
     // Send the email
+    console.log("Attempting to send email to ayoub.iqrae@gmail.com");
     const info = await transporter.sendMail({
       from: '"AKHDAR.MA" <ayoub.iqrae@gmail.com>',
       to: "ayoub.iqrae@gmail.com",
       subject: "🛒 Nouvelle commande de AKHDAR.MA",
       html: emailHtml,
+      // Add alternative text version for better deliverability
+      text: `Nouvelle Commande - AKHDAR.MA\n\nDétails du client:\nNom: ${orderDetails.name}\nAdresse: ${orderDetails.address}\nTéléphone: ${orderDetails.phone}\nHeure de livraison préférée: ${deliveryTime}\n\nTotal de la commande: ${orderDetails.totalAmount.toFixed(2)} DH`,
     });
 
     console.log("Email sent successfully:", info.messageId);
@@ -129,12 +138,18 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    // Log the error but don't expose details to the client
+    // Log the detailed error
     console.error("Error sending email notification:", error);
+    console.error("Error details:", JSON.stringify(error, Object.getOwnPropertyNames(error)));
 
     // Return an error response
     return new Response(
-      JSON.stringify({ success: false, error: "Internal server error" }),
+      JSON.stringify({ 
+        success: false, 
+        error: "Internal server error",
+        errorMessage: error.message,
+        errorDetails: JSON.stringify(error, Object.getOwnPropertyNames(error)) 
+      }),
       {
         status: 500,
         headers: {
