@@ -65,11 +65,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
         ) : (
           <Select 
             value={category} 
-            onValueChange={(value) => {
-              onSelectChange(value, 'category');
-              // Automatically set categoryLink to true when category is selected
-              onCheckboxChange(true, 'categoryLink');
-            }}
+            onValueChange={(value) => onSelectChange(value, 'category')}
           >
             <SelectTrigger>
               <SelectValue />

@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
 import { Json } from "@/integrations/supabase/types";
@@ -32,7 +33,7 @@ export const transformProductForSupabase = (product: ExtendedProduct): Omit<Supa
     image_url: product.videoUrl && product.videoUrl.trim() !== '' ? product.videoUrl : product.image,
     description: product.description,
     unit: product.unit,
-    link_to_category: product.categoryLink, // Use the actual value instead of forcing it to true
+    link_to_category: Boolean(product.categoryLink), // Ensure it's always a boolean
     media_type: product.videoUrl && product.videoUrl.trim() !== '' ? 'video' : 'image',
     stock: product.stock || 0,
     additional_images: product.additionalImages || null
@@ -66,7 +67,7 @@ export const transformProductFromSupabase = (product: SupabaseProduct): Extended
     image: product.image_url || '',
     description: product.description || '',
     unit: product.unit || 'kg',
-    categoryLink: product.link_to_category || false, // Use the actual value from DB
+    categoryLink: Boolean(product.link_to_category), // Ensure it's always a boolean
     videoUrl: product.media_type === 'video' ? product.image_url : undefined,
     featured: true, // Always default to true since it doesn't exist in DB
     stock: product.stock || 0,
@@ -177,6 +178,7 @@ export const fixProductImportType = (products: any[]): Product[] => {
     id: String(product.id),
     category: product.category as 'fruit' | 'vegetable', // Force type cast for compatibility
     featured: true, // Always set featured to true since it doesn't exist in DB
+    categoryLink: Boolean(product.link_to_category), // Ensure proper conversion
     additionalImages: product.additional_images || []
   }));
 };

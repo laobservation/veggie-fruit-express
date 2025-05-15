@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Product } from '@/types/product';
 import { supabase } from '@/integrations/supabase/client';
@@ -9,9 +10,10 @@ interface Category {
 }
 
 export const useProductForm = (product: Product) => {
-  // Don't force categoryLink to true, use the actual value
+  // Make sure we have the correct initial value for categoryLink
   const initialProduct = {
-    ...product
+    ...product,
+    categoryLink: product.categoryLink !== undefined ? product.categoryLink : false
   };
   
   const [formData, setFormData] = useState<Product>(initialProduct);
@@ -88,14 +90,22 @@ export const useProductForm = (product: Product) => {
   };
   
   const handleSelectChange = (value: string, field: string) => {
-    setFormData({
-      ...formData,
-      [field]: value
-    });
+    // If changing category, also set categoryLink to true
+    if (field === 'category') {
+      setFormData({
+        ...formData,
+        [field]: value,
+        categoryLink: true
+      });
+    } else {
+      setFormData({
+        ...formData,
+        [field]: value
+      });
+    }
   };
   
   const handleCheckboxChange = (checked: boolean, field: string) => {
-    // Allow categoryLink to be toggled
     setFormData({
       ...formData,
       [field]: checked
