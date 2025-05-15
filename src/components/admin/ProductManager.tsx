@@ -1,11 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/types/product';
 import ProductList from './ProductList';
 import { createProduct, updateProduct, fetchProducts, deleteProduct } from '@/services/productService';
-import { validateProductForm, prepareProductData } from '@/services/productServiceUtils';
+// import { validateProductForm, prepareProductData } from '@/services/productServiceUtils';
+import { prepareProductData } from '@/services/productServiceUtils'; // only keep prepareProductData
 import ProductManagerActions from './ProductManagerActions';
 import ProductDialogManager from './ProductDialogManager';
 
@@ -32,30 +32,25 @@ const ProductManager: React.FC = () => {
     stock: 0
   };
   
-  // Fetch products from Supabase when component mounts
   useEffect(() => {
     loadProducts();
-
-    // Set up a subscription to listen for product changes
     const productsChannel = supabase
       .channel('products-changes')
       .on(
         'postgres_changes',
         {
-          event: '*', // Listen for all events
+          event: '*',
           schema: 'public',
           table: 'Products'
         },
         (payload) => {
           console.log('Products table changed:', payload);
-          // Refresh the products
           loadProducts();
         }
       )
       .subscribe();
       
     return () => {
-      // Unsubscribe when component unmounts
       supabase.removeChannel(productsChannel);
     };
   }, []);
@@ -89,45 +84,30 @@ const ProductManager: React.FC = () => {
     setSelectedProduct(product);
     setIsDialogOpen(true);
   };
-  
+
+  // 🔧 CHANGED SECTION: Removed validation to allow incomplete product forms
   const handleSaveProduct = async (formData: Product, mediaType: 'image' | 'video') => {
-    // Validate form data
-    const validation = validateProductForm(formData, mediaType);
-    if (!validation.isValid) {
-      toast({
-        title: "Erreur",
-        description: validation.errorMessage,
-        variant: "destructive",
-      });
-      return;
-    }
-    
     const finalFormData = prepareProductData(formData, mediaType);
-    
+
     setIsSaving(true);
     try {
       if (isEditing && selectedProduct) {
-        // Update existing product
         await updateProduct(selectedProduct.id, finalFormData);
-        
         toast({
           title: "Succès",
           description: "Le produit a été mis à jour avec succès.",
         });
       } else {
-        // Add new product
         await createProduct(finalFormData);
-        
         toast({
           title: "Succès",
           description: "Le nouveau produit a été ajouté avec succès.",
         });
       }
-      
-      // Close the dialog and reload the products
+
       setIsDialogOpen(false);
       loadProducts();
-      
+
     } catch (error) {
       console.error('Error saving product:', error);
       toast({
@@ -140,20 +120,62 @@ const ProductManager: React.FC = () => {
     }
   };
 
+  /*
+  // 🛑 OLD VERSION WITH VALIDATION
+  const handleSaveProduct = async (formData: Product, mediaType: 'image' | 'video') => {
+    const validation = validateProductForm(formData, mediaType);
+    if (!validation.isValid) {
+      toast({
+        title: "Erreur",
+        description: validation.errorMessage,
+        variant: "destructive",
+      });
+      return;
+    }
+
+    const finalFormData = prepareProductData(formData, mediaType);
+
+    setIsSaving(true);
+    try {
+      if (isEditing && selectedProduct) {
+        await updateProduct(selectedProduct.id, finalFormData);
+        toast({
+          title: "Succès",
+          description: "Le produit a été mis à jour avec succès.",
+        });
+      } else {
+        await createProduct(finalFormData);
+        toast({
+          title: "Succès",
+          description: "Le nouveau produit a été ajouté avec succès.",
+        });
+      }
+
+      setIsDialogOpen(false);
+      loadProducts();
+
+    } catch (error) {
+      console.error('Error saving product:', error);
+      toast({
+        title: "Erreur",
+        description: "Une erreur s'est produite lors de l'enregistrement du produit.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  */
+
   const handleDeleteProduct = async (productId: string) => {
     if (window.confirm('Êtes-vous sûr de vouloir supprimer ce produit ?')) {
       try {
         await deleteProduct(productId);
-        
-        // Remove product from local state
         setAllProducts(allProducts.filter(p => p.id !== productId));
-        
         toast({
           title: "Succès",
           description: "Le produit a été supprimé avec succès.",
         });
-        
-        // Reload products to ensure UI is in sync with database
         loadProducts();
       } catch (error) {
         console.error('Error deleting product:', error);
