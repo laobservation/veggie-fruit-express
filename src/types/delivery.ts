@@ -6,6 +6,7 @@ export interface OrderDetails {
   address: string;
   phone: string;
   preferredTime: string;
+  deliveryDay?: string; // Added for delivery day
   totalAmount: number;
   subtotal: number;
   shippingCost: number;
@@ -20,4 +21,5 @@ export type FormValues = {
   phone: string;
   preferDeliveryTime: boolean;
   deliveryTime?: string;
+  deliveryDay?: string; // Added for delivery day
 };

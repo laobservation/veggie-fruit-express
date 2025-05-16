@@ -28,6 +28,7 @@ export interface Order {
   subtotal?: number;
   shipping_cost?: number;
   preferred_time?: string | null;
+  delivery_day?: string | null; // Added delivery day
   status: OrderStatus;
   notified: boolean;
   created_at: string;
@@ -44,6 +45,7 @@ export interface RawOrder {
   subtotal?: number | null;
   shipping_cost?: number | null;
   preferred_time?: string | null;
+  delivery_day?: string | null; // Added delivery day
   status?: string | null;
   notified?: boolean | null;
   created_at: string;

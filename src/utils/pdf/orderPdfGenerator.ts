@@ -25,36 +25,25 @@ export const generateOrderPDF = (order: Order) => {
       }, 0);
     }
     
-    // Estimate shipping cost (typical 30 DH)
+    // Estimate shipping cost
     const shippingCost = order.total_amount ? (order.total_amount - subtotal) : 30;
     
-    // Add header
-    addHeaderToPdf(doc);
-    
-    doc.setFontSize(14);
-    doc.setTextColor(0, 0, 0);
-    doc.text("Détails de la Commande #" + order.id, 105, 70, { align: 'center' });
-    
-    // Customer information
-    doc.setFontSize(12);
-    doc.text("Informations Client", 20, 85);
+    // Add header with dotted lines like in the provided receipt image
     doc.setFontSize(10);
-    doc.text(`Nom: ${order['Client Name']}`, 20, 95);
-    doc.text(`Adresse: ${order['Adresse']}`, 20, 100);
-    doc.text(`Téléphone: ${order['Phone'] || 'Non fourni'}`, 20, 105);
-    doc.text(`Date: ${formatDate(order.created_at)}`, 20, 110);
+    doc.setTextColor(0, 0, 0);
+    doc.text("............................................", 10, 40);
     
-    let yPosition = 115;
-    if (order.preferred_time) {
-      doc.text(`Heure de livraison préférée: ${order.preferred_time}`, 20, yPosition);
-      yPosition += 5;
-    }
+    doc.setFontSize(11);
+    doc.text("Date:", 20, 50);
+    doc.text(formatDate(order.created_at), 105, 50, { align: 'right' });
     
-    // Status
-    doc.text(`Statut: ${order.status || 'Nouveau'}`, 20, yPosition);
+    doc.text("Client:", 20, 60);
+    doc.text(order['Client Name'] || '', 105, 60, { align: 'right' });
     
-    // Create order items table
-    const tableColumn = ["Produit", "Quantité", "Prix unitaire", "Total"];
+    doc.text("............................................", 10, 70);
+    
+    // Items table with simple styling like in image
+    const tableColumn = ["Produit", "Qté", "Prix", "Total"];
     const tableRows: any[] = [];
     
     if (order.order_items && order.order_items.length > 0) {
@@ -66,7 +55,7 @@ export const generateOrderPDF = (order: Order) => {
         // Add service information to the item name if services exist
         if (item.services && item.services.length > 0) {
           itemName += "\n" + item.services.map(service => 
-            `+ ${service.name} (${formatPrice(service.price)})`
+            `+ ${service.name}`
           ).join("\n");
           
           // Add service costs to the unit price
@@ -86,29 +75,57 @@ export const generateOrderPDF = (order: Order) => {
       });
     }
     
-    // Use autoTable
+    // Use autoTable with simpler styling
     autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
-      startY: 130,
-      theme: 'striped',
-      headStyles: { fillColor: [39, 174, 96] }
+      startY: 95,
+      theme: 'plain',
+      headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: 'bold' },
+      styles: { cellPadding: 3 }
     });
     
-    // Totals
-    const finalY = (doc as any).lastAutoTable.finalY || 160;
-    doc.setFontSize(10);
-    doc.text(`Sous-total: ${formatPrice(subtotal)}`, 150, finalY + 10, { align: 'right' });
-    doc.text(`Frais de livraison: ${formatPrice(shippingCost)}`, 150, finalY + 15, { align: 'right' });
+    // Dotted line before totals
+    const finalY = (doc as any).lastAutoTable.finalY || 150;
+    doc.text("............................................", 10, finalY + 10);
     
-    doc.setFontSize(12);
-    doc.text(`Total: ${formatPrice(order.total_amount || 0)}`, 150, finalY + 25, { align: 'right' });
-    doc.setFontSize(8);
-    doc.text(`(Tous les prix sont en ${currency})`, 150, finalY + 30, { align: 'right' });
+    // Totals with right alignment
+    doc.text("Sous-total:", 50, finalY + 20);
+    doc.text(`${formatPrice(subtotal)} ${currency}`, 105, finalY + 20, { align: 'right' });
     
-    // Footer
-    doc.setFontSize(10);
-    doc.text("Document généré le " + new Date().toLocaleString('fr-FR'), 20, finalY + 40);
+    doc.text("Livraison:", 50, finalY + 30);
+    doc.text(`${formatPrice(shippingCost)} ${currency}`, 105, finalY + 30, { align: 'right' });
+    
+    doc.text("TVA:", 50, finalY + 40);
+    // Calculate 5.5% VAT on subtotal for example
+    const vat = subtotal * 0.055;
+    doc.text(`5.5%`, 80, finalY + 40);
+    doc.text(`${formatPrice(vat)} ${currency}`, 105, finalY + 40, { align: 'right' });
+    
+    doc.text("............................................", 10, finalY + 50);
+    
+    // Total with bold style
+    doc.setFont(undefined, 'bold');
+    doc.text("Total TTC:", 50, finalY + 60);
+    doc.text(`${formatPrice(order.total_amount || 0)} ${currency}`, 105, finalY + 60, { align: 'right' });
+    doc.setFont(undefined, 'normal');
+    
+    // Total HT
+    const totalHT = (order.total_amount || 0) - vat;
+    doc.text("............................................", 10, finalY + 70);
+    doc.setFont(undefined, 'bold');
+    doc.text(`Total HT: ${formatPrice(totalHT)} ${currency}`, 105, finalY + 80, { align: 'right' });
+    doc.setFont(undefined, 'normal');
+    
+    // Delivery information
+    doc.text("............................................", 10, finalY + 90);
+    if (order.delivery_day) {
+      doc.text(`Jour de livraison: ${order.delivery_day}`, 20, finalY + 100);
+    }
+    if (order.preferred_time) {
+      doc.text(`Heure de livraison: ${order.preferred_time}`, 20, finalY + 110);
+    }
+    doc.text(`Adresse: ${order['Adresse'] || ''}`, 20, finalY + 120);
     
     // Save PDF
     doc.save(`commande-${order.id}.pdf`);

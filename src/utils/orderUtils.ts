@@ -20,6 +20,7 @@ export const processOrder = async (
     address: data.address,
     phone: data.phone,
     preferredTime: data.preferDeliveryTime ? data.deliveryTime : '',
+    deliveryDay: data.deliveryDay || '', // Added delivery day
     totalAmount: totalAmount,
     subtotal: subtotal,
     shippingCost: shippingCost,
@@ -45,6 +46,7 @@ export const processOrder = async (
       client: data.name,
       address: data.address,
       phone: data.phone,
+      deliveryDay: data.deliveryDay,
       items: itemsData,
       totals: { subtotal, shippingCost, totalAmount }
     });
@@ -61,6 +63,7 @@ export const processOrder = async (
         'shipping_cost': shippingCost,
         'subtotal': subtotal,
         'preferred_time': data.preferDeliveryTime ? data.deliveryTime : null,
+        'delivery_day': data.deliveryDay || null, // Added delivery day
         'status': 'new',
         'notified': false
       })

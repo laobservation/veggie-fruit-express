@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ShoppingBag } from 'lucide-react';
@@ -17,7 +18,7 @@ const ProductActions: React.FC<ProductActionsProps> = ({
       </Button>
       
       <Button onClick={handleBuyNow} className="flex-1 ml-2 text-white bg-green-600 hover:bg-green-500 font-bold">
-        Acheter maintenant
+        Ajouter au panier
       </Button>
     </div>;
 };

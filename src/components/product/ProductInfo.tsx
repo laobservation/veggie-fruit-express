@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Product } from '@/types/product';
 import { ServiceOption } from '@/types/product';
@@ -45,9 +46,10 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
         </div>
       </div>
       
-      
-      {/* Additional Services - Moved up to appear without scrolling */}
-      <ServiceOptions serviceOptions={serviceOptions} selectedService={selectedService} setSelectedService={setSelectedService} />
+      {/* Show additional services only for products in the pack category */}
+      {isPack && (
+        <ServiceOptions serviceOptions={serviceOptions} selectedService={selectedService} setSelectedService={setSelectedService} />
+      )}
     </div>;
 };
 export default ProductInfo;

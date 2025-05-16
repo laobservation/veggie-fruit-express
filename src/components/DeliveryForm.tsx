@@ -37,7 +37,8 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({
       address: '',
       phone: '',
       preferDeliveryTime: false,
-      deliveryTime: 'matin'
+      deliveryTime: 'matin',
+      deliveryDay: '' // Added default value for delivery day
     }
   });
   

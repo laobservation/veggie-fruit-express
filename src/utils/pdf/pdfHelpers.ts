@@ -24,7 +24,7 @@ export const addLogoToPdf = (doc: jsPDF): Promise<void> => {
       doc.setFillColor(255, 255, 255);
       doc.rect(105 - 25, 5, 50, 50, 'F');
       // Then add the logo
-      doc.addImage(img, 'PNG', 105 - 20, 10, 40, 40, undefined, 'FAST');
+      doc.addImage(img, 'PNG', 105 - 20, 10, 40, 20, undefined, 'FAST');
       resolve();
     };
     
@@ -40,9 +40,9 @@ export const addLogoToPdf = (doc: jsPDF): Promise<void> => {
 // Helper function to add header text to PDF
 export const addHeaderToPdf = (doc: jsPDF) => {
   // Add header text
-  doc.setFontSize(20);
-  doc.setTextColor(39, 174, 96);
-  doc.text("Marché Bio", 105, 60, { align: 'center' });
+  doc.setFontSize(12);
+  doc.setTextColor(0, 0, 0);
+  doc.text("Marché Bio", 105, 35, { align: 'center' });
 };
 
 // Helper to calculate total price including services

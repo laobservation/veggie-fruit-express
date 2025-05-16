@@ -10,6 +10,7 @@ interface OrderDetails {
   address: string;
   phone: string;
   preferredTime?: string;
+  deliveryDay?: string;
   totalAmount: number;
   subtotal: number;
   shippingCost: number;
@@ -64,6 +65,7 @@ const OrderConfirmation: React.FC<OrderConfirmationProps> = ({
           address={orderDetails.address}
           phone={orderDetails.phone}
           preferredTime={orderDetails.preferredTime}
+          deliveryDay={orderDetails.deliveryDay}
         />
         
         <OrderSummary 

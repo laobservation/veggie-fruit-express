@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/form';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Input } from '@/components/ui/input';
 
 const DeliveryTimeSelector: React.FC = () => {
   const form = useFormContext();
@@ -17,11 +18,29 @@ const DeliveryTimeSelector: React.FC = () => {
 
   return (
     <>
+      {/* Delivery Day Field */}
+      <FormField
+        control={form.control}
+        name="deliveryDay"
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel>Jour de livraison</FormLabel>
+            <FormControl>
+              <Input 
+                placeholder="Exemple: Lundi, 20/05/2024" 
+                {...field} 
+              />
+            </FormControl>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
+      
       <FormField
         control={form.control}
         name="preferDeliveryTime"
         render={({ field }) => (
-          <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+          <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4 mt-4">
             <FormControl>
               <Checkbox
                 checked={field.value}
