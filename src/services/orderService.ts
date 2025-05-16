@@ -44,6 +44,7 @@ export const transformRawOrder = (rawOrder: RawOrder): Order => {
     subtotal: rawOrder.subtotal || 0,
     shipping_cost: rawOrder.shipping_cost || 0,
     preferred_time: rawOrder.preferred_time,
+    delivery_day: rawOrder.delivery_day,
     status: (rawOrder.status as OrderStatus) || 'new',
     notified: rawOrder.notified || false,
     created_at: rawOrder.created_at

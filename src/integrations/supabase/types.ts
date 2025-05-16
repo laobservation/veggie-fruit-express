@@ -101,6 +101,7 @@ export type Database = {
           Adresse: string | null
           "Client Name": string | null
           created_at: string
+          delivery_day: string | null
           id: number
           notified: boolean | null
           order_items: Json | null
@@ -115,6 +116,7 @@ export type Database = {
           Adresse?: string | null
           "Client Name"?: string | null
           created_at?: string
+          delivery_day?: string | null
           id?: number
           notified?: boolean | null
           order_items?: Json | null
@@ -129,6 +131,7 @@ export type Database = {
           Adresse?: string | null
           "Client Name"?: string | null
           created_at?: string
+          delivery_day?: string | null
           id?: number
           notified?: boolean | null
           order_items?: Json | null
