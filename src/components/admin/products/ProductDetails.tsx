@@ -36,7 +36,7 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
   unit,
   description,
   featured,
-  categoryLink,
+  categoryLink = true, // Default to true
   categories,
   loadingCategories,
   onInputChange,
@@ -148,9 +148,21 @@ const ProductDetails: React.FC<ProductDetailsProps> = ({
           } 
         />
         <Label htmlFor="categoryLink">Afficher dans la page de Catégorie</Label>
-        <p className="text-xs text-gray-500 ml-2">
-          (Les produits sélectionnés apparaîtront sur leur page de catégorie respective)
-        </p>
+        <div className="text-xs text-gray-500 ml-2">
+          (Désactivez cette option uniquement si vous ne voulez pas que ce produit apparaisse sur sa page de catégorie)
+        </div>
+      </div>
+
+      <div className="grid gap-2">
+        <Label htmlFor="description">Description</Label>
+        <textarea
+          id="description"
+          name="description"
+          value={description}
+          onChange={onInputChange}
+          className="min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+          placeholder="Décrivez le produit..."
+        />
       </div>
     </>
   );

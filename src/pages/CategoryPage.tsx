@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Header from '@/components/Header';
@@ -22,7 +23,7 @@ const CategoryPage = () => {
       try {
         const { data, error } = await getCategoriesTable()
           .select('*')
-          .ilike('name', categoryId)
+          .ilike('name', categoryId.replace(/-/g, ' '))
           .single();
           
         if (error) {
@@ -50,7 +51,7 @@ const CategoryPage = () => {
     const setFallbackCategoryInfo = () => {
       // Use fallback category info based on URL
       const config = categoryConfig[categoryId as keyof typeof categoryConfig] || {
-        title: categoryId ? categoryId.charAt(0).toUpperCase() + categoryId.slice(1) : 'Products',
+        title: categoryId ? categoryId.charAt(0).toUpperCase() + categoryId.slice(1).replace(/-/g, ' ') : 'Products',
         description: 'Browse our selection of products.',
         bgClass: 'bg-gray-100'
       };
@@ -106,24 +107,26 @@ const CategoryPage = () => {
       title: 'Healthy Drinks',
       description: 'Refresh yourself with our selection of healthy and natural drinks.',
       bgClass: 'bg-blue-100'
+    },
+    'salade-jus': {
+      title: 'Salades & Jus',
+      description: 'Discover our fresh salads and juices prepared daily.',
+      bgClass: 'bg-lime-100'
     }
   };
 
   const fetchProductsByCategory = async () => {
     setIsLoading(true);
     try {
-      // Normalize the category ID for database query (singular form)
-      let dbCategory = categoryId;
-      if (categoryId === 'fruits') dbCategory = 'fruit';
-      if (categoryId === 'vegetables') dbCategory = 'vegetable';
-      if (categoryId === 'packs') dbCategory = 'pack';
-      if (categoryId === 'drinks') dbCategory = 'drink';
+      // Map URL category to database category type
+      let dbCategory = mapUrlToDatabaseCategory(categoryId);
       
-      // Fetch products linked to this category - removed link_to_category filter since we want all products
+      // Fetch products linked to this category AND have categoryLink set to true
       const { data, error } = await supabase
         .from('Products')
         .select('*')
-        .eq('category', dbCategory);
+        .eq('category', dbCategory)
+        .eq('link_to_category', true);
       
       if (error) {
         throw error;
@@ -131,13 +134,14 @@ const CategoryPage = () => {
       
       // Transform the products
       if (data && data.length > 0) {
+        console.log(`Found ${data.length} products for category ${dbCategory} with link_to_category=true`);
         const categoryProducts = data.map(product => transformProductFromSupabase({
           ...product,
           additional_images: product.additional_images || null
         }));
         setProducts(categoryProducts);
       } else {
-        console.log('No products found for category:', categoryId);
+        console.log('No products found for category:', dbCategory);
         setProducts([]);
       }
     } catch (error) {
@@ -145,6 +149,23 @@ const CategoryPage = () => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  // Helper function to map URL category to database category
+  const mapUrlToDatabaseCategory = (urlCategory: string | undefined): string => {
+    if (!urlCategory) return 'vegetable';
+    
+    // Handle common mappings
+    const mapping: Record<string, string> = {
+      'fruits': 'fruit',
+      'vegetables': 'vegetable',
+      'légumes': 'vegetable',
+      'packs': 'pack',
+      'drinks': 'drink',
+      'salade-jus': 'salade-jus'
+    };
+    
+    return mapping[urlCategory.toLowerCase()] || urlCategory.toLowerCase();
   };
 
   return (

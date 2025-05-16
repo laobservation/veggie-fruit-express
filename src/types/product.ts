@@ -2,7 +2,7 @@
 export interface Product {
   id: string;
   name: string;
-  category: 'fruit' | 'vegetable' | 'pack' | 'drink';
+  category: 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus';
   price: number;
   image: string;
   description: string;

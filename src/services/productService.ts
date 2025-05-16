@@ -33,7 +33,7 @@ export const transformProductForSupabase = (product: ExtendedProduct): Omit<Supa
     image_url: product.videoUrl && product.videoUrl.trim() !== '' ? product.videoUrl : product.image,
     description: product.description,
     unit: product.unit,
-    link_to_category: Boolean(product.categoryLink), // Ensure it's always a boolean
+    link_to_category: Boolean(product.categoryLink), // Always use Boolean conversion for consistency
     media_type: product.videoUrl && product.videoUrl.trim() !== '' ? 'video' : 'image',
     stock: product.stock || 0,
     additional_images: product.additionalImages || null
@@ -47,8 +47,9 @@ export const transformProductFromSupabase = (product: SupabaseProduct): Extended
   }
   
   // Map category from database to local format with broader type support
-  let category: 'fruit' | 'vegetable' | 'pack' | 'drink' = 'vegetable';
+  let category: 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus' = 'vegetable';
   
+  // Handle category mapping - extended to support salade-jus
   if (product.category === 'fruit') {
     category = 'fruit';
   } else if (product.category === 'vegetable') {
@@ -57,6 +58,8 @@ export const transformProductFromSupabase = (product: SupabaseProduct): Extended
     category = 'pack';
   } else if (product.category === 'drink') {
     category = 'drink';
+  } else if (product.category === 'salade-jus') {
+    category = 'salade-jus';
   }
   
   return {
@@ -176,7 +179,8 @@ export const fixProductImportType = (products: any[]): Product[] => {
   return products.map(product => ({
     ...product,
     id: String(product.id),
-    category: product.category as 'fruit' | 'vegetable', // Force type cast for compatibility
+    // Support extended categories
+    category: product.category as 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus',
     featured: true, // Always set featured to true since it doesn't exist in DB
     categoryLink: Boolean(product.link_to_category), // Ensure proper conversion
     additionalImages: product.additional_images || []

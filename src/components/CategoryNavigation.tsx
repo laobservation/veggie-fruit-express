@@ -26,15 +26,15 @@ export const CategoryNavigation: React.FC = () => {
     },
     { 
       id: 'vegetables', 
-      name: 'Vegetables', 
+      name: 'Légumes', 
       imageIcon: '/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png', 
       bg: 'bg-green-100', 
-      path: '/category/vegetables' 
+      path: '/category/légumes' 
     },
     { 
       id: 'packs', 
       name: 'Packs', 
-      imageIcon: '/lovable-uploads/3e6664d5-ad8b-4a42-8cd9-a740bb96dcd4.png', 
+      imageIcon: '/lovable-uploads/3e6664d5-ad8b-4a42-8cd9-a740bb96dcd4.png',
       bg: 'bg-amber-100', 
       path: '/category/packs' 
     },
@@ -45,6 +45,13 @@ export const CategoryNavigation: React.FC = () => {
       bg: 'bg-blue-100', 
       path: '/category/drinks' 
     },
+    {
+      id: 'salade-jus',
+      name: 'Salades & Jus',
+      imageIcon: null,
+      bg: 'bg-lime-100',
+      path: '/category/salade-jus'
+    }
   ];
 
   useEffect(() => {
@@ -83,13 +90,18 @@ export const CategoryNavigation: React.FC = () => {
       
       if (data && data.length > 0) {
         // Transform to match our Category interface
-        const formattedCategories: Category[] = data.map(cat => ({
-          id: cat.id,
-          name: cat.name,
-          imageIcon: cat.image_icon || null, // Don't manipulate the URL
-          bg: cat.background_color || 'bg-gray-100',
-          path: `/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`
-        }));
+        const formattedCategories: Category[] = data.map(cat => {
+          // Format URL-friendly path
+          const pathName = cat.name.toLowerCase().replace(/\s+/g, '-');
+          
+          return {
+            id: cat.id,
+            name: cat.name,
+            imageIcon: cat.image_icon || null,
+            bg: cat.background_color || 'bg-gray-100',
+            path: `/category/${pathName}`
+          };
+        });
         
         console.log('Formatted categories:', formattedCategories);
         setCategories(formattedCategories);
