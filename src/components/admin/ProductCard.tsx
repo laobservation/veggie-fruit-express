@@ -13,12 +13,13 @@ interface ProductCardProps {
 
 const ProductCard: React.FC<ProductCardProps> = ({ product, onEdit, onDelete }) => {
   // Function to display category name with proper formatting
-  const getCategoryDisplay = (category: 'fruit' | 'vegetable' | 'pack' | 'drink') => {
+  const getCategoryDisplay = (category: 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus') => {
     switch(category) {
       case 'fruit': return 'Fruit';
       case 'vegetable': return 'Légume';
       case 'pack': return 'Pack';
       case 'drink': return 'Boisson';
+      case 'salade-jus': return 'Salade & Jus';
       default: return category;
     }
   };

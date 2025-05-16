@@ -98,12 +98,13 @@ export const useProductPage = () => {
   };
 
   // Helper function to get formatted category text
-  const getCategoryText = (category: 'fruit' | 'vegetable' | 'pack' | 'drink') => {
+  const getCategoryText = (category: string) => {
     switch(category) {
       case 'fruit': return 'Fruits';
       case 'vegetable': return 'Légumes';
       case 'pack': return 'Packs';
       case 'drink': return 'Boissons';
+      case 'salade-jus': return 'Salades & Jus';
       default: return 'Produits';
     }
   };

@@ -34,7 +34,7 @@ export const useProductDetails = (productId: string | undefined) => {
             
             // Get related products for this product - using updated type for category
             const related = getProductById(productId) ? 
-              getProductsByCategory(localProduct.category)
+              getProductsByCategory(localProduct.category as any)
                 .filter(p => p.id !== localProduct.id)
                 .slice(0, 4) : 
               [];
@@ -77,7 +77,7 @@ export const useProductDetails = (productId: string | undefined) => {
 };
 
 // Helper function to get products by category - needed since we're importing from a file that we're editing
-const getProductsByCategory = (category: 'fruit' | 'vegetable' | 'pack' | 'drink'): Product[] => {
+const getProductsByCategory = (category: string): Product[] => {
   // This is a simplified version just for use in this hook
   return [];
 };

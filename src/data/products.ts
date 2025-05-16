@@ -1,3 +1,4 @@
+
 import { Product } from '@/types/product';
 
 export const products: Product[] = [
@@ -98,7 +99,7 @@ export const getFeaturedProducts = (): Product[] => {
   return products.filter(product => product.featured);
 };
 
-export const getProductsByCategory = (category: 'fruit' | 'vegetable' | 'pack' | 'drink'): Product[] => {
+export const getProductsByCategory = (category: 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus'): Product[] => {
   return products.filter(product => product.category === category);
 };
 
@@ -106,7 +107,7 @@ export const getProductById = (id: string): Product | undefined => {
   return products.find(product => product.id === id);
 };
 
-export const getCategoryLinkedProducts = (category: 'fruit' | 'vegetable' | 'pack' | 'drink'): Product[] => {
+export const getCategoryLinkedProducts = (category: 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus'): Product[] => {
   return products.filter(product => product.category === category && product.categoryLink);
 };
 
