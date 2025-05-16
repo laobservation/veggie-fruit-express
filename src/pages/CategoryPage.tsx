@@ -121,6 +121,8 @@ const CategoryPage = () => {
       // Map URL category to database category type
       let dbCategory = mapUrlToDatabaseCategory(categoryId);
       
+      console.log('Fetching products for category:', dbCategory, 'from URL:', categoryId);
+      
       // Fetch products linked to this category AND have categoryLink set to true
       const { data, error } = await supabase
         .from('Products')
@@ -155,7 +157,7 @@ const CategoryPage = () => {
   const mapUrlToDatabaseCategory = (urlCategory: string | undefined): string => {
     if (!urlCategory) return 'vegetable';
     
-    // Handle common mappings
+    // Handle common mappings - ensure singular forms are used in the database
     const mapping: Record<string, string> = {
       'fruits': 'fruit',
       'vegetables': 'vegetable',
@@ -165,6 +167,7 @@ const CategoryPage = () => {
       'salade-jus': 'salade-jus'
     };
     
+    console.log('Mapping URL category:', urlCategory, 'to database category:', mapping[urlCategory.toLowerCase()] || urlCategory.toLowerCase());
     return mapping[urlCategory.toLowerCase()] || urlCategory.toLowerCase();
   };
 

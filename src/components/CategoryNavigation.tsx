@@ -91,8 +91,14 @@ export const CategoryNavigation: React.FC = () => {
       if (data && data.length > 0) {
         // Transform to match our Category interface
         const formattedCategories: Category[] = data.map(cat => {
-          // Format URL-friendly path
-          const pathName = cat.name.toLowerCase().replace(/\s+/g, '-');
+          // Format URL-friendly path - ensure we have consistent plural forms for URLs
+          let pathName = cat.name.toLowerCase().replace(/\s+/g, '-');
+          
+          // Special handling for certain categories to maintain consistent URL structure
+          if (pathName === 'fruit') pathName = 'fruits';
+          if (pathName === 'vegetable' || pathName === 'légume') pathName = 'légumes';
+          if (pathName === 'pack') pathName = 'packs';
+          if (pathName === 'drink') pathName = 'drinks';
           
           return {
             id: cat.id,
