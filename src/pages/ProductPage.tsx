@@ -11,6 +11,7 @@ import RelatedProducts from '@/components/product/RelatedProducts';
 import ProductActions from '@/components/product/ProductActions';
 import ProductMeta from '@/components/product/ProductMeta';
 import ProductLoadingError from '@/components/product/ProductLoadingError';
+import CategoryBenefitsSection from '@/components/CategoryBenefitsSection';
 import { useProductPage } from '@/hooks/use-product-page';
 
 const ProductPage = () => {
@@ -29,6 +30,7 @@ const ProductPage = () => {
     isPack,
     categoryText,
     serviceOptions,
+    categoryPath,
   } = useProductPage();
   
   // Show loading state or error if product not found
@@ -60,6 +62,12 @@ const ProductPage = () => {
             ) : (
               <ProductImage product={product} />
             )}
+            
+            {/* Category Benefits Section */}
+            <CategoryBenefitsSection 
+              categoryName={categoryText}
+              categoryPath={categoryPath}
+            />
             
             {/* Product Info - Now includes description above product actions */}
             <div ref={productInfoRef}>

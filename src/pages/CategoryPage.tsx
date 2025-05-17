@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import Header from '@/components/Header';
 import ProductGrid from '@/components/ProductGrid';
+import CategoryBenefitsSection from '@/components/CategoryBenefitsSection';
 import { supabase, getCategoriesTable } from '@/integrations/supabase/client';
 import { transformProductFromSupabase } from '@/services/productService';
 import { Product } from '@/types/product';
@@ -171,6 +172,11 @@ const CategoryPage = () => {
     return mapping[urlCategory.toLowerCase()] || urlCategory.toLowerCase();
   };
 
+  // Get the corresponding category path for linking back
+  const getCategoryPath = () => {
+    return `/category/${categoryId}`;
+  };
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -185,6 +191,12 @@ const CategoryPage = () => {
         </div>
         
         <div className="container mx-auto px-4 py-8">
+          {/* Add the CategoryBenefitsSection component */}
+          <CategoryBenefitsSection 
+            categoryName={categoryName} 
+            categoryPath={getCategoryPath()}
+          />
+          
           <ProductGrid products={products} isLoading={isLoading} />
         </div>
       </main>

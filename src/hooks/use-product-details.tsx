@@ -8,11 +8,11 @@ import { getProductById } from '@/data/products';
 export const useProductDetails = (productId: string | undefined) => {
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchProduct = async () => {
-      setLoading(true);
+      setIsLoading(true);
       
       try {
         if (!productId) {
@@ -50,12 +50,13 @@ export const useProductDetails = (productId: string | undefined) => {
           setProduct(transformedProduct);
           
           // Fetch related products from the same category
+          // Now fetch more products (up to 12) for the carousel
           const { data: relatedData } = await supabase
             .from('Products')
             .select('*')
             .eq('category', transformedProduct.category)
             .neq('id', parseInt(productId, 10))
-            .limit(4);
+            .limit(12); // Increased limit for carousel
             
           if (relatedData && relatedData.length > 0) {
             // Transform each related product using our helper
@@ -65,7 +66,7 @@ export const useProductDetails = (productId: string | undefined) => {
       } catch (err) {
         console.error('Error fetching product:', err);
       } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
     

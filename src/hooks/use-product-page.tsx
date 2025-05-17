@@ -109,9 +109,22 @@ export const useProductPage = () => {
     }
   };
 
+  // Get category path for linking
+  const getCategoryPath = (category: string) => {
+    switch(category) {
+      case 'fruit': return '/category/fruits';
+      case 'vegetable': return '/category/légumes';
+      case 'pack': return '/category/packs';
+      case 'drink': return '/category/drinks';
+      case 'salade-jus': return '/category/salade-jus';
+      default: return '/';
+    }
+  };
+
   const favoriteStatus = product ? isFavorite(product.id) : false;
   const isPack = product?.category === 'pack';
   const categoryText = product ? getCategoryText(product.category) : '';
+  const categoryPath = product ? getCategoryPath(product.category) : '';
 
   return {
     product,
@@ -128,6 +141,7 @@ export const useProductPage = () => {
     favoriteStatus,
     isPack,
     categoryText,
+    categoryPath,
     serviceOptions: productServiceOptions,
   };
 };
