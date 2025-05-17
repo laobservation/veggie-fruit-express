@@ -1,53 +1,33 @@
-
 import React from 'react';
 import { Heart } from 'lucide-react';
 import { Product } from '@/types/product';
 import { cn } from '@/lib/utils';
 import SocialShareButtons from './SocialShareButtons';
-
 interface ProductHeaderProps {
   product: Product;
   favoriteStatus: boolean;
   handleFavoriteClick: () => void;
 }
-
 const ProductHeader: React.FC<ProductHeaderProps> = ({
   product,
   favoriteStatus,
   handleFavoriteClick
 }) => {
-  return (
-    <div className="relative pb-4">
+  return <div className="relative pb-4">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-xl font-bold text-gray-800">{product.name}</h1>
-          <p className="text-sm text-gray-500 mt-1">
-            {product.category.charAt(0).toUpperCase() + product.category.slice(1)}
-          </p>
+          
         </div>
         
         <div className="flex items-center gap-2">
           <SocialShareButtons product={product} />
           
-          <button 
-            onClick={handleFavoriteClick}
-            aria-label={favoriteStatus ? "Remove from favorites" : "Add to favorites"}
-            className={cn(
-              "h-10 w-10 rounded-full flex items-center justify-center transition-all duration-300",
-              favoriteStatus ? "bg-red-50" : "bg-gray-100"
-            )}
-          >
-            <Heart 
-              className={cn(
-                "h-5 w-5 transition-colors duration-300",
-                favoriteStatus ? "fill-red-500 text-red-500" : "text-gray-500"
-              )} 
-            />
+          <button onClick={handleFavoriteClick} aria-label={favoriteStatus ? "Remove from favorites" : "Add to favorites"} className={cn("h-10 w-10 rounded-full flex items-center justify-center transition-all duration-300", favoriteStatus ? "bg-red-50" : "bg-gray-100")}>
+            <Heart className={cn("h-5 w-5 transition-colors duration-300", favoriteStatus ? "fill-red-500 text-red-500" : "text-gray-500")} />
           </button>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default ProductHeader;

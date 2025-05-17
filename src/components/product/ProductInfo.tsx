@@ -1,10 +1,8 @@
-
 import React from 'react';
 import { Product } from '@/types/product';
 import { ServiceOption } from '@/types/product';
 import { formatPrice } from '@/lib/formatPrice';
 import ServiceOptions from './ServiceOptions';
-
 interface ProductInfoProps {
   product: Product;
   totalPrice: number;
@@ -13,7 +11,6 @@ interface ProductInfoProps {
   selectedService: string | null;
   setSelectedService: (value: string | null) => void;
 }
-
 const ProductInfo: React.FC<ProductInfoProps> = ({
   product,
   totalPrice,
@@ -37,9 +34,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
         return 'Produits';
     }
   };
-
-  return (
-    <div className="bg-white rounded-lg p-5 mb-4 shadow-sm">
+  return <div className="bg-white rounded-lg p-5 mb-4 shadow-sm mx-0 py-[12px] my-0 px-[12px]">
       <div className="flex justify-between items-center mb-3">
         <h1 className="text-2xl font-bold">{product.name}</h1>
         <div className="text-right">
@@ -50,11 +45,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
       </div>
       
       {/* Show additional services only for products in the pack category */}
-      {isPack && (
-        <ServiceOptions serviceOptions={serviceOptions} selectedService={selectedService} setSelectedService={setSelectedService} />
-      )}
-    </div>
-  );
+      {isPack && <ServiceOptions serviceOptions={serviceOptions} selectedService={selectedService} setSelectedService={setSelectedService} />}
+    </div>;
 };
-
 export default ProductInfo;
