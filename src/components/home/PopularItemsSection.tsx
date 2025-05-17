@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Product } from '@/types/product';
@@ -8,13 +7,11 @@ import { useCart } from '@/hooks/use-cart';
 import { useFavorites } from '@/hooks/use-favorites';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import '@/components/ui/plus-animation.css';
-
 interface PopularItemsSectionProps {
   products: Product[];
   isLoading: boolean;
   showAll?: boolean;
 }
-
 const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
   products,
   isLoading,
@@ -29,16 +26,13 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
   } = useFavorites();
 
   // Sort products with newest first if showing all
-  const sortedProducts = showAll 
-    ? [...products].sort((a, b) => {
-        // Assuming products have some sort of timestamp or ID that reflects order
-        return Number(b.id) - Number(a.id); // Newest first based on ID
-      })
-    : products;
-    
+  const sortedProducts = showAll ? [...products].sort((a, b) => {
+    // Assuming products have some sort of timestamp or ID that reflects order
+    return Number(b.id) - Number(a.id); // Newest first based on ID
+  }) : products;
+
   // Determine how many products to display
   const displayProducts = showAll ? sortedProducts : sortedProducts.slice(0, 6);
-
   const handleAddToCart = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
@@ -46,16 +40,14 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
     // Add item immediately without animation
     addItem(product);
   };
-  
   const handleFavoriteClick = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
     toggleFavorite(product);
   };
-  
   return <div className="mb-8 px-4 md:px-0">
       <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-gray-800">Packs Populaires</h2>
+        <h2 className="text-xl font-bold text-gray-800">Légumes :</h2>
         <div className="flex gap-2">
           <button className="p-1 rounded-full border border-gray-300 text-gray-600">
             <ChevronLeft size={18} />
@@ -93,5 +85,4 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
       </div>
     </div>;
 };
-
 export default PopularItemsSection;
