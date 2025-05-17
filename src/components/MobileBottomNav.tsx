@@ -1,8 +1,10 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Home, Heart, MessageSquare, ShoppingCart } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
 import { useFavorites } from '@/hooks/use-favorites';
+
 const MobileBottomNav = () => {
   const {
     openCart,
@@ -35,7 +37,7 @@ const MobileBottomNav = () => {
         <span className="text-xs font-medium text-gray-800 mt-1">Favoris</span>
       </Link>
       
-      <a href="https://wa.me/+212600000000?text=Je souhaite commander des produits" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center">
+      <a href="https://wa.me/212649150370?text=Je souhaite commander des produits" target="_blank" rel="noopener noreferrer" className="flex flex-col items-center">
         <div className="rounded-full p-3 bg-green-500">
           <MessageSquare className="h-5 w-5 text-white stroke-[2.5px]" />
         </div>
@@ -53,4 +55,5 @@ const MobileBottomNav = () => {
       </button>
     </div>;
 };
+
 export default MobileBottomNav;

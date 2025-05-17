@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getProductsWithStock } from '@/data/products';
@@ -7,7 +8,7 @@ import { Product } from '@/types/product';
 import PromotionSlider from '@/components/home/PromotionSlider';
 import CategoriesSection from '@/components/home/CategoriesSection';
 import PopularItemsSection from '@/components/home/PopularItemsSection';
-import NewArrivalSection from '@/components/home/NewArrivalSection';
+
 const HomePage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -38,6 +39,7 @@ const HomePage: React.FC = () => {
     };
     loadProducts();
   }, []);
+
   return <div className="bg-gray-50 min-h-screen pb-28 md:pb-6 py-0 px-0">
       {/* Promotions Slider - Uses the slider data from database */}
       <PromotionSlider />
@@ -47,9 +49,7 @@ const HomePage: React.FC = () => {
 
       {/* Popular Items Section */}
       <PopularItemsSection products={products} isLoading={isLoading} />
-      
-      {/* New Arrivals Section - Only show if there are enough products */}
-      {products.length > 6 && <NewArrivalSection products={products} isLoading={isLoading} />}
     </div>;
 };
+
 export default HomePage;
