@@ -21,7 +21,7 @@ const ProductActions: React.FC<ProductActionsProps> = ({
       </Button>
       
       <Button onClick={handleBuyNow} className="flex-1 ml-2 text-white bg-green-600 hover:bg-green-500 font-bold">
-        Ajouter au panier
+        Acheter-maintenant
       </Button>
     </div>
   );

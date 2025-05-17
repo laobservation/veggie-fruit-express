@@ -1,3 +1,4 @@
+
 import { jsPDF } from 'jspdf';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -11,18 +12,15 @@ export const addLogoToPdf = async (doc: jsPDF): Promise<void> => {
 
     if (error) {
       console.error("Error fetching site name:", error);
-      doc.setFontSize(16);
-      doc.text("Veggie Shop", 14, 22); // Default name if fetch fails
+      // Note: We're not using this anymore as we're adding the logo image directly
+      // in the PDF generator functions
       return;
     }
 
-    const siteName = data?.site_name || "Veggie Shop";
-    doc.setFontSize(16);
-    doc.text(siteName, 14, 22);
+    // We're not setting the site name text anymore as we use the logo image
+    // This function is kept for backward compatibility
   } catch (err) {
     console.error("Error in addLogoToPdf:", err);
-    doc.setFontSize(16);
-    doc.text("Veggie Shop", 14, 22); // Fallback in case of any error
   }
 };
 

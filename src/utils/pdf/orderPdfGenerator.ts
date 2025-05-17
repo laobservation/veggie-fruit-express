@@ -28,21 +28,35 @@ export const generateOrderPDF = (order: Order) => {
     // Estimate shipping cost
     const shippingCost = order.total_amount ? (order.total_amount - subtotal) : 30;
     
-    // Add header with dotted lines like in the provided receipt image
+    // Add logo image at the top center
+    try {
+      doc.addImage('/lovable-uploads/16c76097-c928-4d2e-a9e0-9f350b63b0d0.png', 'PNG', 65, 10, 80, 30);
+    } catch (error) {
+      console.error('Failed to add logo to PDF:', error);
+    }
+    
+    // Add dotted lines and header info
     doc.setFontSize(10);
     doc.setTextColor(0, 0, 0);
-    doc.text("............................................", 10, 40);
+    doc.text("----------------------------------------", 10, 45);
     
     doc.setFontSize(11);
-    doc.text("Date:", 20, 50);
-    doc.text(formatDate(order.created_at), 105, 50, { align: 'right' });
+    doc.text("Date:", 20, 55);
+    doc.text(formatDate(order.created_at), 105, 55, { align: 'right' });
     
-    doc.text("Client:", 20, 60);
-    doc.text(order['Client Name'] || '', 105, 60, { align: 'right' });
+    doc.text("Client:", 20, 65);
+    doc.text(order['Client Name'] || '', 105, 65, { align: 'right' });
     
-    doc.text("............................................", 10, 70);
+    doc.text("----------------------------------------", 10, 75);
     
-    // Items table with simple styling like in image
+    // Add receipt title
+    doc.setFontSize(14);
+    doc.setFont(undefined, 'bold');
+    doc.text("BON DE COMMANDE", 105, 85, { align: 'center' });
+    doc.setFont(undefined, 'normal');
+    doc.setFontSize(10);
+    
+    // Items table with simple styling
     const tableColumn = ["Produit", "Qté", "Prix", "Total"];
     const tableRows: any[] = [];
     
@@ -82,12 +96,12 @@ export const generateOrderPDF = (order: Order) => {
       startY: 95,
       theme: 'plain',
       headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: 'bold' },
-      styles: { cellPadding: 3 }
+      styles: { cellPadding: 3, fontSize: 9 }
     });
     
     // Dotted line before totals
     const finalY = (doc as any).lastAutoTable.finalY || 150;
-    doc.text("............................................", 10, finalY + 10);
+    doc.text("----------------------------------------", 10, finalY + 10);
     
     // Totals with right alignment
     doc.text("Sous-total:", 50, finalY + 20);
@@ -96,36 +110,30 @@ export const generateOrderPDF = (order: Order) => {
     doc.text("Livraison:", 50, finalY + 30);
     doc.text(`${formatPrice(shippingCost)} ${currency}`, 105, finalY + 30, { align: 'right' });
     
-    doc.text("TVA:", 50, finalY + 40);
-    // Calculate 5.5% VAT on subtotal for example
-    const vat = subtotal * 0.055;
-    doc.text(`5.5%`, 80, finalY + 40);
-    doc.text(`${formatPrice(vat)} ${currency}`, 105, finalY + 40, { align: 'right' });
-    
-    doc.text("............................................", 10, finalY + 50);
+    doc.text("----------------------------------------", 10, finalY + 40);
     
     // Total with bold style
     doc.setFont(undefined, 'bold');
-    doc.text("Total TTC:", 50, finalY + 60);
-    doc.text(`${formatPrice(order.total_amount || 0)} ${currency}`, 105, finalY + 60, { align: 'right' });
+    doc.text("TOTAL:", 50, finalY + 50);
+    doc.text(`${formatPrice(order.total_amount || 0)} ${currency}`, 105, finalY + 50, { align: 'right' });
     doc.setFont(undefined, 'normal');
     
-    // Total HT
-    const totalHT = (order.total_amount || 0) - vat;
-    doc.text("............................................", 10, finalY + 70);
-    doc.setFont(undefined, 'bold');
-    doc.text(`Total HT: ${formatPrice(totalHT)} ${currency}`, 105, finalY + 80, { align: 'right' });
-    doc.setFont(undefined, 'normal');
+    doc.text("----------------------------------------", 10, finalY + 60);
     
     // Delivery information
-    doc.text("............................................", 10, finalY + 90);
     if (order.delivery_day) {
-      doc.text(`Jour de livraison: ${order.delivery_day}`, 20, finalY + 100);
+      doc.text(`Jour de livraison: ${order.delivery_day}`, 20, finalY + 70);
     }
     if (order.preferred_time) {
-      doc.text(`Heure de livraison: ${order.preferred_time}`, 20, finalY + 110);
+      doc.text(`Heure de livraison: ${order.preferred_time}`, 20, finalY + 80);
     }
-    doc.text(`Adresse: ${order['Adresse'] || ''}`, 20, finalY + 120);
+    doc.text(`Adresse: ${order['Adresse'] || ''}`, 20, finalY + 90);
+    doc.text(`Téléphone: ${order['Phone'] || ''}`, 20, finalY + 100);
+    
+    // Thank you message
+    doc.text("----------------------------------------", 10, finalY + 110);
+    doc.setFontSize(12);
+    doc.text("Merci pour votre commande!", 105, finalY + 120, { align: 'center' });
     
     // Save PDF
     doc.save(`commande-${order.id}.pdf`);

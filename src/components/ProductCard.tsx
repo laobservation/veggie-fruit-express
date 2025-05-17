@@ -94,7 +94,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, discountPercentage =
             } transition-colors flex items-center px-3 py-1`}
             aria-label="Ajouter au panier"
           >
-            <span className="text-white text-sm mr-1">Ajouter</span>
+            <span className="text-white text-sm mr-1">Ajouter au panier</span>
             <Command className="h-4 w-4 text-white" />
           </button>
           
