@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Product } from '@/types/product';
@@ -8,12 +7,10 @@ import { useCart } from '@/hooks/use-cart';
 import { useFavorites } from '@/hooks/use-favorites';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import '@/components/ui/plus-animation.css';
-
 interface PopularItemsSectionProps {
   products: Product[];
   isLoading: boolean;
 }
-
 const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
   products,
   isLoading
@@ -25,7 +22,6 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
     isFavorite,
     toggleFavorite
   } = useFavorites();
-
   const handleAddToCart = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
@@ -33,13 +29,11 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
     // Add item immediately without animation
     addItem(product);
   };
-
   const handleFavoriteClick = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
     toggleFavorite(product);
   };
-
   return <div className="mb-8 px-4 md:px-0">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-800">Packs Populaires</h2>
@@ -73,12 +67,11 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
                 <span className="text-lg font-bold text-green-600">{formatPrice(product.price)}</span>
               </div>
               <button onClick={e => handleAddToCart(e, product)} aria-label="Ajouter au panier" className="bg-green-500 rounded-full flex items-center px-[15px] mx-0 my-0 py-[5px]">
-                <span className="text-white text-sm font-bold">Ajouter au panier</span>
+                <span className="text-white font-bold text-xs">Ajouter au panier</span>
               </button>
             </div>
           </Link>)}
       </div>
     </div>;
 };
-
 export default PopularItemsSection;
