@@ -72,7 +72,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </div>
             
           <button onClick={handleAddToCart} disabled={hasStock && !isInStock} className={`rounded-full mt-2 ${hasStock && !isInStock ? 'bg-gray-300 cursor-not-allowed' : 'bg-green-500'} transition-colors flex items-center px-3 py-1`} aria-label="Ajouter au panier">
-            <span className="text-white text-sm mr-1">Ajouter au panier</span>
+            <span className="text-white text-sm mr-1 font-medium">Ajouter au panier</span>
             
           </button>
           
