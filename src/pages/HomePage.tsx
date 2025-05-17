@@ -12,9 +12,7 @@ import PopularItemsSection from '@/components/home/PopularItemsSection';
 const HomePage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
   const navigate = useNavigate();
 
   // Load products from Supabase
@@ -47,8 +45,8 @@ const HomePage: React.FC = () => {
       {/* Categories Section */}
       <CategoriesSection />
 
-      {/* Popular Items Section */}
-      <PopularItemsSection products={products} isLoading={isLoading} />
+      {/* Show all products instead of just popular ones */}
+      <PopularItemsSection products={products} isLoading={isLoading} showAll={true} />
     </div>;
 };
 
