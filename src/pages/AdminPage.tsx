@@ -1,17 +1,30 @@
 
 // Fix the import conflict between Lucide and React Router
-import { ArrowLeft, Home, Package, Settings, ShoppingBag, Sliders } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { ArrowLeft, Home, LogOut, Package, Settings, ShoppingBag, Sliders } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dashboard } from '@/components/admin/Dashboard';
 import ProductManager from '@/components/admin/ProductManager';
 import OrdersManager from '@/components/admin/OrdersManager';
 import { Button } from '@/components/ui/button';
+import { useToast } from '@/hooks/use-toast';
 
 // Define the AdminPage component
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
+  const navigate = useNavigate();
+  const { toast } = useToast();
+  
+  const handleLogout = () => {
+    // Clear admin authentication
+    sessionStorage.removeItem('adminAuth');
+    toast({
+      title: "Déconnexion réussie",
+      description: "Vous avez été déconnecté de l'interface d'administration",
+    });
+    navigate('/');
+  };
   
   return (
     <div className="container mx-auto py-10">
@@ -36,6 +49,15 @@ const AdminPage = () => {
               Retour au site
             </Button>
           </Link>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            onClick={handleLogout}
+            className="flex items-center gap-1 text-red-600 hover:bg-red-50 border-red-200"
+          >
+            <LogOut className="h-4 w-4" />
+            Déconnexion
+          </Button>
         </div>
       </div>
       
