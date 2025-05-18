@@ -16,8 +16,8 @@ const ProductImage: React.FC<ProductImageProps> = ({ product }) => {
           className="w-full h-full object-contain p-6"
           autoplay={false}
           controls={true}
-          loading="eager" // Eager loading for main product image
-          isHero={true} // Mark as LCP
+          loading="eager" // Eager loading for the main product image
+          isHero={true} // Mark as LCP element
         />
       </div>
     </div>
