@@ -7,15 +7,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Veggie Express</title>
     
-    <!-- Preload critical fonts -->
+    <!-- Preconnect to critical domains -->
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
     
-    <!-- Preload critical assets -->
-    <link rel="preload" as="image" href="/images/hero-1.jpg" fetchpriority="high" />
+    <!-- Preload true LCP image only -->
+    <link rel="preload" as="image" href="/lovable-uploads/4c234092-7248-4896-9d9b-9da5909ffbfb.png" fetchpriority="high" />
     
-    <!-- Inline critical CSS -->
+    <!-- Inline minimal critical CSS -->
     <style>
-      /* Critical CSS for above-the-fold content */
+      /* Critical CSS for above-the-fold content only */
       body {
         margin: 0;
         padding: 0;
@@ -30,7 +30,14 @@
         min-height: 100vh;
       }
       
-      /* Prevent content layout shift */
+      /* Header and navigation critical styles */
+      header {
+        background-color: transparent;
+        padding-top: 24px;
+        padding-bottom: 24px;
+      }
+      
+      /* Prevent layout shift with aspect-ratio */
       .aspect-square {
         aspect-ratio: 1/1;
       }
@@ -42,7 +49,7 @@
   <body>
     <div id="root"></div>
     <!-- Defer non-essential scripts -->
-    <script src="https://cdn.gpteng.co/gptengineer.js" type="module" defer></script>
     <script type="module" src="/src/main.tsx"></script>
+    <script src="https://cdn.gpteng.co/gptengineer.js" type="module" defer></script>
   </body>
 </html>
