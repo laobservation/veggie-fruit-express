@@ -47,14 +47,14 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({
     );
   }
 
-  // Display image as fallback - only set high priority on true hero/LCP image
+  // Display image as fallback with appropriate loading strategy
   return (
     <img
       src={product.image}
       alt={product.name}
       className={`${className} object-contain`}
-      loading={isHero ? "eager" : loading} 
-      fetchPriority={isHero ? "high" : "auto"} // Only the main product image gets high priority
+      loading={isHero ? "eager" : loading} // Use eager loading for hero/LCP images
+      fetchPriority={isHero ? "high" : "auto"} // High priority fetch for LCP
       onError={(e) => {
         (e.target as HTMLImageElement).src = '/images/placeholder.svg';
       }}

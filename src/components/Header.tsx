@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
@@ -8,7 +7,6 @@ import Cart from './Cart';
 import MobileMenu from './MobileMenu';
 import { useIsMobile } from '@/hooks/use-mobile';
 import SearchBar from './SearchBar';
-
 const Header = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -24,11 +22,9 @@ const Header = () => {
       setIsMobileMenuOpen(false);
     }
   }, [isMobile, isMobileMenuOpen]);
-  
   const handleCartClick = () => {
     openCart();
   };
-  
   return <header className="bg-transparent py-[24px]">
       <div className="container mx-auto px-4 flex items-center justify-between relative">
         <div className="flex items-center gap-6">
@@ -45,16 +41,10 @@ const Header = () => {
           </div>
         </div>
         
-        {/* Center Logo - This is likely part of LCP */}
+        {/* Center Logo */}
         <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center">
           <Link to="/" className="flex items-center">
-            <img 
-              src="/lovable-uploads/4c234092-7248-4896-9d9b-9da5909ffbfb.png" 
-              alt="Marché Bio Logo" 
-              className="h-14 w-auto object-contain"
-              loading="eager"
-              fetchPriority="high"
-            />
+            <img src="/lovable-uploads/4c234092-7248-4896-9d9b-9da5909ffbfb.png" alt="Marché Bio Logo" className="h-14 w-auto object-contain" />
           </Link>
         </div>
         
@@ -75,5 +65,4 @@ const Header = () => {
       <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
     </header>;
 };
-
 export default Header;

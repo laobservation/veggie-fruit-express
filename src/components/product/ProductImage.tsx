@@ -17,7 +17,7 @@ const ProductImage: React.FC<ProductImageProps> = ({ product }) => {
           autoplay={false}
           controls={true}
           loading="eager" // Eager loading for the main product image
-          isHero={true} // This is the true LCP element
+          isHero={true} // Mark as LCP element
         />
       </div>
     </div>
