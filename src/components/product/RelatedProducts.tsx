@@ -21,7 +21,7 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
   const [isPaused, setIsPaused] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const totalSlides = Math.ceil(products.length / 4);
+  const totalSlides = Math.ceil(products.length / 3); // Changed to 3 items per slide
 
   useEffect(() => {
     // Start autoplay for carousel
@@ -41,7 +41,7 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
     }
 
     // Only start autoplay if we have enough products and it's not paused
-    if (products.length > 4 && !isPaused) {
+    if (products.length > 3 && !isPaused) { // Changed to 3
       autoplayRef.current = setInterval(() => {
         if (carouselRef.current) {
           const nextButton = carouselRef.current.querySelector('[aria-label="Next slide"]');
@@ -140,14 +140,19 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
         <Carousel opts={{
           align: "start",
           loop: true,
-          slidesToScroll: 4,
+          slidesToScroll: 3, // Changed to 3
         }}>
           <CarouselContent>
             {products.map(relatedProduct => (
-              <CarouselItem key={relatedProduct.id} className="basis-1/4">
+              <CarouselItem key={relatedProduct.id} className="basis-1/3"> {/* Changed to 1/3 */}
                 <div className="cursor-pointer relative p-1" onClick={() => handleProductClick(relatedProduct.id)}>
                   <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden">
-                    <img src={relatedProduct.image} alt={relatedProduct.name} className="w-full h-full object-cover" />
+                    <img 
+                      src={relatedProduct.image} 
+                      alt={relatedProduct.name} 
+                      className="w-full h-full object-cover"
+                      loading="lazy" 
+                    />
                   </div>
                   {/* Product name */}
                   <div className="mt-2 text-sm font-medium text-center truncate">
@@ -171,9 +176,9 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
           </div>
         </Carousel>
         
-        {/* Swipe hint animation */}
-        {products.length > 4 && !isPaused && (
-          <div className="absolute top-1/2 right-4 transform -translate-y-1/2 animate-pulse">
+        {/* Swipe hint animation - moved to right white space */}
+        {products.length > 3 && !isPaused && (
+          <div className="absolute top-1/2 right-8 transform -translate-y-1/2 animate-pulse">
             <div className="flex items-center gap-1">
               <div className="w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
               <ChevronRight size={16} className="text-gray-400 animate-bounce" />

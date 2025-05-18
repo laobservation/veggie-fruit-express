@@ -5,17 +5,12 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import WebsiteSettings from '@/components/admin/WebsiteSettings';
-import LogoManager from '@/components/admin/LogoManager';
-import PageManager from '@/components/admin/PageManager';
-import ContentEditor from '@/components/admin/ContentEditor';
-import SliderEditor from '@/components/admin/SliderEditor';
 import CustomersList from '@/components/admin/CustomersList';
 import FooterEditor from '@/components/admin/FooterEditor';
 import CategoryManager from '@/components/admin/CategoryManager';
 
 const AdminSettingsPage = () => {
-  const [activeTab, setActiveTab] = useState("general");
+  const [activeTab, setActiveTab] = useState("categories");
   
   return (
     <div className="container mx-auto py-10">
@@ -29,66 +24,12 @@ const AdminSettingsPage = () => {
         </Link>
       </div>
       
-      <Tabs defaultValue="general" className="w-full" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-6 mb-8">
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="appearance">Appearance</TabsTrigger>
-          <TabsTrigger value="content">Content</TabsTrigger>
+      <Tabs defaultValue="categories" className="w-full" value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-3 mb-8">
           <TabsTrigger value="categories">Categories</TabsTrigger>
           <TabsTrigger value="footer">Footer</TabsTrigger>
           <TabsTrigger value="customers">Customers</TabsTrigger>
         </TabsList>
-        
-        <TabsContent value="general" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Website Settings</CardTitle>
-              <CardDescription>Manage basic website information</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <WebsiteSettings />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="appearance" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Logo Management</CardTitle>
-              <CardDescription>Upload and manage your website logos</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <LogoManager />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="content">
-          <Card>
-            <CardHeader>
-              <CardTitle>Content Management</CardTitle>
-              <CardDescription>Edit your website's main content</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="pages">
-                <TabsList className="mb-4">
-                  <TabsTrigger value="pages">Page Management</TabsTrigger>
-                  <TabsTrigger value="content">Content Blocks</TabsTrigger>
-                  <TabsTrigger value="slider">Slider Images</TabsTrigger>
-                </TabsList>
-                <TabsContent value="pages">
-                  <PageManager />
-                </TabsContent>
-                <TabsContent value="content">
-                  <ContentEditor />
-                </TabsContent>
-                <TabsContent value="slider">
-                  <SliderEditor />
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-          </Card>
-        </TabsContent>
         
         <TabsContent value="categories">
           <Card>

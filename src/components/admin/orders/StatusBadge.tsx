@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 
 interface StatusBadgeProps {
@@ -7,16 +7,34 @@ interface StatusBadgeProps {
 }
 
 export const StatusBadge: React.FC<StatusBadgeProps> = ({ status }) => {
-  switch(status) {
-    case 'processing':
-      return <Badge className="bg-blue-500">En traitement</Badge>;
-    case 'shipped':
-      return <Badge className="bg-orange-500">Expédiée</Badge>;
-    case 'delivered':
-      return <Badge className="bg-green-500">Livrée</Badge>;
-    case 'cancelled':
-      return <Badge className="bg-red-500">Annulée</Badge>;
-    default:
-      return <Badge className="bg-gray-500">Nouvelle</Badge>;
-  }
+  const [badgeClass, setBadgeClass] = useState<string>("");
+  const [statusText, setStatusText] = useState<string>("");
+  
+  useEffect(() => {
+    // Dynamically update the badge style and text based on status
+    switch(status) {
+      case 'processing':
+        setBadgeClass("bg-blue-500");
+        setStatusText("En traitement");
+        break;
+      case 'shipped':
+        setBadgeClass("bg-orange-500");
+        setStatusText("Expédiée");
+        break;
+      case 'delivered':
+        setBadgeClass("bg-green-500");
+        setStatusText("Livrée");
+        break;
+      case 'cancelled':
+        setBadgeClass("bg-red-500");
+        setStatusText("Annulée");
+        break;
+      default:
+        setBadgeClass("bg-gray-500");
+        setStatusText("Nouvelle");
+        break;
+    }
+  }, [status]);
+  
+  return <Badge className={badgeClass}>{statusText}</Badge>;
 };

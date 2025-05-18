@@ -7,7 +7,8 @@ interface MediaDisplayProps {
   className?: string;
   autoplay?: boolean;
   controls?: boolean;
-  loading?: "lazy" | "eager"; // Add loading property
+  loading?: "lazy" | "eager";
+  isHero?: boolean; // To identify the LCP image
 }
 
 const MediaDisplay: React.FC<MediaDisplayProps> = ({ 
@@ -15,7 +16,8 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({
   className = "", 
   autoplay = true,
   controls = true,
-  loading = "lazy" // Default to lazy loading
+  loading = "lazy",
+  isHero = false
 }) => {
   const [videoId, setVideoId] = useState<string | null>(null);
   
@@ -37,6 +39,7 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({
           title={product.name}
           className="w-full h-full object-cover"
           frameBorder="0"
+          loading={loading}
           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
         ></iframe>
@@ -44,13 +47,14 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({
     );
   }
 
-  // Display image as fallback
+  // Display image as fallback with appropriate loading strategy
   return (
     <img
       src={product.image}
       alt={product.name}
       className={`${className} object-contain`}
-      loading={loading}
+      loading={isHero ? "eager" : loading} // Use eager loading for hero/LCP images
+      fetchPriority={isHero ? "high" : "auto"} // High priority fetch for LCP
       onError={(e) => {
         (e.target as HTMLImageElement).src = '/images/placeholder.svg';
       }}

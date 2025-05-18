@@ -23,18 +23,38 @@ const OrdersManager: React.FC = () => {
     refreshOrders
   } = useOrders();
 
-  // Force refresh on component mount and set up polling
+  // Force refresh on component mount and set up polling with performance optimization
   useEffect(() => {
     // Immediate refresh when component mounts
     refreshOrders();
     
     // Set up more frequent polling for new orders
     const intervalId = setInterval(() => {
-      refreshOrders();
+      // Only poll when the document is visible to save resources
+      if (document.visibilityState === 'visible') {
+        refreshOrders();
+      }
     }, 60000); // Poll every minute
     
-    return () => clearInterval(intervalId);
-  }, [refreshOrders]); // Add refreshOrders to dependency array
+    // Add visibility change listener to pause/resume polling
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        refreshOrders();
+      }
+    };
+    
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    
+    return () => {
+      clearInterval(intervalId);
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, [refreshOrders]);
+
+  // Memoize callbacks for better performance
+  const handleCloseDialog = React.useCallback(() => {
+    setViewDialogOpen(false);
+  }, [setViewDialogOpen]);
 
   return (
     <div>
@@ -53,7 +73,7 @@ const OrdersManager: React.FC = () => {
       
       <OrderDetailsDialog
         open={viewDialogOpen}
-        onClose={() => setViewDialogOpen(false)}
+        onClose={handleCloseDialog}
         order={selectedOrder}
         onDelete={handleDeleteOrder}
         onGeneratePDF={handleGeneratePDF}
