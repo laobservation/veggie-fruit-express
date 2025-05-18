@@ -82,7 +82,7 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
             <button onClick={e => handleFavoriteClick(e, product)} className="absolute top-2 right-2 p-1 rounded-full bg-white/80 z-10">
               <Heart className={`h-4 w-4 ${isFavorite(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
             </button>
-            <div className="flex justify-center mb-3">
+            <div className="flex justify-center mb-3 bg-stone-50 text-lime-600">
               <img src={product.image} alt={product.name} className="h-28 object-cover" />
             </div>
             <div className="flex flex-col items-center">
