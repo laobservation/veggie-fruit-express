@@ -1,4 +1,3 @@
-
 import { useCallback } from 'react';
 import { Order, OrderStatus } from '@/types/order';
 import { useToast } from '@/hooks/use-toast';
@@ -59,7 +58,14 @@ export const useOrdersOperations = (
 
   const handleUpdateStatus = async (orderId: number, status: string) => {
     try {
-      // Optimistically update the UI first for better responsiveness
+      await updateOrderStatusService(orderId, status as OrderStatus);
+
+      toast({
+        title: "Succès",
+        description: `Le statut de la commande a été mis à jour.`,
+      });
+      
+      // Update the order in the local state
       setOrders((prevOrders: Order[]) => prevOrders.map(order => 
         order.id === orderId ? { ...order, status: status as OrderStatus } : order
       ));
@@ -68,19 +74,8 @@ export const useOrdersOperations = (
       if (selectedOrder && selectedOrder.id === orderId) {
         setSelectedOrder({ ...selectedOrder, status: status as OrderStatus });
       }
-      
-      // Then send the update to the server
-      await updateOrderStatusService(orderId, status as OrderStatus);
-      
-      toast({
-        title: "Succès",
-        description: `Le statut de la commande a été mis à jour à "${status}".`,
-      });
     } catch (err) {
       console.error("Error updating status:", err);
-      
-      // If the server update failed, revert the UI changes
-      // This should ideally fetch the latest state from the server
       toast({
         title: "Erreur",
         description: "Une erreur s'est produite lors de la mise à jour du statut.",

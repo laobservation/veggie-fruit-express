@@ -51,7 +51,7 @@ export const useOrders = () => {
   const refreshOrders = useCallback(async () => {
     try {
       await fetchOrders();
-      // Silent refresh - don't show a toast every time
+      toast.success("Liste des commandes mise à jour");
     } catch (error) {
       console.error("Error refreshing orders:", error);
       toast.error("Erreur lors de la mise à jour des commandes");
@@ -60,7 +60,6 @@ export const useOrders = () => {
 
   return {
     orders,
-    setOrders,  // Expose the setOrders function for real-time updates
     loading,
     selectedOrder,
     viewDialogOpen,

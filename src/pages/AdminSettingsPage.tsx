@@ -7,10 +7,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import WebsiteSettings from '@/components/admin/WebsiteSettings';
 import LogoManager from '@/components/admin/LogoManager';
-import FooterEditor from '@/components/admin/FooterEditor';
-import CategoryManager from '@/components/admin/CategoryManager';
+import PageManager from '@/components/admin/PageManager';
+import ContentEditor from '@/components/admin/ContentEditor';
 import SliderEditor from '@/components/admin/SliderEditor';
 import CustomersList from '@/components/admin/CustomersList';
+import FooterEditor from '@/components/admin/FooterEditor';
+import CategoryManager from '@/components/admin/CategoryManager';
 
 const AdminSettingsPage = () => {
   const [activeTab, setActiveTab] = useState("general");
@@ -28,10 +30,12 @@ const AdminSettingsPage = () => {
       </div>
       
       <Tabs defaultValue="general" className="w-full" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-4 mb-8">
+        <TabsList className="grid grid-cols-6 mb-8">
           <TabsTrigger value="general">General</TabsTrigger>
           <TabsTrigger value="appearance">Appearance</TabsTrigger>
+          <TabsTrigger value="content">Content</TabsTrigger>
           <TabsTrigger value="categories">Categories</TabsTrigger>
+          <TabsTrigger value="footer">Footer</TabsTrigger>
           <TabsTrigger value="customers">Customers</TabsTrigger>
         </TabsList>
         
@@ -57,24 +61,31 @@ const AdminSettingsPage = () => {
               <LogoManager />
             </CardContent>
           </Card>
-          
+        </TabsContent>
+        
+        <TabsContent value="content">
           <Card>
             <CardHeader>
-              <CardTitle>Slider Management</CardTitle>
-              <CardDescription>Manage your homepage slider</CardDescription>
+              <CardTitle>Content Management</CardTitle>
+              <CardDescription>Edit your website's main content</CardDescription>
             </CardHeader>
             <CardContent>
-              <SliderEditor />
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader>
-              <CardTitle>Footer Management</CardTitle>
-              <CardDescription>Customize your website's footer</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <FooterEditor />
+              <Tabs defaultValue="pages">
+                <TabsList className="mb-4">
+                  <TabsTrigger value="pages">Page Management</TabsTrigger>
+                  <TabsTrigger value="content">Content Blocks</TabsTrigger>
+                  <TabsTrigger value="slider">Slider Images</TabsTrigger>
+                </TabsList>
+                <TabsContent value="pages">
+                  <PageManager />
+                </TabsContent>
+                <TabsContent value="content">
+                  <ContentEditor />
+                </TabsContent>
+                <TabsContent value="slider">
+                  <SliderEditor />
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
         </TabsContent>
@@ -87,6 +98,18 @@ const AdminSettingsPage = () => {
             </CardHeader>
             <CardContent>
               <CategoryManager />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="footer">
+          <Card>
+            <CardHeader>
+              <CardTitle>Footer Management</CardTitle>
+              <CardDescription>Customize your website's footer</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <FooterEditor />
             </CardContent>
           </Card>
         </TabsContent>

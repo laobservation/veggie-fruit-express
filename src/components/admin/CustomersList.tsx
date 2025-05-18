@@ -18,7 +18,7 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Search, Filter, MoreVertical, Trash2 } from 'lucide-react';
+import { Search, Filter, MoreVertical } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,16 +27,6 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle
-} from '@/components/ui/alert-dialog';
 
 interface Customer {
   id: string;
@@ -53,8 +43,6 @@ const CustomersList: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const { toast } = useToast();
-  const [customerToDelete, setCustomerToDelete] = useState<Customer | null>(null);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchCustomers();
@@ -111,55 +99,6 @@ const CustomersList: React.FC = () => {
       });
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDeleteCustomer = (customer: Customer) => {
-    setCustomerToDelete(customer);
-    setDeleteDialogOpen(true);
-  };
-
-  const confirmDeleteCustomer = async () => {
-    if (!customerToDelete) return;
-    
-    try {
-      // Get orders for this customer
-      const { data: customerOrders, error: fetchError } = await supabase
-        .from('Orders')
-        .select('id')
-        .eq('Client Name', customerToDelete.name);
-      
-      if (fetchError) throw fetchError;
-      
-      if (customerOrders && customerOrders.length > 0) {
-        // Delete orders one by one
-        for (const order of customerOrders) {
-          const { error: deleteError } = await supabase
-            .from('Orders')
-            .delete()
-            .eq('id', order.id);
-          
-          if (deleteError) throw deleteError;
-        }
-      }
-      
-      // Remove from local state after successful deletion
-      setCustomers(customers.filter(c => c.id !== customerToDelete.id));
-      
-      toast({
-        title: "Succès",
-        description: `Le client ${customerToDelete.name} et ses commandes ont été supprimés`,
-      });
-    } catch (error) {
-      console.error('Error deleting customer:', error);
-      toast({
-        title: "Erreur",
-        description: "Impossible de supprimer le client",
-        variant: "destructive",
-      });
-    } finally {
-      setDeleteDialogOpen(false);
-      setCustomerToDelete(null);
     }
   };
 
@@ -237,13 +176,6 @@ const CustomersList: React.FC = () => {
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem>Voir les commandes</DropdownMenuItem>
                             <DropdownMenuItem>Envoyer un message</DropdownMenuItem>
-                            <DropdownMenuItem 
-                              className="text-red-600"
-                              onClick={() => handleDeleteCustomer(customer)}
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Supprimer le client
-                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>
@@ -255,26 +187,6 @@ const CustomersList: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Confirmer la suppression</AlertDialogTitle>
-            <AlertDialogDescription>
-              Êtes-vous sûr de vouloir supprimer ce client et toutes ses commandes ? Cette action est irréversible.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Annuler</AlertDialogCancel>
-            <AlertDialogAction 
-              onClick={confirmDeleteCustomer}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Supprimer
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };
