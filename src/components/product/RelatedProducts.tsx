@@ -21,7 +21,7 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
   const [isPaused, setIsPaused] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const totalSlides = Math.ceil(products.length / 4);
+  const totalSlides = Math.ceil(products.length / 3); // Changed from 4 to 3
 
   useEffect(() => {
     // Start autoplay for carousel
@@ -41,7 +41,7 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
     }
 
     // Only start autoplay if we have enough products and it's not paused
-    if (products.length > 4 && !isPaused) {
+    if (products.length > 3 && !isPaused) { // Changed from 4 to 3
       autoplayRef.current = setInterval(() => {
         if (carouselRef.current) {
           const nextButton = carouselRef.current.querySelector('[aria-label="Next slide"]');
@@ -50,7 +50,7 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
             setCurrentSlide(prev => (prev + 1) % totalSlides);
           }
         }
-      }, 5000); // Slide every 5 seconds
+      }, 6000); // Increased from 5000 to 6000 for smoother transition
     }
   };
 
@@ -140,11 +140,11 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
         <Carousel opts={{
           align: "start",
           loop: true,
-          slidesToScroll: 4,
+          slidesToScroll: 3, // Changed from 4 to 3
         }}>
           <CarouselContent>
             {products.map(relatedProduct => (
-              <CarouselItem key={relatedProduct.id} className="basis-1/4">
+              <CarouselItem key={relatedProduct.id} className="basis-1/3"> {/* Changed from basis-1/4 to basis-1/3 */}
                 <div className="cursor-pointer relative p-1" onClick={() => handleProductClick(relatedProduct.id)}>
                   <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden">
                     <img src={relatedProduct.image} alt={relatedProduct.name} className="w-full h-full object-cover" />
@@ -171,11 +171,10 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
           </div>
         </Carousel>
         
-        {/* Swipe hint animation */}
-        {products.length > 4 && !isPaused && (
-          <div className="absolute top-1/2 right-4 transform -translate-y-1/2 animate-pulse">
+        {/* Swipe hint animation - moved to white space */}
+        {products.length > 3 && !isPaused && (
+          <div className="absolute top-1/2 right-8 transform -translate-y-1/2 animate-pulse bg-white/80 p-1 rounded-full">
             <div className="flex items-center gap-1">
-              <div className="w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
               <ChevronRight size={16} className="text-gray-400 animate-bounce" />
             </div>
           </div>
