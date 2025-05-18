@@ -68,7 +68,7 @@ const AdminAuthPage = () => {
         <h1 className="text-2xl font-bold mb-2">Accès Administrateur</h1>
         <p className="text-gray-600 mb-6">Veuillez entrer le code PIN à 6 chiffres pour accéder aux paramètres d'administration</p>
         
-        <div className="mb-6 px-[76px]">
+        <div className="mb-6 px-[73px] bg-transparent">
           <InputOTP maxLength={6} value={pin} onChange={setPin} placeholder="•" className="my-0">
             <InputOTPGroup>
               <InputOTPSlot index={0} className="border-gray-300" />
