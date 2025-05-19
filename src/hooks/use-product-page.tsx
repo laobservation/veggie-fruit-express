@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '@/hooks/use-cart';
@@ -76,8 +77,6 @@ export const useProductPage = () => {
       const selectedServices = selectedService 
         ? [productServiceOptions.find(s => s.id === selectedService)].filter(Boolean) as ServiceOption[]
         : [];
-      
-      // Use the correct number of arguments for addItem
       addItem(product, 1, selectedServices);
     }
   };
@@ -93,15 +92,13 @@ export const useProductPage = () => {
       const selectedServices = selectedService 
         ? [productServiceOptions.find(s => s.id === selectedService)].filter(Boolean) as ServiceOption[]
         : [];
-      
-      // Use the correct number of arguments for addItem
       addItem(product, 1, selectedServices);
       openCart(); // Opens the cart/checkout form
     }
   };
 
   // Helper function to get formatted category text
-  function getCategoryText(category: string) {
+  const getCategoryText = (category: string) => {
     switch(category) {
       case 'fruit': return 'Fruits';
       case 'vegetable': return 'Légumes';
@@ -110,10 +107,10 @@ export const useProductPage = () => {
       case 'salade-jus': return 'Salades & Jus';
       default: return 'Produits';
     }
-  }
+  };
 
   // Get category path for linking
-  function getCategoryPath(category: string) {
+  const getCategoryPath = (category: string) => {
     switch(category) {
       case 'fruit': return '/category/fruits';
       case 'vegetable': return '/category/légumes';
@@ -122,7 +119,7 @@ export const useProductPage = () => {
       case 'salade-jus': return '/category/salade-jus';
       default: return '/';
     }
-  }
+  };
 
   const favoriteStatus = product ? isFavorite(product.id) : false;
   const isPack = product?.category === 'pack';

@@ -10,7 +10,13 @@ import {
   CarouselNext,
 } from "@/components/ui/carousel";
 import { useInView } from 'react-intersection-observer';
-import { InstagramPost } from '@/hooks/use-instagram-posts';
+
+interface InstagramPost {
+  id: string;
+  videoUrl: string;
+  thumbnailUrl: string;
+  caption: string;
+}
 
 interface InstagramFeedProps {
   posts: InstagramPost[];
@@ -125,7 +131,7 @@ const InstagramFeed: React.FC<InstagramFeedProps> = ({ posts, isLoading = false 
                   <video
                     ref={(el) => handleVideoRef(post.id, el)}
                     src={post.videoUrl}
-                    poster={post.thumbnailUrl || undefined}
+                    poster={post.thumbnailUrl}
                     loop
                     muted
                     playsInline

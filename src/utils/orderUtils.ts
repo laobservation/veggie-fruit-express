@@ -19,7 +19,7 @@ export const processOrder = async (
     name: data.name,
     address: data.address,
     phone: data.phone,
-    preferredTime: data.preferDeliveryTime ? data.deliveryTime || '' : '',
+    preferredTime: data.preferDeliveryTime ? data.deliveryTime : '',
     deliveryDay: data.deliveryDay || '', // Added delivery day
     totalAmount: totalAmount,
     subtotal: subtotal,

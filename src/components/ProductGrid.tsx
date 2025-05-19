@@ -1,7 +1,6 @@
 
 import { Product } from '@/types/product';
 import ProductCard from './ProductCard';
-import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ProductGridProps {
   products: Product[];
@@ -10,8 +9,6 @@ interface ProductGridProps {
 }
 
 const ProductGrid: React.FC<ProductGridProps> = ({ products, title, isLoading = false }) => {
-  const isMobile = useIsMobile();
-  
   return (
     <section className="py-6 w-full">
       {title && (
@@ -20,7 +17,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, title, isLoading = 
       
       {isLoading ? (
         <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-          {Array(isMobile ? 4 : 6).fill(0).map((_, i) => (
+          {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="bg-white p-4 rounded-lg shadow-sm animate-pulse">
               <div className="w-full h-28 bg-gray-200 rounded mb-3"></div>
               <div className="h-4 bg-gray-200 rounded mb-2"></div>
@@ -31,7 +28,7 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, title, isLoading = 
       ) : products.length === 0 ? (
         <p className="text-center text-gray-500 py-8">Aucun produit trouvé.</p>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
           {products.map((product) => (
             <ProductCard 
               key={product.id} 

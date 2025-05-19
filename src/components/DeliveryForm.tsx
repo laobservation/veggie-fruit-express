@@ -27,8 +27,9 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({
     getShippingCost,
     clearCart
   } = useCart();
-  
-  const { settings } = useSettings();
+  const {
+    settings
+  } = useSettings();
   
   const form = useForm<FormValues>({
     defaultValues: {
@@ -114,8 +115,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({
   const shippingCost = getShippingCost();
   const totalAmount = subtotal + shippingCost;
   
-  return (
-    <FormProvider {...form}>
+  return <FormProvider {...form}>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <CustomerInfoFields />
@@ -141,24 +141,16 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({
           </div>
           
           <div className="pt-4">
-            <Button 
-              type="submit" 
-              disabled={items.length === 0} 
-              className="w-full text-white bg-green-600 hover:bg-green-500"
-            >
+            <Button type="submit" disabled={items.length === 0} className="w-full text-white bg-green-600 hover:bg-green-500">
               Finaliser la commande
             </Button>
-            
-            {items.length === 0 && (
-              <p className="text-sm text-red-500 mt-2 text-center">
+            {items.length === 0 && <p className="text-sm text-red-500 mt-2 text-center">
                 Votre panier est vide
-              </p>
-            )}
+              </p>}
           </div>
         </form>
       </Form>
-    </FormProvider>
-  );
+    </FormProvider>;
 };
 
 export default DeliveryForm;

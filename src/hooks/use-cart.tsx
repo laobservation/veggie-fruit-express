@@ -2,10 +2,10 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Product } from '@/types/product';
+import { ReactNode, useState, useEffect } from 'react';
+import CartNotification from '@/components/CartNotification';
 import { ServiceOption } from '@/types/product';
-import { useState, useEffect, createContext, useContext, ReactNode } from 'react';
 
-// Export CartItem interface so it can be used in other files
 export interface CartItem {
   product: Product;
   quantity: number;
@@ -14,143 +14,140 @@ export interface CartItem {
 
 interface CartState {
   items: CartItem[];
-  isOpen: boolean;
+  showNotification: boolean;
+  notificationItem: CartItem | null;
+  isCartOpen: boolean;
+  cartReminder: boolean;
   cartIconAnimating: boolean;
-  isCartReminderVisible: boolean;
+  addItem: (product: Product, quantity?: number, selectedServices?: ServiceOption[]) => void;
+  removeItem: (productId: string) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
+  clearCart: () => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
   getShippingCost: () => number;
-  addItem: (product: Product, quantity?: number, selectedServices?: ServiceOption[]) => void;
-  removeItem: (productId: number | string) => void;
-  updateQuantity: (productId: number | string, quantity: number) => void;
-  clearCart: () => void;
+  hideNotification: () => void;
   openCart: () => void;
   closeCart: () => void;
-  toggleCart: () => void;
-  isCartOpen: boolean;
-  toggleCartReminder: (visible: boolean) => void;
+  toggleCartReminder: (state: boolean) => void;
+  setCartIconAnimating: (state: boolean) => void;
 }
 
 export const useCart = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
-      isOpen: false,
+      showNotification: false,
+      notificationItem: null,
       isCartOpen: false,
+      cartReminder: false,
       cartIconAnimating: false,
-      isCartReminderVisible: false,
-      
+      addItem: (product: Product, quantity = 1, selectedServices = []) => {
+        const currentItems = get().items;
+        const existingItemIndex = currentItems.findIndex(item => item.product.id === product.id);
+
+        if (existingItemIndex !== -1) {
+          // If the item exists, check if it has the same services
+          const existingItem = currentItems[existingItemIndex];
+          const hasSameServices = 
+            JSON.stringify(existingItem.selectedServices?.map(s => s.id).sort()) === 
+            JSON.stringify(selectedServices?.map(s => s.id).sort());
+          
+          if (hasSameServices) {
+            // Update quantity for the item with same services
+            const updatedItems = currentItems.map((item, index) => 
+              index === existingItemIndex
+                ? { ...item, quantity: item.quantity + quantity }
+                : item
+            );
+            
+            set({
+              items: updatedItems,
+              showNotification: true,
+              notificationItem: {
+                product,
+                quantity: existingItem.quantity + quantity,
+                selectedServices
+              },
+              cartIconAnimating: true
+            });
+          } else {
+            // Add as a new item because services are different
+            set({ 
+              items: [...currentItems, { product, quantity, selectedServices }],
+              showNotification: true,
+              notificationItem: { product, quantity, selectedServices },
+              cartIconAnimating: true
+            });
+          }
+        } else {
+          // If the item doesn't exist, add it
+          set({ 
+            items: [...currentItems, { product, quantity, selectedServices }],
+            showNotification: true,
+            notificationItem: { product, quantity, selectedServices },
+            cartIconAnimating: true
+          });
+        }
+        
+        // Reset animation state after animation completes
+        setTimeout(() => {
+          set({ cartIconAnimating: false });
+        }, 1000);
+      },
+      removeItem: (productId: string) => {
+        const currentItems = get().items;
+        set({
+          items: currentItems.filter(item => item.product.id !== productId),
+        });
+      },
+      updateQuantity: (productId: string, quantity: number) => {
+        const currentItems = get().items;
+        
+        if (quantity <= 0) {
+          get().removeItem(productId);
+          return;
+        }
+        
+        set({
+          items: currentItems.map(item =>
+            item.product.id === productId
+              ? { ...item, quantity }
+              : item
+          ),
+        });
+      },
+      clearCart: () => set({ items: [] }),
       getTotalItems: () => {
         return get().items.reduce((total, item) => total + item.quantity, 0);
       },
-      
       getTotalPrice: () => {
-        return get().items.reduce((total, item) => {
-          // Include base product price
-          let itemTotal = item.product.price * item.quantity;
+        const itemsTotal = get().items.reduce((total, item) => {
+          // Calculate product price
+          const productTotal = item.product.price * item.quantity;
           
-          // Add selected services cost if any
-          if (item.selectedServices && item.selectedServices.length > 0) {
-            const servicesCost = item.selectedServices.reduce((acc, service) => acc + service.price, 0);
-            itemTotal += servicesCost * item.quantity;
-          }
-          
-          return total + itemTotal;
+          // Add service costs if any
+          const servicesCost = (item.selectedServices?.reduce((acc, service) => 
+            acc + service.price, 0) || 0) * item.quantity;
+            
+          return total + productTotal + servicesCost;
         }, 0);
+        
+        // Add shipping cost
+        return itemsTotal;
       },
-      
-      // Add shipping cost calculation
       getShippingCost: () => {
-        // Fixed shipping cost or based on cart total
-        const subtotal = get().getTotalPrice();
-        // Free shipping for orders over 100
-        return subtotal >= 100 ? 0 : 20;
+        // Fixed shipping cost of 20 DH
+        return get().items.length > 0 ? 20 : 0;
       },
-      
-      addItem: (product: Product, quantity = 1, selectedServices?: ServiceOption[]) => {
-        set((state) => {
-          // Find if the product already exists in the cart
-          const existingItem = state.items.find((item) => item.product.id === product.id);
-          
-          let updatedItems;
-          
-          if (existingItem) {
-            // If it exists, update its quantity
-            updatedItems = state.items.map((item) => {
-              if (item.product.id === product.id) {
-                return { 
-                  ...item, 
-                  quantity: item.quantity + quantity,
-                  selectedServices: selectedServices || item.selectedServices
-                };
-              }
-              return item;
-            });
-          } else {
-            // If it doesn't exist, add it to the cart
-            updatedItems = [...state.items, { 
-              product, 
-              quantity,
-              selectedServices
-            }];
-          }
-          
-          // Start cart icon animation
-          set({ cartIconAnimating: true });
-          
-          // Stop animation after 1 second
-          setTimeout(() => {
-            set({ cartIconAnimating: false });
-          }, 1000);
-          
-          return { items: updatedItems, isCartOpen: true };
-        });
-      },
-      
-      removeItem: (productId: number | string) => {
-        set((state) => ({
-          items: state.items.filter((item) => item.product.id !== productId),
-        }));
-      },
-      
-      updateQuantity: (productId: number | string, quantity: number) => {
-        set((state) => {
-          if (quantity <= 0) {
-            return {
-              items: state.items.filter((item) => item.product.id !== productId),
-            };
-          }
-          
-          return {
-            items: state.items.map((item) => {
-              if (item.product.id === productId) {
-                return { ...item, quantity };
-              }
-              return item;
-            }),
-          };
-        });
-      },
-      
-      clearCart: () => {
-        set({ items: [] });
-      },
-      
-      openCart: () => {
-        set({ isOpen: true, isCartOpen: true });
-      },
-      
-      closeCart: () => {
-        set({ isOpen: false, isCartOpen: false });
-      },
-      
-      toggleCart: () => {
-        set((state) => ({ isOpen: !state.isOpen, isCartOpen: !state.isCartOpen }));
-      },
-      
-      toggleCartReminder: (visible: boolean) => {
-        set({ isCartReminderVisible: visible });
-      },
+      hideNotification: () => set({ 
+        showNotification: false, 
+        notificationItem: null
+      }),
+      openCart: () => set({ isCartOpen: true }),
+      closeCart: () => set({ isCartOpen: false }),
+      toggleCartReminder: (state: boolean) => set({ cartReminder: state }),
+      setCartIconAnimating: (state: boolean) => set({ cartIconAnimating: state })
     }),
     {
       name: 'cart-storage',
@@ -158,45 +155,30 @@ export const useCart = create<CartState>()(
   )
 );
 
-// Create Cart Notification Provider for cart notifications
-type CartNotificationContextType = {
-  latestAddedProduct: Product | null;
-  quantity: number;
-  showNotification: boolean;
-  setShowNotification: (show: boolean) => void;
-  addToNotification: (product: Product, quantity: number) => void;
-};
-
-const CartNotificationContext = createContext<CartNotificationContextType | null>(null);
-
-export const CartNotificationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [latestAddedProduct, setLatestAddedProduct] = useState<Product | null>(null);
-  const [quantity, setQuantity] = useState<number>(0);
-  const [showNotification, setShowNotification] = useState<boolean>(false);
-
-  const addToNotification = (product: Product, quantity: number) => {
-    setLatestAddedProduct(product);
-    setQuantity(quantity);
-    setShowNotification(true);
-  };
+// CartNotificationProvider component to render notifications
+export const CartNotificationProvider = ({ children }: { children: ReactNode }) => {
+  const { 
+    showNotification, 
+    notificationItem, 
+    hideNotification, 
+    openCart
+  } = useCart();
 
   return (
-    <CartNotificationContext.Provider value={{ 
-      latestAddedProduct, 
-      quantity, 
-      showNotification, 
-      setShowNotification, 
-      addToNotification 
-    }}>
+    <>
       {children}
-    </CartNotificationContext.Provider>
+      
+      {showNotification && notificationItem && (
+        <CartNotification
+          product={notificationItem.product}
+          quantity={notificationItem.quantity}
+          onClose={hideNotification}
+          onViewCart={() => {
+            openCart();
+            hideNotification();
+          }}
+        />
+      )}
+    </>
   );
-};
-
-export const useCartNotification = () => {
-  const context = useContext(CartNotificationContext);
-  if (!context) {
-    throw new Error('useCartNotification must be used within a CartNotificationProvider');
-  }
-  return context;
 };

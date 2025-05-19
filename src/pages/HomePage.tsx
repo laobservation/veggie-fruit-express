@@ -9,14 +9,22 @@ import PromotionSlider from '@/components/home/PromotionSlider';
 import CategoriesSection from '@/components/home/CategoriesSection';
 import PopularItemsSection from '@/components/home/PopularItemsSection';
 import InstagramFeed from '@/components/home/InstagramFeed';
-import { useInstagramPosts } from '@/hooks/use-instagram-posts';
+import { supabase } from '@/integrations/supabase/client';
+
+interface InstagramPost {
+  id: string;
+  videoUrl: string;
+  thumbnailUrl: string;
+  caption: string;
+}
 
 const HomePage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [instagramPosts, setInstagramPosts] = useState<InstagramPost[]>([]);
+  const [instagramLoading, setInstagramLoading] = useState(true);
   const { toast } = useToast();
   const { categories, loading: categoriesLoading } = useCategories();
-  const { posts: instagramPosts, isLoading: instagramLoading } = useInstagramPosts();
 
   // Load products from Supabase
   useEffect(() => {
@@ -39,6 +47,38 @@ const HomePage: React.FC = () => {
     };
     
     loadProducts();
+  }, []);
+  
+  // Load Instagram posts
+  useEffect(() => {
+    const loadInstagramPosts = async () => {
+      setInstagramLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('instagram_posts')
+          .select('*')
+          .order('created_at', { ascending: false });
+          
+        if (error) throw error;
+        
+        // Transform the data to match our component interface
+        const transformedPosts: InstagramPost[] = (data || []).map((post: any) => ({
+          id: post.id,
+          videoUrl: post.video_url,
+          thumbnailUrl: post.thumbnail_url,
+          caption: post.caption
+        }));
+        
+        setInstagramPosts(transformedPosts);
+      } catch (error) {
+        console.error('Error loading Instagram posts:', error);
+        // Don't show a toast here to avoid disrupting the user experience
+      } finally {
+        setInstagramLoading(false);
+      }
+    };
+    
+    loadInstagramPosts();
   }, []);
 
   // Map categories from database format to our application format

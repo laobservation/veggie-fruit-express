@@ -1,4 +1,3 @@
-
 import { Heart, Command } from 'lucide-react';
 import { Product } from '@/types/product';
 import { Link } from 'react-router-dom';
@@ -7,7 +6,6 @@ import { useCart } from '@/hooks/use-cart';
 import { useState, useEffect } from 'react';
 import { useFavorites } from '@/hooks/use-favorites';
 import '@/components/ui/heart-animation.css';
-
 interface ProductCardProps {
   product: Product;
   discountPercentage?: number;
@@ -35,7 +33,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
   useEffect(() => {
     setFavoriteStatus(isFavorite(product.id));
   }, [product.id, isFavorite, favorites]);
-  
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -43,7 +40,6 @@ const ProductCard: React.FC<ProductCardProps> = ({
     // Add item immediately without animation
     addItem(product);
   };
-  
   const handleFavoriteClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
@@ -54,9 +50,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
     // Process in background
     await toggleFavorite(product);
   };
-  
-  return (
-    <Link to={`/product/${product.id}`} className="block">
+  return <Link to={`/product/${product.id}`} className="block">
       <div className="bg-white rounded-xl overflow-hidden shadow-sm relative">
         <div className="relative">
           {discountPercentage > 0 && <div className="absolute bottom-2 right-2 bg-yellow-400 text-black font-medium px-2 py-1 rounded-full text-xs z-10">
@@ -77,20 +71,14 @@ const ProductCard: React.FC<ProductCardProps> = ({
             <span className="text-xs text-gray-500 font-normal ml-1">/{product.unit}</span>
           </div>
             
-          <button 
-            onClick={handleAddToCart} 
-            disabled={hasStock && !isInStock} 
-            className={`rounded-full mt-2 ${hasStock && !isInStock ? 'bg-gray-300 cursor-not-allowed' : 'bg-green-500'} transition-colors flex items-center px-3 py-1`} 
-            aria-label="Ajouter au panier"
-          >
+          <button onClick={handleAddToCart} disabled={hasStock && !isInStock} className={`rounded-full mt-2 ${hasStock && !isInStock ? 'bg-gray-300 cursor-not-allowed' : 'bg-green-500'} transition-colors flex items-center px-3 py-1`} aria-label="Ajouter au panier">
             <span className="text-white text-sm mr-1 font-medium">Ajouter au panier</span>
+            
           </button>
           
           {hasStock && !isInStock && <p className="text-xs text-red-500 mt-1">Épuisé</p>}
         </div>
       </div>
-    </Link>
-  );
+    </Link>;
 };
-
 export default ProductCard;
