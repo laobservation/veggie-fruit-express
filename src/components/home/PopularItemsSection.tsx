@@ -100,7 +100,7 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
       </div>
       
       {hasMoreProducts && <div className="flex justify-center mt-4">
-          <Button onClick={handleShowMore} variant="outline" className="border-green-500 text-base font-medium rounded-2xl text-lime-800 bg-lime-50">
+          <Button onClick={handleShowMore} variant="outline" className="border-green-500 text-base font-medium rounded-2xl bg-white text-green-500">
             Afficher plus
           </Button>
         </div>}
