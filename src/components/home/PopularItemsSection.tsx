@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Product } from '@/types/product';
@@ -29,7 +28,7 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
     isFavorite,
     toggleFavorite
   } = useFavorites();
-  const [displayCount, setDisplayCount] = useState(3); // Changed from 4 to 3 as requested
+  const [displayCount, setDisplayCount] = useState(4);
 
   // Sort products with newest first if showing all
   const sortedProducts = [...products].sort((a, b) => {
@@ -43,7 +42,6 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
   // Determine how many products to display
   const displayProducts = filteredProducts.slice(0, displayCount);
   const hasMoreProducts = displayCount < filteredProducts.length;
-  
   const handleAddToCart = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
@@ -51,21 +49,17 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
     // Add item immediately without animation
     addItem(product);
   };
-  
   const handleFavoriteClick = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
     toggleFavorite(product);
   };
-  
   const handleShowMore = () => {
-    setDisplayCount(prev => prev + 3); // Changed from 4 to 3 as requested
+    setDisplayCount(prev => prev + 4);
   };
-  
   if (filteredProducts.length === 0 && category) {
     return null; // Don't render the section if there are no products for this category
   }
-  
   return <div className="mb-8 px-4 md:px-0">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-800">{title} :</h2>
@@ -79,17 +73,17 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
         </div>
       </div>
       
-      <div className="grid grid-cols-3 md:grid-cols-3 gap-3">
-        {isLoading ? Array(3).fill(0).map((_, index) => <div key={index} className="bg-white p-4 rounded-lg shadow-sm animate-pulse">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        {isLoading ? Array(4).fill(0).map((_, index) => <div key={index} className="bg-white p-4 rounded-lg shadow-sm animate-pulse">
               <div className="w-full h-28 bg-gray-200 rounded mb-3"></div>
               <div className="h-4 bg-gray-200 rounded mb-2"></div>
               <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-            </div>) : displayProducts.map(product => <Link key={product.id} to={`/product/${product.id}`} className="bg-white p-4 rounded-lg shadow-sm relative mx-0 my-0 px-[8px] py-[8px] hover:shadow-md transition-shadow">
-            <button onClick={e => handleFavoriteClick(e, product)} className="absolute top-2 right-2 p-1 rounded-full bg-white/80 z-10 hover:bg-gray-100 transition-colors">
+            </div>) : displayProducts.map(product => <Link key={product.id} to={`/product/${product.id}`} className="bg-white p-4 rounded-lg shadow-sm relative mx-0 my-0 px-[8px] py-[8px]">
+            <button onClick={e => handleFavoriteClick(e, product)} className="absolute top-2 right-2 p-1 rounded-full bg-white/80 z-10">
               <Heart className={`h-4 w-4 ${isFavorite(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
             </button>
-            <div className="flex justify-center mb-3 bg-white text-green-500">
-              <img src={product.image} alt={product.name} className="h-28 object-cover transition-transform hover:scale-105 duration-300" />
+            <div className="flex justify-center mb-3 bg-stone-50 text-green-500">
+              <img src={product.image} alt={product.name} className="h-28 object-cover" />
             </div>
             <div className="flex flex-col items-center">
               <h3 className="text-sm font-medium mb-1 text-center">{product.name}</h3>
@@ -98,7 +92,7 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
                 <span className="text-sm text-gray-500 mr-1">/</span>
                 <span className="text-lg font-bold text-green-600">{formatPrice(product.price)}</span>
               </div>
-              <button onClick={e => handleAddToCart(e, product)} aria-label="Ajouter au panier" className="bg-green-500 rounded-full flex items-center px-[15px] mx-0 my-0 py-[5px] hover:bg-green-600 transition-colors">
+              <button onClick={e => handleAddToCart(e, product)} aria-label="Ajouter au panier" className="bg-green-500 rounded-full flex items-center px-[15px] mx-0 my-0 py-[5px]">
                 <span className="text-white font-bold text-xs">Ajouter au panier</span>
               </button>
             </div>
@@ -106,7 +100,7 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
       </div>
       
       {hasMoreProducts && <div className="flex justify-center mt-4">
-          <Button onClick={handleShowMore} variant="outline" className="border-green-500 text-base font-medium rounded-2xl text-lime-800 bg-lime-50 hover:bg-lime-100 transition-colors">
+          <Button onClick={handleShowMore} variant="outline" className="border-green-500 text-base font-medium rounded-2xl text-lime-800 bg-lime-50">
             Afficher plus
           </Button>
         </div>}

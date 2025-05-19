@@ -11,10 +11,6 @@ export const generateThankYouPDF = (orderDetails: any) => {
   addLogoToPdf(doc).then(() => finishPDFGeneration());
   
   async function finishPDFGeneration() {
-    // Add Arabic font support
-    doc.addFont('/fonts/NotoSansArabic-Regular.ttf', 'NotoSansArabic', 'normal');
-    doc.addFont('/fonts/NotoSansArabic-Bold.ttf', 'NotoSansArabic', 'bold');
-    
     // Fetch currency from settings
     const currency = await fetchCurrencyFromSettings();
     
@@ -79,28 +75,14 @@ export const generateThankYouPDF = (orderDetails: any) => {
       });
     }
     
-    // Use autoTable with Arabic font support
+    // Use autoTable with simpler styling
     autoTable(doc, {
       head: [tableColumn],
       body: tableRows,
       startY: 95,
       theme: 'plain',
       headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: 'bold' },
-      styles: { 
-        cellPadding: 3, 
-        fontSize: 9,
-        font: 'NotoSansArabic'
-      },
-      didDrawCell: (data) => {
-        // Check for Arabic content and adjust text alignment if needed
-        if (data.cell.section === 'body' && data.column.index === 0) {
-          const text = data.cell.text[0];
-          if (typeof text === 'string' && /[\u0600-\u06FF]/.test(text)) {
-            // Arabic text is found, can set RTL here if needed
-            // The font should handle the rendering properly
-          }
-        }
-      }
+      styles: { cellPadding: 3, fontSize: 9 }
     });
     
     // Dotted line before totals
