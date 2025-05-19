@@ -10,10 +10,10 @@ interface ProductImageProps {
 const ProductImage: React.FC<ProductImageProps> = ({ product }) => {
   return (
     <div className="bg-white rounded-lg mb-4 overflow-hidden shadow-sm">
-      <div className="aspect-square">
+      <div className="aspect-square bg-white">
         <MediaDisplay 
           product={product} 
-          className="w-full h-full object-contain p-6"
+          className="w-full h-full object-contain p-6 bg-white"
           autoplay={false}
           controls={true}
           loading="eager" // Eager loading for the main product image

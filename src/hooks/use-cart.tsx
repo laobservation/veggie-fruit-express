@@ -18,6 +18,7 @@ interface CartState {
   notificationItem: CartItem | null;
   isCartOpen: boolean;
   cartReminder: boolean;
+  cartIconAnimating: boolean;
   addItem: (product: Product, quantity?: number, selectedServices?: ServiceOption[]) => void;
   removeItem: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
@@ -29,6 +30,7 @@ interface CartState {
   openCart: () => void;
   closeCart: () => void;
   toggleCartReminder: (state: boolean) => void;
+  setCartIconAnimating: (state: boolean) => void;
 }
 
 export const useCart = create<CartState>()(
@@ -39,6 +41,7 @@ export const useCart = create<CartState>()(
       notificationItem: null,
       isCartOpen: false,
       cartReminder: false,
+      cartIconAnimating: false,
       addItem: (product: Product, quantity = 1, selectedServices = []) => {
         const currentItems = get().items;
         const existingItemIndex = currentItems.findIndex(item => item.product.id === product.id);
@@ -65,14 +68,16 @@ export const useCart = create<CartState>()(
                 product,
                 quantity: existingItem.quantity + quantity,
                 selectedServices
-              }
+              },
+              cartIconAnimating: true
             });
           } else {
             // Add as a new item because services are different
             set({ 
               items: [...currentItems, { product, quantity, selectedServices }],
               showNotification: true,
-              notificationItem: { product, quantity, selectedServices }
+              notificationItem: { product, quantity, selectedServices },
+              cartIconAnimating: true
             });
           }
         } else {
@@ -80,9 +85,15 @@ export const useCart = create<CartState>()(
           set({ 
             items: [...currentItems, { product, quantity, selectedServices }],
             showNotification: true,
-            notificationItem: { product, quantity, selectedServices }
+            notificationItem: { product, quantity, selectedServices },
+            cartIconAnimating: true
           });
         }
+        
+        // Reset animation state after animation completes
+        setTimeout(() => {
+          set({ cartIconAnimating: false });
+        }, 1000);
       },
       removeItem: (productId: string) => {
         const currentItems = get().items;
@@ -135,7 +146,8 @@ export const useCart = create<CartState>()(
       }),
       openCart: () => set({ isCartOpen: true }),
       closeCart: () => set({ isCartOpen: false }),
-      toggleCartReminder: (state: boolean) => set({ cartReminder: state })
+      toggleCartReminder: (state: boolean) => set({ cartReminder: state }),
+      setCartIconAnimating: (state: boolean) => set({ cartIconAnimating: state })
     }),
     {
       name: 'cart-storage',
