@@ -14,7 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 interface InstagramPost {
   id: string;
   videoUrl: string;
-  thumbnailUrl: string;
+  thumbnailUrl: string | null;
   caption: string;
 }
 

@@ -27,9 +27,9 @@ import { supabase } from '@/integrations/supabase/client';
 interface InstagramPost {
   id: string;
   videoUrl: string;
-  thumbnailUrl: string;
+  thumbnailUrl: string | null;
   caption: string;
-  createdAt: string;
+  createdAt?: string;
 }
 
 const InstagramManager = () => {
@@ -61,7 +61,16 @@ const InstagramManager = () => {
         
       if (error) throw error;
       
-      setPosts(data || []);
+      // Transform the data to match our component interface
+      const transformedPosts: InstagramPost[] = (data || []).map((post: any) => ({
+        id: post.id,
+        videoUrl: post.video_url,
+        thumbnailUrl: post.thumbnail_url,
+        caption: post.caption,
+        createdAt: post.created_at
+      }));
+      
+      setPosts(transformedPosts);
     } catch (error) {
       console.error('Error loading Instagram posts:', error);
       toast({
@@ -205,7 +214,7 @@ const InstagramManager = () => {
                   </div>
                 ) : null}
                 <img 
-                  src={post.thumbnailUrl} 
+                  src={post.thumbnailUrl || undefined} 
                   alt={post.caption}
                   className="w-full h-full object-cover"
                   onError={(e) => {

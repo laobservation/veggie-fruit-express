@@ -1,6 +1,7 @@
 
 import { Product } from '@/types/product';
 import ProductCard from './ProductCard';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface ProductGridProps {
   products: Product[];
@@ -9,6 +10,8 @@ interface ProductGridProps {
 }
 
 const ProductGrid: React.FC<ProductGridProps> = ({ products, title, isLoading = false }) => {
+  const isMobile = useIsMobile();
+  
   return (
     <section className="py-6 w-full">
       {title && (

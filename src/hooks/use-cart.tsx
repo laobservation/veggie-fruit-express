@@ -2,183 +2,118 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Product } from '@/types/product';
-import { ReactNode, useState, useEffect } from 'react';
-import CartNotification from '@/components/CartNotification';
-import { ServiceOption } from '@/types/product';
 
-export interface CartItem {
-  product: Product;
+interface CartItem extends Product {
   quantity: number;
-  selectedServices?: ServiceOption[];
 }
 
 interface CartState {
   items: CartItem[];
-  showNotification: boolean;
-  notificationItem: CartItem | null;
-  isCartOpen: boolean;
-  cartReminder: boolean;
+  isOpen: boolean;
   cartIconAnimating: boolean;
-  addItem: (product: Product, quantity?: number, selectedServices?: ServiceOption[]) => void;
-  removeItem: (productId: string) => void;
-  updateQuantity: (productId: string, quantity: number) => void;
-  clearCart: () => void;
   getTotalItems: () => number;
   getTotalPrice: () => number;
-  getShippingCost: () => number;
-  hideNotification: () => void;
+  addItem: (product: Product) => void;
+  removeItem: (productId: number | string) => void;
+  updateQuantity: (productId: number | string, quantity: number) => void;
+  clearCart: () => void;
   openCart: () => void;
   closeCart: () => void;
-  toggleCartReminder: (state: boolean) => void;
-  setCartIconAnimating: (state: boolean) => void;
+  toggleCart: () => void;
 }
 
 export const useCart = create<CartState>()(
   persist(
     (set, get) => ({
       items: [],
-      showNotification: false,
-      notificationItem: null,
-      isCartOpen: false,
-      cartReminder: false,
+      isOpen: false,
       cartIconAnimating: false,
-      addItem: (product: Product, quantity = 1, selectedServices = []) => {
-        const currentItems = get().items;
-        const existingItemIndex = currentItems.findIndex(item => item.product.id === product.id);
-
-        if (existingItemIndex !== -1) {
-          // If the item exists, check if it has the same services
-          const existingItem = currentItems[existingItemIndex];
-          const hasSameServices = 
-            JSON.stringify(existingItem.selectedServices?.map(s => s.id).sort()) === 
-            JSON.stringify(selectedServices?.map(s => s.id).sort());
-          
-          if (hasSameServices) {
-            // Update quantity for the item with same services
-            const updatedItems = currentItems.map((item, index) => 
-              index === existingItemIndex
-                ? { ...item, quantity: item.quantity + quantity }
-                : item
-            );
-            
-            set({
-              items: updatedItems,
-              showNotification: true,
-              notificationItem: {
-                product,
-                quantity: existingItem.quantity + quantity,
-                selectedServices
-              },
-              cartIconAnimating: true
-            });
-          } else {
-            // Add as a new item because services are different
-            set({ 
-              items: [...currentItems, { product, quantity, selectedServices }],
-              showNotification: true,
-              notificationItem: { product, quantity, selectedServices },
-              cartIconAnimating: true
-            });
-          }
-        } else {
-          // If the item doesn't exist, add it
-          set({ 
-            items: [...currentItems, { product, quantity, selectedServices }],
-            showNotification: true,
-            notificationItem: { product, quantity, selectedServices },
-            cartIconAnimating: true
-          });
-        }
-        
-        // Reset animation state after animation completes
-        setTimeout(() => {
-          set({ cartIconAnimating: false });
-        }, 1000);
-      },
-      removeItem: (productId: string) => {
-        const currentItems = get().items;
-        set({
-          items: currentItems.filter(item => item.product.id !== productId),
-        });
-      },
-      updateQuantity: (productId: string, quantity: number) => {
-        const currentItems = get().items;
-        
-        if (quantity <= 0) {
-          get().removeItem(productId);
-          return;
-        }
-        
-        set({
-          items: currentItems.map(item =>
-            item.product.id === productId
-              ? { ...item, quantity }
-              : item
-          ),
-        });
-      },
-      clearCart: () => set({ items: [] }),
+      
       getTotalItems: () => {
         return get().items.reduce((total, item) => total + item.quantity, 0);
       },
+      
       getTotalPrice: () => {
-        const itemsTotal = get().items.reduce((total, item) => {
-          // Calculate product price
-          const productTotal = item.product.price * item.quantity;
-          
-          // Add service costs if any
-          const servicesCost = (item.selectedServices?.reduce((acc, service) => 
-            acc + service.price, 0) || 0) * item.quantity;
-            
-          return total + productTotal + servicesCost;
+        return get().items.reduce((total, item) => {
+          return total + item.price * item.quantity;
         }, 0);
-        
-        // Add shipping cost
-        return itemsTotal;
       },
-      getShippingCost: () => {
-        // Fixed shipping cost of 20 DH
-        return get().items.length > 0 ? 20 : 0;
+      
+      addItem: (product: Product) => {
+        set((state) => {
+          // Find if the product already exists in the cart
+          const existingItem = state.items.find((item) => item.id === product.id);
+          
+          let updatedItems;
+          
+          if (existingItem) {
+            // If it exists, update its quantity
+            updatedItems = state.items.map((item) => {
+              if (item.id === product.id) {
+                return { ...item, quantity: item.quantity + 1 };
+              }
+              return item;
+            });
+          } else {
+            // If it doesn't exist, add it to the cart
+            updatedItems = [...state.items, { ...product, quantity: 1 }];
+          }
+          
+          // Start cart icon animation
+          set({ cartIconAnimating: true });
+          
+          // Stop animation after 1 second
+          setTimeout(() => {
+            set({ cartIconAnimating: false });
+          }, 1000);
+          
+          return { items: updatedItems };
+        });
       },
-      hideNotification: () => set({ 
-        showNotification: false, 
-        notificationItem: null
-      }),
-      openCart: () => set({ isCartOpen: true }),
-      closeCart: () => set({ isCartOpen: false }),
-      toggleCartReminder: (state: boolean) => set({ cartReminder: state }),
-      setCartIconAnimating: (state: boolean) => set({ cartIconAnimating: state })
+      
+      removeItem: (productId: number | string) => {
+        set((state) => ({
+          items: state.items.filter((item) => item.id !== productId),
+        }));
+      },
+      
+      updateQuantity: (productId: number | string, quantity: number) => {
+        set((state) => {
+          if (quantity <= 0) {
+            return {
+              items: state.items.filter((item) => item.id !== productId),
+            };
+          }
+          
+          return {
+            items: state.items.map((item) => {
+              if (item.id === productId) {
+                return { ...item, quantity };
+              }
+              return item;
+            }),
+          };
+        });
+      },
+      
+      clearCart: () => {
+        set({ items: [] });
+      },
+      
+      openCart: () => {
+        set({ isOpen: true });
+      },
+      
+      closeCart: () => {
+        set({ isOpen: false });
+      },
+      
+      toggleCart: () => {
+        set((state) => ({ isOpen: !state.isOpen }));
+      },
     }),
     {
       name: 'cart-storage',
     }
   )
 );
-
-// CartNotificationProvider component to render notifications
-export const CartNotificationProvider = ({ children }: { children: ReactNode }) => {
-  const { 
-    showNotification, 
-    notificationItem, 
-    hideNotification, 
-    openCart
-  } = useCart();
-
-  return (
-    <>
-      {children}
-      
-      {showNotification && notificationItem && (
-        <CartNotification
-          product={notificationItem.product}
-          quantity={notificationItem.quantity}
-          onClose={hideNotification}
-          onViewCart={() => {
-            openCart();
-            hideNotification();
-          }}
-        />
-      )}
-    </>
-  );
-};

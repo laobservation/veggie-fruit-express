@@ -14,7 +14,7 @@ import { useInView } from 'react-intersection-observer';
 interface InstagramPost {
   id: string;
   videoUrl: string;
-  thumbnailUrl: string;
+  thumbnailUrl: string | null;
   caption: string;
 }
 
@@ -131,7 +131,7 @@ const InstagramFeed: React.FC<InstagramFeedProps> = ({ posts, isLoading = false 
                   <video
                     ref={(el) => handleVideoRef(post.id, el)}
                     src={post.videoUrl}
-                    poster={post.thumbnailUrl}
+                    poster={post.thumbnailUrl || undefined}
                     loop
                     muted
                     playsInline
