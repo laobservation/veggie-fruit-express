@@ -10,13 +10,7 @@ import {
   CarouselNext,
 } from "@/components/ui/carousel";
 import { useInView } from 'react-intersection-observer';
-
-interface InstagramPost {
-  id: string;
-  videoUrl: string;
-  thumbnailUrl: string | null;
-  caption: string;
-}
+import { InstagramPost } from '@/hooks/use-instagram-posts';
 
 interface InstagramFeedProps {
   posts: InstagramPost[];
