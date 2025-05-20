@@ -2,6 +2,7 @@
 import { FormValues, OrderData } from '@/types/delivery';
 import { supabase } from '@/integrations/supabase/client';
 import { CartItem } from '@/hooks/use-cart';
+import { Json } from '@/integrations/supabase/types';
 
 export async function processOrder(
   formData: FormValues,
@@ -29,19 +30,28 @@ export async function processOrder(
   // Save order to database
   try {
     // Create the insert data object with proper types
+    // Convert the cart items to a format compatible with Json type
+    const orderItems = cartItems.map(item => ({
+      id: item.product.id,
+      name: item.product.name,
+      price: item.product.price,
+      quantity: item.quantity,
+      image: item.product.image,
+      unit: item.product.unit,
+      // Convert services to a simpler format that fits Json type
+      services: item.selectedServices ? 
+        item.selectedServices.map(s => ({
+          id: s.id,
+          name: s.name,
+          price: s.price
+        })) : []
+    }));
+
     const insertData = {
-      "Client Name": orderData.clientName, // Note: Using quotes for column names with spaces
+      "Client Name": orderData.clientName,
       "Adresse": orderData.address,
       "Phone": orderData.phone,
-      order_items: cartItems.map(item => ({
-        id: item.product.id,
-        name: item.product.name,
-        price: item.product.price,
-        quantity: item.quantity,
-        image: item.product.image,
-        unit: item.product.unit,
-        services: item.selectedServices || []
-      })),
+      order_items: orderItems as unknown as Json,
       preferred_time: preferredTime,
       delivery_day: orderData.deliveryDay,
       subtotal: subtotal,
