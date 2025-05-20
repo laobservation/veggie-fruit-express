@@ -66,9 +66,18 @@ export const useProductPage = () => {
       setError(null);
       
       try {
-        // Parse productId to number if it's numeric, otherwise use as is (string)
-        // Need to handle both string and number IDs properly
-        const parsedId = !isNaN(parseInt(productId)) ? parseInt(productId) : productId;
+        // Convert productId to number for the database query
+        // If it can't be converted to a number, we'll handle that separately
+        let parsedId: number;
+        
+        try {
+          parsedId = parseInt(productId);
+          if (isNaN(parsedId)) {
+            throw new Error('Invalid product ID');
+          }
+        } catch {
+          throw new Error('Invalid product ID format');
+        }
         
         const { data, error } = await supabase
           .from('Products')
@@ -107,9 +116,22 @@ export const useProductPage = () => {
   
   // Fetch related products
   const fetchRelatedProducts = async (category: string) => {
+    if (!productId) return;
+    
     try {
-      // Make sure to parse productId consistently here too
-      const parsedCurrentId = !isNaN(parseInt(productId || '')) ? parseInt(productId || '') : productId;
+      // Convert productId to number for the database query
+      // Similar to above, handle the case where it's not a valid number
+      let parsedCurrentId: number;
+      
+      try {
+        parsedCurrentId = parseInt(productId);
+        if (isNaN(parsedCurrentId)) {
+          throw new Error('Invalid product ID');
+        }
+      } catch {
+        console.error('Cannot parse product ID for related products query');
+        return;
+      }
       
       const { data, error } = await supabase
         .from('Products')

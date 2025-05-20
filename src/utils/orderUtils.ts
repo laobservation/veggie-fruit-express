@@ -1,4 +1,3 @@
-
 import { FormValues, OrderData } from '@/types/delivery';
 import { supabase } from '@/integrations/supabase/client';
 import { CartItem } from '@/hooks/use-cart';
@@ -47,10 +46,24 @@ export async function processOrder(
         })) : []
     }));
 
+    // Convert phone to number if possible, otherwise pass as null
+    let phoneNumber: number | null = null;
+    if (formData.phone) {
+      // Remove any non-digit characters
+      const digitsOnly = formData.phone.replace(/\D/g, '');
+      if (digitsOnly) {
+        phoneNumber = parseInt(digitsOnly, 10);
+        // If parsing fails, keep as null
+        if (isNaN(phoneNumber)) {
+          phoneNumber = null;
+        }
+      }
+    }
+
     const insertData = {
       "Client Name": orderData.clientName,
       "Adresse": orderData.address,
-      "Phone": orderData.phone,
+      "Phone": phoneNumber, // Converted to number or null if invalid
       order_items: orderItems as unknown as Json,
       preferred_time: preferredTime,
       delivery_day: orderData.deliveryDay,
