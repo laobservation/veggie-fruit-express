@@ -13,10 +13,10 @@ const ProductHeader: React.FC<ProductHeaderProps> = ({
   favoriteStatus,
   handleFavoriteClick
 }) => {
-  return <div className="relative pb-4">
-      <div className="flex justify-between items-center">
+  return <div className="relative pb-4 py-0 my-0">
+      <div className="flex justify-between items-center mx-[121px] py-0 px-0 my-[9px]">
         <div>
-          <h1 className="font-bold text-gray-800 mx-0 py-0 px-0 text-xl my-[41px]">{product.name}</h1>
+          
           
         </div>
         
