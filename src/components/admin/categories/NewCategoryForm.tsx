@@ -2,6 +2,7 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { NewCategoryFormData } from '@/types/category';
 import CategoryIconPreview from './CategoryIconPreview';
@@ -10,13 +11,21 @@ interface NewCategoryFormProps {
   newCategory: NewCategoryFormData;
   onNewCategoryChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onAddCategory: () => void;
+  onSwitchChange?: (checked: boolean, field: string) => void;
 }
 
 const NewCategoryForm: React.FC<NewCategoryFormProps> = ({
   newCategory,
   onNewCategoryChange,
-  onAddCategory
+  onAddCategory,
+  onSwitchChange
 }) => {
+  const handleSwitchChange = (checked: boolean, field: string) => {
+    if (onSwitchChange) {
+      onSwitchChange(checked, field);
+    }
+  };
+  
   return (
     <Card className="bg-white">
       <CardHeader>
@@ -67,6 +76,35 @@ const NewCategoryForm: React.FC<NewCategoryFormProps> = ({
               />
               <p className="text-xs text-gray-500 mt-1">
                 Tailwind CSS background color class (e.g. bg-red-100)
+              </p>
+            </div>
+
+            <div className="flex justify-between items-center mb-4">
+              <label htmlFor="isVisible" className="block text-sm font-medium">
+                Visible on Homepage
+              </label>
+              <Switch
+                id="isVisible"
+                checked={newCategory.isVisible !== false}
+                onCheckedChange={(checked) => handleSwitchChange(checked, 'isVisible')}
+              />
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="displayOrder" className="block text-sm font-medium mb-1">
+                Display Order
+              </label>
+              <Input
+                id="displayOrder"
+                name="displayOrder"
+                type="number"
+                placeholder="0"
+                value={newCategory.displayOrder || 0}
+                onChange={onNewCategoryChange}
+                min={0}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Lower values appear first (0 is first)
               </p>
             </div>
 

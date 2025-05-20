@@ -19,6 +19,10 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				sans: ['Nunito', 'Noto Kufi Arabic', 'sans-serif'],
+				arabic: ['Noto Kufi Arabic', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -100,12 +104,24 @@ export default {
 					to: {
 						transform: 'translateX(-100%)'
 					}
+				},
+				'cart-pop': {
+					'0%': {
+						transform: 'scale(1)'
+					},
+					'50%': {
+						transform: 'scale(1.3)'
+					},
+					'100%': {
+						transform: 'scale(1)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
 				'accordion-up': 'accordion-up 0.2s ease-out',
-				'slide': 'slide 25s linear infinite'
+				'slide': 'slide 25s linear infinite',
+				'cart-pop': 'cart-pop 0.5s ease-in-out'
 			}
 		}
 	},

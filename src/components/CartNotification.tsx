@@ -22,7 +22,7 @@ const CartNotification: React.FC<CartNotificationProps> = ({
   onClose,
   onViewCart,
   autoClose = true,
-  autoCloseTime = 4000,
+  autoCloseTime = 2000, // Changed to 2 seconds
 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const isMobile = useIsMobile();

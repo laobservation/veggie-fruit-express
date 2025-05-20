@@ -14,7 +14,7 @@ export const useCategories = () => {
     try {
       const { data, error } = await getCategoriesTable()
         .select('*')
-        .order('name', { ascending: true });
+        .order('display_order', { ascending: true });
       
       if (error) throw error;
       
@@ -25,7 +25,9 @@ export const useCategories = () => {
           name: cat.name,
           imageIcon: cat.image_icon, // Don't manipulate the URL
           bg: cat.background_color || 'bg-gray-100',
-          path: `/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}` // Format path with proper slug
+          path: `/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`, // Format path with proper slug
+          isVisible: cat.is_visible !== false, // Default to true if not specified
+          displayOrder: cat.display_order || 0 // Default to 0 if not specified
         }));
         
         setCategories(formattedCategories);

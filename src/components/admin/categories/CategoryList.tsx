@@ -18,6 +18,7 @@ interface CategoryListProps {
   onEditChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSaveEdit: () => void;
   onDelete: (id: string) => void;
+  onSwitchChange?: (checked: boolean, field: string) => void;
 }
 
 const CategoryList: React.FC<CategoryListProps> = ({
@@ -29,7 +30,8 @@ const CategoryList: React.FC<CategoryListProps> = ({
   onCancelEdit,
   onEditChange,
   onSaveEdit,
-  onDelete
+  onDelete,
+  onSwitchChange
 }) => {
   if (loading) {
     return (
@@ -39,22 +41,30 @@ const CategoryList: React.FC<CategoryListProps> = ({
     );
   }
 
+  // Sort categories by display order
+  const sortedCategories = [...categories].sort((a, b) => {
+    const orderA = a.displayOrder !== undefined ? a.displayOrder : 999;
+    const orderB = b.displayOrder !== undefined ? b.displayOrder : 999;
+    return orderA - orderB;
+  });
+
   return (
     <div className="border rounded-md overflow-hidden">
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>Order</TableHead>
             <TableHead>Icon</TableHead>
             <TableHead>Name</TableHead>
-            <TableHead>Background</TableHead>
+            <TableHead>Status</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {categories.length > 0 ? (
-            categories.map((category) => (
+          {sortedCategories.length > 0 ? (
+            sortedCategories.map((category) => (
               <TableRow key={category.id}>
-                <TableCell colSpan={4} className="p-0">
+                <TableCell colSpan={5} className="p-0">
                   <CategoryItem
                     category={category}
                     editingId={editingId}
@@ -64,13 +74,14 @@ const CategoryList: React.FC<CategoryListProps> = ({
                     onEditChange={onEditChange}
                     onSaveEdit={onSaveEdit}
                     onDelete={onDelete}
+                    onSwitchChange={onSwitchChange}
                   />
                 </TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={4} className="text-center py-4">
+              <TableCell colSpan={5} className="text-center py-4">
                 No categories found. Add your first category above.
               </TableCell>
             </TableRow>

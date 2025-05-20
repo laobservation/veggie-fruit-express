@@ -1,80 +1,90 @@
 
 import { useState } from 'react';
-import { toast } from '@/hooks/use-toast';
 import { Category } from '@/types/category';
-import { updateCategory } from '@/services/categoryService';
+import { toast } from '@/hooks/use-toast';
+import { supabase, getCategoriesTable } from '@/integrations/supabase/client';
 
 export const useCategoryEdit = () => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Category | null>(null);
-  
-  // Start editing a category
+
   const handleEdit = (category: Category) => {
-    console.log('Starting edit for category:', category);
     setEditingId(category.id);
     setEditForm({...category});
   };
 
-  // Cancel editing
   const handleCancelEdit = () => {
     setEditingId(null);
     setEditForm(null);
   };
 
-  // Handle changes to the edit form
   const handleEditChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    if (editForm) {
-      console.log(`Changing ${name} to ${value}`);
+    if (!editForm) return;
+    
+    const { name, value, type } = e.target;
+    
+    if (type === 'number') {
+      setEditForm({
+        ...editForm,
+        [name]: parseInt(value)
+      });
+    } else {
       setEditForm({
         ...editForm,
         [name]: value
       });
     }
   };
+  
+  const handleSwitchChange = (checked: boolean, field: string) => {
+    if (!editForm) return;
+    
+    setEditForm({
+      ...editForm,
+      [field]: checked
+    });
+  };
 
-  // Save edited category
   const handleSaveEdit = async () => {
     if (!editForm) return;
     
-    if (!editForm.name) {
-      toast({
-        title: 'Error',
-        description: 'Category name is required',
-        variant: 'destructive'
-      });
-      return;
-    }
-    
-    console.log('Saving category with data:', editForm);
-    const success = await updateCategory(editForm);
-    
-    if (success) {
-      // Play success sound
-      try {
-        const audio = new Audio('/success-sound.mp3');
-        audio.play();
-      } catch (error) {
-        console.error('Error playing sound:', error);
-      }
+    try {
+      const { error } = await getCategoriesTable()
+        .update({
+          name: editForm.name,
+          image_icon: editForm.imageIcon,
+          background_color: editForm.bg,
+          is_visible: editForm.isVisible,
+          display_order: editForm.displayOrder || 0
+        })
+        .eq('id', editingId);
+        
+      if (error) throw error;
       
-      // Reset form state
+      toast({
+        title: "Success",
+        description: "Category updated successfully",
+      });
+      
       setEditingId(null);
       setEditForm(null);
-      
+    } catch (error) {
+      console.error('Error updating category:', error);
       toast({
-        title: 'Success',
-        description: 'Category updated successfully'
+        title: "Error",
+        description: "Failed to update category",
+        variant: "destructive"
       });
     }
   };
-  
+
   return {
     editingId,
     editForm,
     handleEdit,
     handleCancelEdit,
     handleEditChange,
+    handleSwitchChange,
     handleSaveEdit
   };
 };

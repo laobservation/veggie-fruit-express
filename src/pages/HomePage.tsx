@@ -38,8 +38,17 @@ const HomePage: React.FC = () => {
     loadProducts();
   }, []);
 
+  // Filter categories that should be visible
+  const visibleCategories = categories
+    .filter(cat => cat.isVisible !== false)
+    .sort((a, b) => {
+      const orderA = a.displayOrder !== undefined ? a.displayOrder : 999;
+      const orderB = b.displayOrder !== undefined ? b.displayOrder : 999;
+      return orderA - orderB;
+    });
+
   // Map categories from database format to our application format
-  const mappedCategories = categories.map(cat => {
+  const mappedCategories = visibleCategories.map(cat => {
     let categoryValue: 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus' = 'vegetable';
     
     // Convert the category name to a value that matches our Product type

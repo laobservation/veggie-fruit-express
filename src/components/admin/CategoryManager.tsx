@@ -9,8 +9,21 @@ import CategoryList from './categories/CategoryList';
 
 const CategoryManager: React.FC = () => {
   const { categories, loading, fetchCategories } = useCategories();
-  const { editingId, editForm, handleEdit, handleCancelEdit, handleEditChange, handleSaveEdit } = useCategoryEdit();
-  const { newCategory, handleNewCategoryChange, handleAddCategory } = useNewCategory();
+  const { 
+    editingId, 
+    editForm, 
+    handleEdit, 
+    handleCancelEdit, 
+    handleEditChange, 
+    handleSwitchChange: handleEditSwitchChange, 
+    handleSaveEdit 
+  } = useCategoryEdit();
+  const { 
+    newCategory, 
+    handleNewCategoryChange, 
+    handleNewCategorySwitchChange, 
+    handleAddCategory 
+  } = useNewCategory();
 
   // Handle category deletion and update the UI
   const handleDelete = async (id: string) => {
@@ -26,6 +39,7 @@ const CategoryManager: React.FC = () => {
         newCategory={newCategory} 
         onNewCategoryChange={handleNewCategoryChange} 
         onAddCategory={handleAddCategory} 
+        onSwitchChange={handleNewCategorySwitchChange}
       />
 
       <div className="space-y-4">
@@ -40,6 +54,7 @@ const CategoryManager: React.FC = () => {
           onEditChange={handleEditChange}
           onSaveEdit={handleSaveEdit}
           onDelete={handleDelete}
+          onSwitchChange={handleEditSwitchChange}
         />
       </div>
     </div>

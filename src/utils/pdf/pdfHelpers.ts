@@ -73,3 +73,31 @@ export const calculateItemTotalWithServices = (item: any) => {
     totalPrice
   };
 };
+
+// Check if text contains Arabic characters
+export const containsArabic = (text: string): boolean => {
+  const arabicPattern = /[\u0600-\u06FF\u0750-\u077F\u08A0-\u08FF\uFB50-\uFDFF\uFE70-\uFEFF]/;
+  return arabicPattern.test(text);
+};
+
+// Format text with proper direction based on language
+export const formatTextWithLanguage = (doc: jsPDF, text: string, x: number, y: number, options: any = {}): void => {
+  // Check if text contains Arabic
+  if (containsArabic(text)) {
+    // If the text contains Arabic, add the Noto Kufi Arabic font to the PDF
+    try {
+      doc.setFont("NotoKufiArabic");
+    } catch (e) {
+      // If the font isn't loaded yet, use the default font
+      console.log("Arabic font not loaded, using default");
+    }
+    
+    // For Arabic text, we need to ensure right alignment
+    const alignOption = { align: "right", ...options };
+    doc.text(text, x, y, alignOption);
+  } else {
+    // For non-Arabic text, use normal font and alignment
+    doc.setFont("Nunito");
+    doc.text(text, x, y, options);
+  }
+};

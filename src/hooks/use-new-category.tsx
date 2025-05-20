@@ -2,27 +2,42 @@
 import { useState } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { NewCategoryFormData } from '@/types/category';
-import { addCategory } from '@/services/categoryService';
+import { supabase, getCategoriesTable } from '@/integrations/supabase/client';
 
 export const useNewCategory = () => {
   const [newCategory, setNewCategory] = useState<NewCategoryFormData>({
     name: '',
     imageIcon: '',
-    bg: 'bg-red-100'
+    bg: 'bg-gray-100',
+    isVisible: true,
+    displayOrder: 0
   });
-  
-  // Handle changes to the new category form
+
   const handleNewCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
+    
+    if (type === 'number') {
+      setNewCategory({
+        ...newCategory,
+        [name]: parseInt(value)
+      });
+    } else {
+      setNewCategory({
+        ...newCategory,
+        [name]: value
+      });
+    }
+  };
+  
+  const handleNewCategorySwitchChange = (checked: boolean, field: string) => {
     setNewCategory({
       ...newCategory,
-      [name]: value
+      [field]: checked
     });
   };
 
-  // Add a new category
   const handleAddCategory = async () => {
-    if (!newCategory.name) {
+    if (!newCategory.name.trim()) {
       toast({
         title: "Error",
         description: "Category name is required",
@@ -30,36 +45,45 @@ export const useNewCategory = () => {
       });
       return;
     }
-    
-    const success = await addCategory(newCategory);
-    
-    if (success) {
-      // Play success sound
-      try {
-        const audio = new Audio('/success-sound.mp3');
-        audio.play();
-      } catch (error) {
-        console.error('Error playing sound:', error);
-      }
-      
-      // Reset the form
+
+    try {
+      const { error } = await getCategoriesTable().insert({
+        name: newCategory.name,
+        image_icon: newCategory.imageIcon || null,
+        background_color: newCategory.bg || 'bg-gray-100',
+        is_visible: newCategory.isVisible,
+        display_order: newCategory.displayOrder || 0
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Category added successfully",
+      });
+
+      // Reset form
       setNewCategory({
         name: '',
         imageIcon: '',
-        bg: 'bg-red-100'
+        bg: 'bg-gray-100',
+        isVisible: true,
+        displayOrder: 0
       });
-      
+    } catch (error) {
+      console.error('Error adding category:', error);
       toast({
-        title: "Success",
-        description: "Category added successfully"
+        title: "Error",
+        description: "Failed to add category",
+        variant: "destructive"
       });
     }
   };
-  
+
   return {
     newCategory,
-    setNewCategory,
     handleNewCategoryChange,
+    handleNewCategorySwitchChange,
     handleAddCategory
   };
 };

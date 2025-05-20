@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase, getCategoriesTable } from '@/integrations/supabase/client';
@@ -7,6 +8,8 @@ interface Category {
   imageIcon?: string | null;
   bg: string;
   path: string;
+  isVisible?: boolean;
+  displayOrder?: number;
 }
 export const CategoryNavigation: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -66,9 +69,11 @@ export const CategoryNavigation: React.FC = () => {
       const {
         data,
         error
-      } = await getCategoriesTable().select('*').order('name', {
-        ascending: true
-      });
+      } = await getCategoriesTable()
+        .select('*')
+        .order('display_order', { ascending: true })
+        .eq('is_visible', true);
+        
       if (error) throw error;
       if (data && data.length > 0) {
         // Transform to match our Category interface
@@ -86,10 +91,20 @@ export const CategoryNavigation: React.FC = () => {
             name: cat.name,
             imageIcon: cat.image_icon || null,
             bg: cat.background_color || 'bg-gray-100',
-            path: `/category/${pathName}`
+            path: `/category/${pathName}`,
+            isVisible: cat.is_visible !== false,
+            displayOrder: cat.display_order || 0
           };
         });
         console.log('Formatted categories:', formattedCategories);
+        
+        // Sort by display order
+        formattedCategories.sort((a, b) => {
+          const orderA = a.displayOrder !== undefined ? a.displayOrder : 999;
+          const orderB = b.displayOrder !== undefined ? b.displayOrder : 999;
+          return orderA - orderB;
+        });
+        
         setCategories(formattedCategories);
       } else {
         // Use default categories if none found in DB

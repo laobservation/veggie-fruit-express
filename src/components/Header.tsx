@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
@@ -7,12 +8,15 @@ import Cart from './Cart';
 import MobileMenu from './MobileMenu';
 import { useIsMobile } from '@/hooks/use-mobile';
 import SearchBar from './SearchBar';
+
 const Header = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isCartAnimating, setIsCartAnimating] = useState(false);
   const {
     getTotalItems,
-    openCart
+    openCart,
+    cartUpdateCount
   } = useCart();
   const isMobile = useIsMobile();
 
@@ -22,9 +26,25 @@ const Header = () => {
       setIsMobileMenuOpen(false);
     }
   }, [isMobile, isMobileMenuOpen]);
+  
+  // Animate cart icon when items are added
+  useEffect(() => {
+    if (cartUpdateCount > 0) {
+      setIsCartAnimating(true);
+      
+      // Remove animation after it completes
+      const timeout = setTimeout(() => {
+        setIsCartAnimating(false);
+      }, 500);
+      
+      return () => clearTimeout(timeout);
+    }
+  }, [cartUpdateCount]);
+
   const handleCartClick = () => {
     openCart();
   };
+
   return <header className="bg-transparent py-[30px]">
       <div className="container mx-auto px-4 flex items-center justify-between relative">
         <div className="flex items-center gap-6">
@@ -54,7 +74,7 @@ const Header = () => {
           </div>
           
           <button onClick={handleCartClick} className="relative rounded-full p-2 flex items-center bg-transparent">
-            <ShoppingCart className="h-5 w-5 text-green-600" />
+            <ShoppingCart className={`h-5 w-5 text-green-600 ${isCartAnimating ? 'animate-cart-pop' : ''}`} />
             <span className="text-green-600 font-semibold ml-2">
               {getTotalItems() < 10 ? `0${getTotalItems()}` : getTotalItems()}
             </span>
@@ -65,4 +85,5 @@ const Header = () => {
       <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
     </header>;
 };
+
 export default Header;
