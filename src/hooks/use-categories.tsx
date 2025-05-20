@@ -38,9 +38,10 @@ export function useCategories(): CategoriesState {
 
       // Sort by name if display_order is not available
       const sortedCategories = categoriesData.sort((a, b) => {
-        // If we have display_order, use it; otherwise sort by name
-        if (a.display_order !== undefined && b.display_order !== undefined) {
-          return a.display_order - b.display_order;
+        // If we have is_visible, prioritize visible categories
+        if ((a.is_visible !== undefined) && (b.is_visible !== undefined)) {
+          if (a.is_visible && !b.is_visible) return -1;
+          if (!a.is_visible && b.is_visible) return 1;
         }
         
         // Fallback to sorting by name

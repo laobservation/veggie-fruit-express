@@ -69,7 +69,7 @@ export const useProductPage = () => {
         const { data, error } = await supabase
           .from('Products')
           .select('*')
-          .eq('id', parseInt(productId, 10) || productId)
+          .eq('id', isNaN(parseInt(productId)) ? productId : parseInt(productId))
           .single();
         
         if (error) {
@@ -108,7 +108,7 @@ export const useProductPage = () => {
         .from('Products')
         .select('*')
         .eq('category', category)
-        .neq('id', parseInt(productId as string, 10) || productId)
+        .neq('id', isNaN(parseInt(productId as string)) ? productId : parseInt(productId as string))
         .limit(4);
       
       if (error) {

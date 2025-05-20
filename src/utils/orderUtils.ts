@@ -34,7 +34,7 @@ export async function processOrder(
         'Client Name': orderData.clientName,
         'Adresse': orderData.address,
         'Phone': orderData.phone,
-        'order_items': cartItems.map(item => ({
+        order_items: cartItems.map(item => ({
           id: item.product.id,
           name: item.product.name,
           price: item.product.price,
@@ -43,11 +43,11 @@ export async function processOrder(
           unit: item.product.unit,
           services: item.selectedServices || []
         })),
-        'preferred_time': preferredTime,
-        'delivery_day': orderData.deliveryDay,
-        'subtotal': subtotal,
-        'shipping_cost': shippingCost,
-        'total_amount': orderData.totalAmount
+        preferred_time: preferredTime,
+        delivery_day: orderData.deliveryDay,
+        subtotal: subtotal,
+        shipping_cost: shippingCost,
+        total_amount: orderData.totalAmount
       });
     
     if (error) {
