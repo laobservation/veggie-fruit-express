@@ -66,10 +66,13 @@ export const useProductPage = () => {
       setError(null);
       
       try {
+        // Parse productId to number if it's numeric, otherwise use as is (string)
+        const parsedId = !isNaN(Number(productId)) ? Number(productId) : productId;
+        
         const { data, error } = await supabase
           .from('Products')
           .select('*')
-          .eq('id', isNaN(parseInt(productId)) ? productId : parseInt(productId))
+          .eq('id', parsedId)
           .single();
         
         if (error) {
@@ -104,11 +107,13 @@ export const useProductPage = () => {
   // Fetch related products
   const fetchRelatedProducts = async (category: string) => {
     try {
+      const parsedCurrentId = !isNaN(Number(productId)) ? Number(productId) : productId;
+      
       const { data, error } = await supabase
         .from('Products')
         .select('*')
         .eq('category', category)
-        .neq('id', isNaN(parseInt(productId as string)) ? productId : parseInt(productId as string))
+        .neq('id', parsedCurrentId)
         .limit(4);
       
       if (error) {

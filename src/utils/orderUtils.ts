@@ -28,27 +28,30 @@ export async function processOrder(
   
   // Save order to database
   try {
+    // Create the insert data object with proper types
+    const insertData = {
+      "Client Name": orderData.clientName, // Note: Using quotes for column names with spaces
+      "Adresse": orderData.address,
+      "Phone": orderData.phone,
+      order_items: cartItems.map(item => ({
+        id: item.product.id,
+        name: item.product.name,
+        price: item.product.price,
+        quantity: item.quantity,
+        image: item.product.image,
+        unit: item.product.unit,
+        services: item.selectedServices || []
+      })),
+      preferred_time: preferredTime,
+      delivery_day: orderData.deliveryDay,
+      subtotal: subtotal,
+      shipping_cost: shippingCost,
+      total_amount: orderData.totalAmount
+    };
+    
     const { data, error } = await supabase
       .from('Orders')
-      .insert({
-        'Client Name': orderData.clientName,
-        'Adresse': orderData.address,
-        'Phone': orderData.phone,
-        order_items: cartItems.map(item => ({
-          id: item.product.id,
-          name: item.product.name,
-          price: item.product.price,
-          quantity: item.quantity,
-          image: item.product.image,
-          unit: item.product.unit,
-          services: item.selectedServices || []
-        })),
-        preferred_time: preferredTime,
-        delivery_day: orderData.deliveryDay,
-        subtotal: subtotal,
-        shipping_cost: shippingCost,
-        total_amount: orderData.totalAmount
-      });
+      .insert(insertData);
     
     if (error) {
       throw error;

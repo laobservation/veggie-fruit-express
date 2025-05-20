@@ -36,12 +36,21 @@ export function useCategories(): CategoriesState {
         throw error;
       }
 
-      // Sort by name if display_order is not available
+      // Sort categories by visibility first, then by display order or name
       const sortedCategories = categoriesData.sort((a, b) => {
-        // If we have is_visible, prioritize visible categories
-        if ((a.is_visible !== undefined) && (b.is_visible !== undefined)) {
-          if (a.is_visible && !b.is_visible) return -1;
-          if (!a.is_visible && b.is_visible) return 1;
+        // Check if the visibility property exists and prioritize visible categories
+        const aVisible = a.is_visible !== undefined ? a.is_visible : true;
+        const bVisible = b.is_visible !== undefined ? b.is_visible : true;
+        
+        if (aVisible && !bVisible) return -1;
+        if (!aVisible && bVisible) return 1;
+        
+        // If both have the same visibility, check display_order
+        const aOrder = a.display_order !== undefined ? a.display_order : 999;
+        const bOrder = b.display_order !== undefined ? b.display_order : 999;
+        
+        if (aOrder !== bOrder) {
+          return aOrder - bOrder;
         }
         
         // Fallback to sorting by name

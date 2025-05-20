@@ -13,27 +13,33 @@ export type Database = {
         Row: {
           background_color: string
           created_at: string | null
+          display_order: number | null
           icon: string | null
           id: string
           image_icon: string | null
+          is_visible: boolean | null
           name: string
           updated_at: string | null
         }
         Insert: {
           background_color?: string
           created_at?: string | null
+          display_order?: number | null
           icon?: string | null
           id?: string
           image_icon?: string | null
+          is_visible?: boolean | null
           name: string
           updated_at?: string | null
         }
         Update: {
           background_color?: string
           created_at?: string | null
+          display_order?: number | null
           icon?: string | null
           id?: string
           image_icon?: string | null
+          is_visible?: boolean | null
           name?: string
           updated_at?: string | null
         }
