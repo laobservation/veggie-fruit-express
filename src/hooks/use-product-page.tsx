@@ -1,147 +1,144 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Product, ProductService } from '@/types/product';
+import { supabase } from '@/integrations/supabase/client';
+import { transformProductFromSupabase } from '@/services/productService';
 import { useCart } from '@/hooks/use-cart';
-import { useFavorites } from '@/hooks/use-favorites';
-import { useProductDetails } from '@/hooks/use-product-details';
-import { Product, ServiceOption } from '@/types/product';
-
-// Define service options to be used in the product page
-export const productServiceOptions: ServiceOption[] = [
-  {
-    id: "washed",
-    name: "Légumes lavés et prêts à l'emploi (+10,00 Dh)",
-    nameAr: "خضرة مغسولة و منظفة، وجاهزة للاستعمال",
-    price: 10
-  },
-  {
-    id: "cut",
-    name: "Légumes lavés et coupés (+20,00 Dh)",
-    nameAr: "خضرة مغسولة ومقطعة",
-    price: 20
-  },
-  {
-    id: "bags",
-    name: "Légumes lavés et coupés (Sachets de 500g) (+35,00 Dh)",
-    nameAr: "خضرة مغسولة ومقطعة (فأكياس ��يال 500غ)",
-    price: 35
-  }
-];
+import { useCartNotification } from '@/hooks/use-cart';
+import { toast } from '@/hooks/use-toast';
 
 export const useProductPage = () => {
-  const { productId } = useParams();
+  const { productId } = useParams<{ productId: string }>();
+  const [product, setProduct] = useState<Product | null>(null);
+  const [quantity, setQuantity] = useState(1);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+  const [selectedServices, setSelectedServices] = useState<ProductService[]>([]);
   const navigate = useNavigate();
-  const { addItem, openCart } = useCart();
-  const { product, relatedProducts, loading } = useProductDetails(productId);
-  const { isFavorite, toggleFavorite } = useFavorites();
-  const [selectedService, setSelectedService] = useState<string | null>(null);
-  const [totalPrice, setTotalPrice] = useState<number>(0);
-  const productInfoRef = useRef<HTMLDivElement>(null);
+  const { addItem } = useCart();
+  const { showNotification } = useCartNotification();
   
+  // Fetch product details
   useEffect(() => {
-    // Reset scroll position when product changes
-    window.scrollTo(0, 0);
-    // Reset selected service when product changes
-    setSelectedService(null);
-  }, [productId]);
-
-  useEffect(() => {
-    // Calculate total price including selected service
-    if (product) {
-      let servicePrice = 0;
-      if (selectedService) {
-        const service = productServiceOptions.find(s => s.id === selectedService);
-        if (service) {
-          servicePrice = service.price;
+    const fetchProduct = async () => {
+      if (!productId) return;
+      
+      setLoading(true);
+      setError(null);
+      
+      try {
+        const { data, error } = await supabase
+          .from('Products')
+          .select('*')
+          .eq('id', productId)
+          .single();
+        
+        if (error) {
+          throw error;
         }
+        
+        if (!data) {
+          throw new Error('Product not found');
+        }
+        
+        // Transform the product from database format to our application format
+        const productData = transformProductFromSupabase({
+          ...data,
+          additional_images: data.additional_images || null
+        });
+        
+        setProduct(productData);
+        
+        // Fetch related products in the same category
+        fetchRelatedProducts(productData.category);
+      } catch (err) {
+        console.error('Error fetching product:', err);
+        setError('Failed to load product details.');
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchProduct();
+  }, [productId]);
+  
+  // Fetch related products
+  const fetchRelatedProducts = async (category: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('Products')
+        .select('*')
+        .eq('category', category)
+        .neq('id', productId)
+        .limit(4);
+      
+      if (error) {
+        throw error;
       }
       
-      setTotalPrice(product.price + servicePrice);
+      setRelatedProducts(
+        data.map(product => transformProductFromSupabase({
+          ...product,
+          additional_images: product.additional_images || null
+        }))
+      );
+    } catch (err) {
+      console.error('Error fetching related products:', err);
     }
-  }, [product, selectedService]);
+  };
   
-  // Add automatic scroll to product info section
-  useEffect(() => {
-    if (!loading && product && productInfoRef.current) {
-      setTimeout(() => {
-        productInfoRef.current?.scrollIntoView({ 
-          behavior: 'smooth', 
-          block: 'center'
-        });
-      }, 500);
-    }
-  }, [loading, product]);
-  
+  // Add to cart function
   const handleAddToCart = () => {
-    if (product) {
-      const selectedServices = selectedService 
-        ? [productServiceOptions.find(s => s.id === selectedService)].filter(Boolean) as ServiceOption[]
-        : [];
-      addItem(product, 1, selectedServices);
-    }
+    if (!product) return;
+    
+    addItem(product, quantity, selectedServices);
+    
+    // Show notification
+    showNotification(product, quantity);
+    
+    // Show success toast
+    toast({
+      title: "Produit ajouté!",
+      description: `${product.name} a été ajouté à votre panier.`,
+      variant: "default",
+    });
   };
-
-  const handleFavoriteClick = () => {
-    if (product) {
-      toggleFavorite(product);
-    }
+  
+  // Handle service selection
+  const handleServiceSelect = (service: ProductService) => {
+    setSelectedServices(prev => {
+      const exists = prev.some(s => s.id === service.id);
+      
+      if (exists) {
+        return prev.filter(s => s.id !== service.id);
+      } else {
+        return [...prev, service];
+      }
+    });
   };
-
-  const handleBuyNow = () => {
-    if (product) {
-      const selectedServices = selectedService 
-        ? [productServiceOptions.find(s => s.id === selectedService)].filter(Boolean) as ServiceOption[]
-        : [];
-      addItem(product, 1, selectedServices);
-      openCart(); // Opens the cart/checkout form
-    }
+  
+  // Increment quantity
+  const incrementQuantity = () => {
+    setQuantity(prev => prev + 1);
   };
-
-  // Helper function to get formatted category text
-  const getCategoryText = (category: string) => {
-    switch(category) {
-      case 'fruit': return 'Fruits';
-      case 'vegetable': return 'Légumes';
-      case 'pack': return 'Packs';
-      case 'drink': return 'Boissons';
-      case 'salade-jus': return 'Salades & Jus';
-      default: return 'Produits';
-    }
+  
+  // Decrement quantity
+  const decrementQuantity = () => {
+    setQuantity(prev => (prev > 1 ? prev - 1 : 1));
   };
-
-  // Get category path for linking
-  const getCategoryPath = (category: string) => {
-    switch(category) {
-      case 'fruit': return '/category/fruits';
-      case 'vegetable': return '/category/légumes';
-      case 'pack': return '/category/packs';
-      case 'drink': return '/category/drinks';
-      case 'salade-jus': return '/category/salade-jus';
-      default: return '/';
-    }
-  };
-
-  const favoriteStatus = product ? isFavorite(product.id) : false;
-  const isPack = product?.category === 'pack';
-  const categoryText = product ? getCategoryText(product.category) : '';
-  const categoryPath = product ? getCategoryPath(product.category) : '';
-
+  
   return {
     product,
-    relatedProducts,
     loading,
-    navigate,
-    selectedService,
-    setSelectedService,
-    totalPrice,
-    productInfoRef,
+    error,
+    relatedProducts,
+    quantity,
+    selectedServices,
+    incrementQuantity,
+    decrementQuantity,
     handleAddToCart,
-    handleFavoriteClick,
-    handleBuyNow,
-    favoriteStatus,
-    isPack,
-    categoryText,
-    categoryPath,
-    serviceOptions: productServiceOptions,
+    handleServiceSelect
   };
 };

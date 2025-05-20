@@ -1,80 +1,81 @@
 
 import { useState, useEffect } from 'react';
-import { toast } from '@/hooks/use-toast';
 import { supabase, getCategoriesTable } from '@/integrations/supabase/client';
 import { Category } from '@/types/category';
+import { toast } from '@/hooks/use-toast';
 
-export const useCategories = () => {
+interface CategoriesState {
+  categories: Category[];
+  loading: boolean;
+  error: Error | null;
+  fetchCategories: () => Promise<void>;
+}
+
+export function useCategories(): CategoriesState {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<Error | null>(null);
 
-  // Fetch categories from the database
+  // Function to map database fields to category interface
+  const mapDbToCategory = (item: any): Category => ({
+    id: item.id,
+    name: item.name,
+    imageIcon: item.image_icon,
+    bg: item.background_color || 'bg-gray-100',
+    isVisible: item.is_visible !== undefined ? item.is_visible : true,
+    displayOrder: item.display_order !== undefined ? item.display_order : 999
+  });
+
   const fetchCategories = async () => {
-    setLoading(true);
     try {
-      const { data, error } = await getCategoriesTable()
+      setLoading(true);
+      const { data: categoriesData, error } = await getCategoriesTable()
         .select('*')
         .order('display_order', { ascending: true });
-      
-      if (error) throw error;
-      
-      // Transform data to match our Category interface
-      if (data && data.length > 0) {
-        const formattedCategories: Category[] = data.map(cat => ({
-          id: cat.id,
-          name: cat.name,
-          imageIcon: cat.image_icon, // Don't manipulate the URL
-          bg: cat.background_color || 'bg-gray-100',
-          path: `/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`, // Format path with proper slug
-          isVisible: cat.is_visible !== false, // Default to true if not specified
-          displayOrder: cat.display_order || 0 // Default to 0 if not specified
-        }));
-        
-        setCategories(formattedCategories);
-        console.log('Categories fetched:', formattedCategories);
-      } else {
-        setCategories([]);
+
+      if (error) {
+        throw error;
       }
-    } catch (error) {
-      console.error('Error fetching categories:', error);
+
+      const mappedCategories = categoriesData.map(mapDbToCategory);
+      setCategories(mappedCategories);
+    } catch (err) {
+      console.error('Error fetching categories:', err);
+      setError(err instanceof Error ? err : new Error('Failed to fetch categories'));
       toast({
-        title: 'Error',
-        description: 'Failed to load categories',
-        variant: 'destructive'
+        title: "Error",
+        description: "Failed to load categories.",
+        variant: "destructive",
       });
     } finally {
       setLoading(false);
     }
   };
 
-  // Set up realtime subscription for category changes
   useEffect(() => {
     fetchCategories();
-    
-    const channel = supabase
-      .channel('category-changes')
+
+    // Set up real-time subscription for category changes
+    const categoriesSubscription = supabase
+      .channel('public:categories')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: 'categories'
+          table: 'categories',
         },
         () => {
-          console.log('CategoryManager: Detected category change, refreshing...');
+          console.log('Categories changed, refreshing data');
           fetchCategories();
         }
       )
       .subscribe();
-      
+
     return () => {
-      supabase.removeChannel(channel);
+      supabase.removeChannel(categoriesSubscription);
     };
   }, []);
 
-  return {
-    categories,
-    loading,
-    fetchCategories
-  };
-};
+  return { categories, loading, error, fetchCategories };
+}

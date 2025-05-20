@@ -2,7 +2,15 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Product } from '@/types/product';
-import { ProductService } from '@/types/product';
+import React, { createContext, useState, useContext, ReactNode } from 'react';
+import CartNotification from '@/components/CartNotification';
+
+// Define the ProductService type that's used in CartItem
+export interface ProductService {
+  id: string;
+  name: string;
+  price: number;
+}
 
 export interface CartItem {
   product: Product;
@@ -138,5 +146,58 @@ export const useCart = create(
   )
 );
 
-// Export the CartItem type
-export type { CartItem };
+// Context for cart notifications
+interface CartNotificationContextProps {
+  showNotification: (product: Product, quantity: number) => void;
+}
+
+const CartNotificationContext = createContext<CartNotificationContextProps | undefined>(undefined);
+
+// Provider component for cart notifications
+export const CartNotificationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+  const [notification, setNotification] = useState<{ product: Product; quantity: number } | null>(null);
+  const { openCart } = useCart();
+
+  const showNotification = (product: Product, quantity: number) => {
+    setNotification({ product, quantity });
+    
+    // Auto-hide after 2 seconds (as requested)
+    setTimeout(() => {
+      setNotification(null);
+    }, 2000);
+  };
+  
+  const handleCloseNotification = () => {
+    setNotification(null);
+  };
+  
+  const handleViewCart = () => {
+    openCart();
+    setNotification(null);
+  };
+
+  return (
+    <CartNotificationContext.Provider value={{ showNotification }}>
+      {children}
+      {notification && (
+        <CartNotification
+          product={notification.product}
+          quantity={notification.quantity}
+          onClose={handleCloseNotification}
+          onViewCart={handleViewCart}
+          autoClose={true}
+          autoCloseTime={2000} // 2 seconds auto-close
+        />
+      )}
+    </CartNotificationContext.Provider>
+  );
+};
+
+// Hook to access the cart notification context
+export const useCartNotification = () => {
+  const context = useContext(CartNotificationContext);
+  if (context === undefined) {
+    throw new Error('useCartNotification must be used within a CartNotificationProvider');
+  }
+  return context;
+};

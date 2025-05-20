@@ -1,92 +1,65 @@
 
+import { FormValues, OrderData } from '@/types/delivery';
 import { supabase } from '@/integrations/supabase/client';
-import { FormValues, OrderDetails } from '@/types/delivery';
 import { CartItem } from '@/hooks/use-cart';
-import { toast } from 'sonner';
 
-export const processOrder = async (
-  data: FormValues,
-  items: CartItem[],
-  getTotalPrice: () => number,
+export async function processOrder(
+  formData: FormValues,
+  cartItems: CartItem[],
+  getSubtotal: () => number,
   getShippingCost: () => number
-): Promise<OrderDetails> => {
-  const subtotal = getTotalPrice();
+): Promise<OrderData> {
+  // Create order data object
+  const preferredTime = formData.preferDeliveryTime ? formData.deliveryTime : 'any';
+  const subtotal = getSubtotal();
   const shippingCost = getShippingCost();
-  const totalAmount = subtotal + shippingCost;
-
-  // Create order details object for thank you page with proper typing
-  const orderDetails: OrderDetails = {
-    name: data.name,
-    address: data.address,
-    phone: data.phone,
-    preferredTime: data.preferDeliveryTime ? data.deliveryTime : '',
-    deliveryDay: data.deliveryDay || '', // Added delivery day
-    totalAmount: totalAmount,
-    subtotal: subtotal,
-    shippingCost: shippingCost,
-    items: items,
-    date: new Date().toISOString()
+  
+  const orderData: OrderData = {
+    clientName: formData.name,
+    address: formData.address,
+    phone: formData.phone,
+    items: cartItems,
+    preferredTime,
+    deliveryDay: formData.deliveryDay || 'today',
+    subtotal,
+    shippingCost,
+    totalAmount: subtotal + shippingCost
   };
-
+  
+  // Save order to database
   try {
-    // Prepare items data for Supabase with additional validation
-    const itemsData = items.map(item => ({
-      productId: item.product.id,
-      productName: item.product.name,
-      quantity: item.quantity,
-      price: item.product.price,
-      services: item.selectedServices ? item.selectedServices.map(service => ({
-        id: service.id,
-        name: service.name,
-        price: service.price
-      })) : []
-    }));
-    
-    console.log("Preparing to save order with data:", {
-      client: data.name,
-      address: data.address,
-      phone: data.phone,
-      deliveryDay: data.deliveryDay,
-      items: itemsData,
-      totals: { subtotal, shippingCost, totalAmount }
-    });
-    
-    // Insert order into database with explicit column names to avoid any mismatch issues
-    const { data: orderData, error } = await supabase
+    const { data, error } = await supabase
       .from('Orders')
-      .insert({
-        'Client Name': data.name.trim(),
-        'Adresse': data.address.trim(),
-        'Phone': data.phone ? parseInt(data.phone.replace(/\D/g, ''), 10) : null,
-        'order_items': itemsData,
-        'total_amount': totalAmount,
-        'shipping_cost': shippingCost,
+      .insert([{
+        'Client Name': orderData.clientName,
+        'Adresse': orderData.address,
+        'Phone': orderData.phone,
+        'order_items': cartItems.map(item => ({
+          id: item.product.id,
+          name: item.product.name,
+          price: item.product.price,
+          quantity: item.quantity,
+          image: item.product.image,
+          unit: item.product.unit,
+          services: item.selectedServices || []
+        })),
+        'preferred_time': preferredTime,
+        'delivery_day': orderData.deliveryDay,
         'subtotal': subtotal,
-        'preferred_time': data.preferDeliveryTime ? data.deliveryTime : null,
-        'delivery_day': data.deliveryDay || null, // Added delivery day
-        'status': 'new',
-        'notified': false
-      })
-      .select('id')
-      .single();
-      
+        'shipping_cost': shippingCost,
+        'total_amount': orderData.totalAmount
+      }]);
+    
     if (error) {
-      console.error('Error storing order:', error);
-      throw new Error(`Failed to store order: ${error.message}`);
+      throw error;
     }
     
-    if (orderData?.id) {
-      console.log(`Order successfully created with ID: ${orderData.id}`);
-      // Update orderDetails with the order ID
-      orderDetails.orderId = orderData.id;
-    } else {
-      console.warn('Order created but no ID was returned');
-    }
+    console.log('Order saved successfully:', data);
     
-  } catch (err) {
-    console.error('Error processing order:', err);
-    throw err; // Re-throw to allow handling in calling component
+    // Return the order data for thank you page, etc.
+    return orderData;
+  } catch (error) {
+    console.error('Error saving order:', error);
+    throw new Error('Failed to save order to database');
   }
-
-  return orderDetails;
-};
+}
