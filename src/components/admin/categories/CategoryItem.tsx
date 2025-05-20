@@ -36,12 +36,13 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
   
   const handleVisibilityChange = (checked: boolean) => {
     if (editForm && isEditing) {
+      // Create an event-like object and cast it to the expected type
       const event = {
         target: {
           name: 'isVisible',
           value: checked
         }
-      } as React.ChangeEvent<HTMLInputElement>;
+      } as unknown as React.ChangeEvent<HTMLInputElement>;
       
       onEditChange(event);
     } else {

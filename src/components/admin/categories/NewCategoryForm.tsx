@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -24,7 +23,7 @@ const NewCategoryForm: React.FC<NewCategoryFormProps> = ({
         name: 'isVisible',
         value: checked
       }
-    } as React.ChangeEvent<HTMLInputElement>;
+    } as unknown as React.ChangeEvent<HTMLInputElement>;
     
     onNewCategoryChange(event);
   };
