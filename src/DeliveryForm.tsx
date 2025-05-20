@@ -8,8 +8,8 @@ import { useCart } from '@/hooks/use-cart';
 import { toast } from 'sonner';
 import { FormValues } from '@/types/delivery';
 import { processOrder } from '@/utils/orderUtils';
-import CustomerInfoFields from './delivery/CustomerInfoFields';
-import DeliveryTimeSelector from './delivery/DeliveryTimeSelector';
+import CustomerInfoFields from '@/components/delivery/CustomerInfoFields';
+import DeliveryTimeSelector from '@/components/delivery/DeliveryTimeSelector';
 import { useSettings } from '@/hooks/use-settings';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -95,6 +95,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({
       console.log("Redirecting to thank-you page with order details:", orderDetails);
 
       // Make sure navigation happens after state updates complete
+      // Using setTimeout to ensure all state updates have completed
       setTimeout(() => {
         // Redirect to thank you page with order details
         navigate('/thank-you', {

@@ -13,6 +13,8 @@ const Header = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isCartAnimating, setIsCartAnimating] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  
   const {
     getTotalItems,
     openCart,
@@ -40,12 +42,26 @@ const Header = () => {
       return () => clearTimeout(timeout);
     }
   }, [cartUpdateCount]);
+  
+  // Handle scroll for sticky header
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY;
+      setIsScrolled(scrollPosition > 10);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const handleCartClick = () => {
     openCart();
+    setIsCartAnimating(true);
+    setTimeout(() => setIsCartAnimating(false), 500);
   };
 
-  return <header className="bg-transparent py-[30px]">
+  return (
+    <header className={`py-[30px] w-full z-50 transition-all duration-300 ${isScrolled ? 'fixed top-0 left-0 right-0 bg-white shadow-md py-4' : 'bg-transparent'}`}>
       <div className="container mx-auto px-4 flex items-center justify-between relative">
         <div className="flex items-center gap-6">
           {isMobile && <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="mr-2 relative z-50 px-0 py-0 mx-[4px] my-0 bg-transparent">
@@ -83,7 +99,8 @@ const Header = () => {
       </div>
       
       <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
-    </header>;
+    </header>
+  );
 };
 
 export default Header;

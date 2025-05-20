@@ -154,10 +154,10 @@ export const CartNotificationProvider: React.FC<{ children: ReactNode }> = ({ ch
   const showNotification = (product: Product, quantity: number) => {
     setNotification({ product, quantity });
     
-    // Auto-hide after 2 seconds (as requested)
+    // Auto-hide after 2 seconds as specifically requested
     setTimeout(() => {
       setNotification(null);
-    }, 2000);
+    }, 2000); // Fixed at 2 seconds
   };
   
   const handleCloseNotification = () => {

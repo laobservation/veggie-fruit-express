@@ -1,3 +1,4 @@
+
 import { FormValues, OrderData } from '@/types/delivery';
 import { supabase } from '@/integrations/supabase/client';
 import { CartItem } from '@/hooks/use-cart';
@@ -28,7 +29,6 @@ export async function processOrder(
   
   // Save order to database
   try {
-    // Create the insert data object with proper types
     // Convert the cart items to a format compatible with Json type
     const orderItems = cartItems.map(item => ({
       id: item.product.id,
@@ -46,7 +46,8 @@ export async function processOrder(
         })) : []
     }));
 
-    // Convert phone to number if possible, otherwise pass as null
+    // Convert phone to number if possible, otherwise pass as string
+    // Since the database expects a number for Phone field
     let phoneNumber: number | null = null;
     if (formData.phone) {
       // Remove any non-digit characters
@@ -77,6 +78,7 @@ export async function processOrder(
       .insert(insertData);
     
     if (error) {
+      console.error('Error saving order:', error);
       throw error;
     }
     
