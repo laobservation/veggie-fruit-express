@@ -38,8 +38,10 @@ const HomePage: React.FC = () => {
     loadProducts();
   }, []);
 
-  // Map categories from database format to our application format
-  const mappedCategories = categories.map(cat => {
+  // Map categories from database format to our application format, filtering out hidden categories
+  const visibleCategories = categories.filter(cat => cat.isVisible !== false);
+  
+  const mappedCategories = visibleCategories.map(cat => {
     let categoryValue: 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus' = 'vegetable';
     
     // Convert the category name to a value that matches our Product type

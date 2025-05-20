@@ -9,7 +9,7 @@ import CategoryList from './categories/CategoryList';
 
 const CategoryManager: React.FC = () => {
   const { categories, loading, fetchCategories } = useCategories();
-  const { editingId, editForm, handleEdit, handleCancelEdit, handleEditChange, handleSaveEdit } = useCategoryEdit();
+  const { editingId, editForm, handleEdit, handleCancelEdit, handleEditChange, handleSaveEdit, handleToggleVisibility, handleUpdateDisplayOrder } = useCategoryEdit();
   const { newCategory, handleNewCategoryChange, handleAddCategory } = useNewCategory();
 
   // Handle category deletion and update the UI
@@ -40,6 +40,8 @@ const CategoryManager: React.FC = () => {
           onEditChange={handleEditChange}
           onSaveEdit={handleSaveEdit}
           onDelete={handleDelete}
+          onToggleVisibility={handleToggleVisibility}
+          onUpdateDisplayOrder={handleUpdateDisplayOrder}
         />
       </div>
     </div>

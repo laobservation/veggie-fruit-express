@@ -8,15 +8,17 @@ export const useNewCategory = () => {
   const [newCategory, setNewCategory] = useState<NewCategoryFormData>({
     name: '',
     imageIcon: '',
-    bg: 'bg-red-100'
+    bg: 'bg-red-100',
+    isVisible: true,
+    displayOrder: 999
   });
   
   // Handle changes to the new category form
   const handleNewCategoryChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
+    const { name, value, type } = e.target;
     setNewCategory({
       ...newCategory,
-      [name]: value
+      [name]: type === 'number' ? (value === '' ? undefined : Number(value)) : value
     });
   };
 
@@ -46,7 +48,9 @@ export const useNewCategory = () => {
       setNewCategory({
         name: '',
         imageIcon: '',
-        bg: 'bg-red-100'
+        bg: 'bg-red-100',
+        isVisible: true,
+        displayOrder: 999
       });
       
       toast({

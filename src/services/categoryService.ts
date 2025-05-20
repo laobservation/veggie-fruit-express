@@ -21,7 +21,9 @@ export const addCategory = async (newCategory: NewCategoryFormData): Promise<boo
     const insertData = {
       name: newCategory.name,
       image_icon: newCategory.imageIcon || null, // Ensure we keep the full URL
-      background_color: newCategory.bg || 'bg-gray-100'
+      background_color: newCategory.bg || 'bg-gray-100',
+      is_visible: newCategory.isVisible !== false,
+      display_order: newCategory.displayOrder || 999
     };
     
     console.log('Insert data being sent to Supabase:', insertData);
@@ -62,15 +64,17 @@ export const updateCategory = async (category: Category): Promise<boolean> => {
   try {
     console.log('Updating category:', category);
     
-    // Map the form fields to database column names
-    const { id, name, imageIcon, bg } = category;
+    // Prepare update data - only include fields that are provided
+    const updateData: Record<string, any> = {};
     
-    const updateData = {
-      name,
-      image_icon: imageIcon, // Don't manipulate the URL - keep it as provided
-      background_color: bg,
-      updated_at: new Date().toISOString()
-    };
+    if (category.name !== undefined) updateData.name = category.name;
+    if (category.imageIcon !== undefined) updateData.image_icon = category.imageIcon;
+    if (category.bg !== undefined) updateData.background_color = category.bg;
+    if (category.isVisible !== undefined) updateData.is_visible = category.isVisible;
+    if (category.displayOrder !== undefined) updateData.display_order = category.displayOrder;
+    
+    // Always update the timestamp
+    updateData.updated_at = new Date().toISOString();
     
     console.log('Update data being sent to Supabase:', updateData);
     
@@ -78,7 +82,7 @@ export const updateCategory = async (category: Category): Promise<boolean> => {
     const { error } = await supabase
       .from('categories')
       .update(updateData)
-      .eq('id', id);
+      .eq('id', category.id);
     
     if (error) {
       console.error('Database error when updating category:', error);

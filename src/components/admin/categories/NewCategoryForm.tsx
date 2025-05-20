@@ -3,6 +3,7 @@ import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Switch } from '@/components/ui/switch';
 import { NewCategoryFormData } from '@/types/category';
 import CategoryIconPreview from './CategoryIconPreview';
 
@@ -17,6 +18,17 @@ const NewCategoryForm: React.FC<NewCategoryFormProps> = ({
   onNewCategoryChange,
   onAddCategory
 }) => {
+  const handleVisibilityChange = (checked: boolean) => {
+    const event = {
+      target: {
+        name: 'isVisible',
+        value: checked
+      }
+    } as React.ChangeEvent<HTMLInputElement>;
+    
+    onNewCategoryChange(event);
+  };
+
   return (
     <Card className="bg-white">
       <CardHeader>
@@ -68,6 +80,35 @@ const NewCategoryForm: React.FC<NewCategoryFormProps> = ({
               <p className="text-xs text-gray-500 mt-1">
                 Tailwind CSS background color class (e.g. bg-red-100)
               </p>
+            </div>
+
+            <div className="mb-4">
+              <label htmlFor="displayOrder" className="block text-sm font-medium mb-1">
+                Display Order
+              </label>
+              <Input
+                id="displayOrder"
+                name="displayOrder"
+                type="number"
+                placeholder="1"
+                value={newCategory.displayOrder || ''}
+                onChange={onNewCategoryChange}
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Lower numbers appear first (e.g. 1 appears before 2)
+              </p>
+            </div>
+
+            <div className="flex items-center justify-between mb-6">
+              <label htmlFor="visibility" className="text-sm font-medium">
+                Show on Homepage
+              </label>
+              <Switch 
+                id="visibility"
+                name="isVisible"
+                checked={newCategory.isVisible}
+                onCheckedChange={handleVisibilityChange}
+              />
             </div>
 
             <Button onClick={onAddCategory} disabled={!newCategory.name}>

@@ -11,6 +11,8 @@ interface Category {
   imageIcon?: string | null;
   bg: string;
   path: string;
+  isVisible?: boolean;
+  displayOrder?: number;
 }
 
 const CategoryCircles: React.FC = () => {
@@ -80,24 +82,28 @@ const CategoryCircles: React.FC = () => {
     try {
       const { data, error } = await getCategoriesTable()
         .select('*')
-        .order('name', { ascending: true });
+        .order('display_order', { ascending: true });
       
       if (error) throw error;
       
       if (data && data.length > 0) {
-        // Transform to match our Category interface
-        const formattedCategories: Category[] = data.map(cat => {
-          // Convert bg-gray-100 to bg-gray-500 for better visibility in circles
-          const bgColor = cat.background_color?.replace('-100', '-500') || 'bg-gray-500';
-          
-          return {
-            id: cat.id,
-            name: cat.name,
-            imageIcon: cat.image_icon || null,
-            bg: bgColor,
-            path: `/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`
-          };
-        });
+        // Transform to match our Category interface and only include visible categories
+        const formattedCategories: Category[] = data
+          .filter(cat => cat.is_visible !== false)
+          .map(cat => {
+            // Convert bg-gray-100 to bg-gray-500 for better visibility in circles
+            const bgColor = cat.background_color?.replace('-100', '-500') || 'bg-gray-500';
+            
+            return {
+              id: cat.id,
+              name: cat.name,
+              imageIcon: cat.image_icon || null,
+              bg: bgColor,
+              path: `/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`,
+              isVisible: cat.is_visible !== false,
+              displayOrder: cat.display_order || 999
+            };
+          });
         
         setCategories(formattedCategories);
       } else {

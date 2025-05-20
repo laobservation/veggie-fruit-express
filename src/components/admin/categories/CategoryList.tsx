@@ -18,6 +18,8 @@ interface CategoryListProps {
   onEditChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onSaveEdit: () => void;
   onDelete: (id: string) => void;
+  onToggleVisibility: (id: string, isVisible: boolean) => void;
+  onUpdateDisplayOrder: (id: string, displayOrder: number) => void;
 }
 
 const CategoryList: React.FC<CategoryListProps> = ({
@@ -29,8 +31,17 @@ const CategoryList: React.FC<CategoryListProps> = ({
   onCancelEdit,
   onEditChange,
   onSaveEdit,
-  onDelete
+  onDelete,
+  onToggleVisibility,
+  onUpdateDisplayOrder
 }) => {
+  // Sort categories by displayOrder
+  const sortedCategories = [...categories].sort((a, b) => {
+    const orderA = a.displayOrder || 999;
+    const orderB = b.displayOrder || 999;
+    return orderA - orderB;
+  });
+
   if (loading) {
     return (
       <div className="flex justify-center py-8">
@@ -44,17 +55,19 @@ const CategoryList: React.FC<CategoryListProps> = ({
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>Order</TableHead>
             <TableHead>Icon</TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Background</TableHead>
+            <TableHead>Visible</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
-          {categories.length > 0 ? (
-            categories.map((category) => (
+          {sortedCategories.length > 0 ? (
+            sortedCategories.map((category) => (
               <TableRow key={category.id}>
-                <TableCell colSpan={4} className="p-0">
+                <TableCell colSpan={6} className="p-0">
                   <CategoryItem
                     category={category}
                     editingId={editingId}
@@ -64,13 +77,15 @@ const CategoryList: React.FC<CategoryListProps> = ({
                     onEditChange={onEditChange}
                     onSaveEdit={onSaveEdit}
                     onDelete={onDelete}
+                    onToggleVisibility={onToggleVisibility}
+                    onUpdateDisplayOrder={onUpdateDisplayOrder}
                   />
                 </TableCell>
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={4} className="text-center py-4">
+              <TableCell colSpan={6} className="text-center py-4">
                 No categories found. Add your first category above.
               </TableCell>
             </TableRow>
