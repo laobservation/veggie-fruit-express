@@ -1,16 +1,9 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Product } from '@/types/product';
+import { Product, ProductService } from '@/types/product';
 import React, { createContext, useState, useContext, ReactNode } from 'react';
 import CartNotification from '@/components/CartNotification';
-
-// Define the ProductService type that's used in CartItem
-export interface ProductService {
-  id: string;
-  name: string;
-  price: number;
-}
 
 export interface CartItem {
   product: Product;

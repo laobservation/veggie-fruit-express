@@ -14,6 +14,13 @@ export interface Product {
   additionalImages?: string[]; // Array of additional image URLs
 }
 
+export interface ProductService {
+  id: string;
+  name: string;
+  nameAr: string;
+  price: number;
+}
+
 export interface ServiceOption {
   id: string;
   name: string;

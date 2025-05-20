@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Product, ProductService } from '@/types/product';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,6 +7,7 @@ import { transformProductFromSupabase } from '@/services/productService';
 import { useCart } from '@/hooks/use-cart';
 import { useCartNotification } from '@/hooks/use-cart';
 import { toast } from '@/hooks/use-toast';
+import { useFavorites } from '@/hooks/use-favorites';
 
 export const useProductPage = () => {
   const { productId } = useParams<{ productId: string }>();
@@ -16,9 +17,45 @@ export const useProductPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
   const [selectedServices, setSelectedServices] = useState<ProductService[]>([]);
+  const [selectedService, setSelectedService] = useState<string | null>(null);
   const navigate = useNavigate();
   const { addItem } = useCart();
   const { showNotification } = useCartNotification();
+  const productInfoRef = useRef<HTMLDivElement>(null);
+  const { isFavorite, toggleFavorite } = useFavorites();
+  const favoriteStatus = productId ? isFavorite(productId) : false;
+  
+  // Derived properties
+  const isPack = product?.category === 'pack';
+  const categoryText = product?.category || '';
+  const categoryPath = `/category/${product?.category || ''}`;
+  const serviceOptions: ProductService[] = [
+    { id: 'sliced', name: 'Tranché', nameAr: 'مقطع', price: 5 },
+    { id: 'peeled', name: 'Épluché', nameAr: 'مقشر', price: 8 }
+  ];
+  
+  // Calculate total price based on product price and selected services
+  const totalPrice = product ? 
+    product.price + (selectedService ? 
+      serviceOptions.find(s => s.id === selectedService)?.price || 0 : 0) : 0;
+  
+  // Handle favorite button click
+  const handleFavoriteClick = () => {
+    if (product) {
+      toggleFavorite(product);
+    }
+  };
+  
+  // Handle buy now button click
+  const handleBuyNow = () => {
+    if (!product) return;
+    
+    // Add to cart first
+    handleAddToCart();
+    
+    // Navigate to checkout
+    navigate('/checkout');
+  };
   
   // Fetch product details
   useEffect(() => {
@@ -32,7 +69,7 @@ export const useProductPage = () => {
         const { data, error } = await supabase
           .from('Products')
           .select('*')
-          .eq('id', productId)
+          .eq('id', parseInt(productId, 10) || productId)
           .single();
         
         if (error) {
@@ -71,7 +108,7 @@ export const useProductPage = () => {
         .from('Products')
         .select('*')
         .eq('category', category)
-        .neq('id', productId)
+        .neq('id', parseInt(productId as string, 10) || productId)
         .limit(4);
       
       if (error) {
@@ -93,7 +130,12 @@ export const useProductPage = () => {
   const handleAddToCart = () => {
     if (!product) return;
     
-    addItem(product, quantity, selectedServices);
+    // Find the selected service object if a service is selected
+    const selectedServiceObjects = selectedService
+      ? serviceOptions.filter(s => s.id === selectedService)
+      : [];
+    
+    addItem(product, quantity, selectedServiceObjects);
     
     // Show notification
     showNotification(product, quantity);
@@ -107,16 +149,8 @@ export const useProductPage = () => {
   };
   
   // Handle service selection
-  const handleServiceSelect = (service: ProductService) => {
-    setSelectedServices(prev => {
-      const exists = prev.some(s => s.id === service.id);
-      
-      if (exists) {
-        return prev.filter(s => s.id !== service.id);
-      } else {
-        return [...prev, service];
-      }
-    });
+  const handleServiceSelect = (serviceId: string) => {
+    setSelectedService(serviceId || null);
   };
   
   // Increment quantity
@@ -136,9 +170,20 @@ export const useProductPage = () => {
     relatedProducts,
     quantity,
     selectedServices,
+    selectedService,
+    setSelectedService,
     incrementQuantity,
     decrementQuantity,
     handleAddToCart,
-    handleServiceSelect
+    handleServiceSelect,
+    totalPrice,
+    productInfoRef,
+    handleFavoriteClick,
+    handleBuyNow,
+    favoriteStatus,
+    isPack,
+    categoryText,
+    serviceOptions,
+    categoryPath
   };
 };

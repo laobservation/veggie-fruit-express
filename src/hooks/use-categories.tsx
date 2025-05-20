@@ -30,14 +30,24 @@ export function useCategories(): CategoriesState {
     try {
       setLoading(true);
       const { data: categoriesData, error } = await getCategoriesTable()
-        .select('*')
-        .order('display_order', { ascending: true });
+        .select('*');
 
       if (error) {
         throw error;
       }
 
-      const mappedCategories = categoriesData.map(mapDbToCategory);
+      // Sort by name if display_order is not available
+      const sortedCategories = categoriesData.sort((a, b) => {
+        // If we have display_order, use it; otherwise sort by name
+        if (a.display_order !== undefined && b.display_order !== undefined) {
+          return a.display_order - b.display_order;
+        }
+        
+        // Fallback to sorting by name
+        return a.name.localeCompare(b.name);
+      });
+
+      const mappedCategories = sortedCategories.map(mapDbToCategory);
       setCategories(mappedCategories);
     } catch (err) {
       console.error('Error fetching categories:', err);

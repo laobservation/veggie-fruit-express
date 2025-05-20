@@ -30,7 +30,7 @@ export async function processOrder(
   try {
     const { data, error } = await supabase
       .from('Orders')
-      .insert([{
+      .insert({
         'Client Name': orderData.clientName,
         'Adresse': orderData.address,
         'Phone': orderData.phone,
@@ -48,7 +48,7 @@ export async function processOrder(
         'subtotal': subtotal,
         'shipping_cost': shippingCost,
         'total_amount': orderData.totalAmount
-      }]);
+      });
     
     if (error) {
       throw error;
