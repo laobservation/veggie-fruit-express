@@ -16,7 +16,7 @@ const ProductHeader: React.FC<ProductHeaderProps> = ({
   return <div className="relative pb-4">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-xl font-bold text-gray-800">{product.name}</h1>
+          <h1 className="font-bold text-gray-800 mx-0 py-0 px-0 text-xl my-[41px]">{product.name}</h1>
           
         </div>
         
