@@ -1,102 +1,129 @@
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useCategories } from '@/hooks/use-categories';
-
-interface CategoryItem {
+import { supabase, getCategoriesTable } from '@/integrations/supabase/client';
+interface Category {
   id: string;
   name: string;
-  path: string;
-  icon?: string;
   imageIcon?: string | null;
-  bg?: string;
-  isVisible?: boolean;
-  displayOrder?: number;
+  bg: string;
+  path: string;
 }
+export const CategoryNavigation: React.FC = () => {
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [loading, setLoading] = useState(true);
 
-const CategoryNavigation: React.FC = () => {
-  const { categories, loading } = useCategories();
+  // Default fallback categories if none are found in DB
+  const defaultCategories = [{
+    id: 'fruits',
+    name: 'Fruits',
+    imageIcon: '/lovable-uploads/7eb3dccd-9b4a-4f2b-afbe-ca6658b17929.png',
+    bg: 'bg-red-100',
+    path: '/category/fruits'
+  }, {
+    id: 'vegetables',
+    name: 'Légumes',
+    imageIcon: '/lovable-uploads/a4732d9c-3513-4646-b357-a64e5ae17c0b.png',
+    bg: 'bg-green-100',
+    path: '/category/légumes'
+  }, {
+    id: 'packs',
+    name: 'Packs',
+    imageIcon: '/lovable-uploads/3e6664d5-ad8b-4a42-8cd9-a740bb96dcd4.png',
+    bg: 'bg-amber-100',
+    path: '/category/packs'
+  }, {
+    id: 'drinks',
+    name: 'Drinks',
+    imageIcon: '/lovable-uploads/6f3cacf5-5377-47c9-8cba-3837c17f4d36.png',
+    bg: 'bg-blue-100',
+    path: '/category/drinks'
+  }, {
+    id: 'salade-jus',
+    name: 'Salades & Jus',
+    imageIcon: null,
+    bg: 'bg-lime-100',
+    path: '/category/salade-jus'
+  }];
+  useEffect(() => {
+    fetchCategories();
 
-  // Default categories in case data isn't available
-  const defaultCategories: CategoryItem[] = [
-    { id: 'fruits', name: 'Fruits', path: '/category/fruits', bg: 'bg-red-100' },
-    { id: 'vegetables', name: 'Légumes', path: '/category/vegetables', bg: 'bg-green-100' },
-    { id: 'packs', name: 'Packs', path: '/category/packs', bg: 'bg-amber-100' },
-  ];
-
-  // Process and sort categories from the database
-  const processedCategories = React.useMemo(() => {
-    if (loading || categories.length === 0) {
-      return defaultCategories;
-    }
-
-    // Filter out categories that are marked as not visible
-    const visibleCategories = categories.filter(cat => cat.isVisible !== false);
-
-    // Map database categories to the format expected by the UI
-    return visibleCategories
-      .map(category => {
-        // Convert database category name to URL-friendly format for the path
-        const pathName = category.name
-          .toLowerCase()
-          .replace(/\s+/g, '-')
-          .replace(/[^\w\-]+/g, '');
-
-        return {
-          id: category.id,
-          name: category.name,
-          path: `/category/${pathName}`,
-          imageIcon: category.imageIcon,
-          bg: category.bg || 'bg-gray-100', // Use bg from database or default
-          isVisible: category.isVisible,
-          displayOrder: category.displayOrder
-        };
-      })
-      .sort((a, b) => {
-        // Sort by displayOrder if available, otherwise maintain default order
-        const orderA = a.displayOrder !== undefined ? a.displayOrder : 999;
-        const orderB = b.displayOrder !== undefined ? b.displayOrder : 999;
-        return orderA - orderB;
+    // Set up a subscription to listen for category changes
+    const categoriesChannel = supabase.channel('categories-changes').on('postgres_changes', {
+      event: '*',
+      schema: 'public',
+      table: 'categories'
+    }, () => {
+      console.log('CategoryNavigation: Detected category change, refreshing...');
+      fetchCategories();
+    }).subscribe();
+    return () => {
+      supabase.removeChannel(categoriesChannel);
+    };
+  }, []);
+  const fetchCategories = async () => {
+    setLoading(true);
+    try {
+      const {
+        data,
+        error
+      } = await getCategoriesTable().select('*').order('name', {
+        ascending: true
       });
-  }, [categories, loading]);
+      if (error) throw error;
+      if (data && data.length > 0) {
+        // Transform to match our Category interface
+        const formattedCategories: Category[] = data.map(cat => {
+          // Format URL-friendly path - ensure we have consistent plural forms for URLs
+          let pathName = cat.name.toLowerCase().replace(/\s+/g, '-');
 
-  // Render skeleton loader during loading
+          // Special handling for certain categories to maintain consistent URL structure
+          if (pathName === 'fruit') pathName = 'fruits';
+          if (pathName === 'vegetable' || pathName === 'légume') pathName = 'légumes';
+          if (pathName === 'pack') pathName = 'packs';
+          if (pathName === 'drink') pathName = 'drinks';
+          return {
+            id: cat.id,
+            name: cat.name,
+            imageIcon: cat.image_icon || null,
+            bg: cat.background_color || 'bg-gray-100',
+            path: `/category/${pathName}`
+          };
+        });
+        console.log('Formatted categories:', formattedCategories);
+        setCategories(formattedCategories);
+      } else {
+        // Use default categories if none found in DB
+        setCategories(defaultCategories);
+      }
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+      setCategories(defaultCategories);
+    } finally {
+      setLoading(false);
+    }
+  };
   if (loading) {
-    return (
-      <div className="overflow-x-auto py-4 flex space-x-3 px-4">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="animate-pulse flex flex-col items-center">
-            <div className="rounded-full h-16 w-16 bg-gray-200"></div>
-            <div className="h-4 w-20 bg-gray-200 rounded mt-2"></div>
-          </div>
-        ))}
-      </div>
-    );
+    return <div className="grid grid-cols-4 gap-4 w-full pb-2">
+        {[1, 2, 3, 4].map(i => <div key={i} className="flex flex-col items-center animate-pulse">
+            <div className="bg-gray-200 w-16 h-16 rounded-lg mb-2"></div>
+            <div className="bg-gray-200 h-4 w-20 rounded"></div>
+          </div>)}
+      </div>;
   }
-
-  return (
-    <nav className="overflow-x-auto py-4 flex space-x-4 px-4">
-      {processedCategories.map((category) => (
-        <Link
-          key={category.id}
-          to={category.path}
-          className="flex flex-col items-center min-w-[80px]"
-        >
-          <div className={`w-16 h-16 rounded-full flex items-center justify-center ${category.bg}`}>
-            {category.imageIcon ? (
-              <img 
-                src={category.imageIcon} 
-                alt={category.name} 
-                className="w-10 h-10 object-contain"
-              />
-            ) : (
-              <span className="text-2xl">🥬</span> // Default icon if none provided
-            )}
+  return <div className="grid grid-cols-4 gap-4 w-full pb-2">
+      {categories.map(category => <Link to={category.path} key={category.id} className="flex flex-col items-center">
+          <div className={`${category.bg} w-16 h-16 rounded-lg flex items-center justify-center mb-2`}>
+            {category.imageIcon ? <img src={category.imageIcon} alt={category.name} className="w-10 h-10 object-contain" onError={e => {
+          console.error("Image failed to load:", category.imageIcon);
+          (e.target as HTMLImageElement).style.display = 'none';
+          const parent = (e.target as HTMLImageElement).parentNode;
+          if (parent instanceof HTMLElement) {
+            parent.innerHTML = `<span class="text-3xl">${category.name.charAt(0)}</span>`;
+          }
+        }} /> : <span className="text-3xl">{category.name.charAt(0)}</span>}
           </div>
-          <span className="mt-1 text-sm font-medium text-center">{category.name}</span>
-        </Link>
-      ))}
-    </nav>
-  );
+          <p className="text-sm text-center text-gray-700 font-bold">{category.name}</p>
+        </Link>)}
+    </div>;
 };
-
 export default CategoryNavigation;

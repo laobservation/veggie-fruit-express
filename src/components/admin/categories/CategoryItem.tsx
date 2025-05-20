@@ -2,9 +2,8 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
 import { Category } from '@/types/category';
-import { Pencil, Trash2, Check, X, Eye, EyeOff } from 'lucide-react';
+import { Pencil, Trash2, Check, X } from 'lucide-react';
 import CategoryIconPreview from './CategoryIconPreview';
 
 interface CategoryItemProps {
@@ -16,7 +15,6 @@ interface CategoryItemProps {
   onSaveEdit: () => void;
   onDelete: (id: string) => void;
   onEditChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  onSwitchChange?: (checked: boolean, field: string) => void;
 }
 
 const CategoryItem: React.FC<CategoryItemProps> = ({
@@ -27,16 +25,9 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
   onCancelEdit,
   onSaveEdit,
   onDelete,
-  onEditChange,
-  onSwitchChange
+  onEditChange
 }) => {
   const isEditing = editingId === category.id;
-  
-  const handleSwitchChange = (checked: boolean, field: string) => {
-    if (onSwitchChange) {
-      onSwitchChange(checked, field);
-    }
-  };
   
   if (isEditing && editForm) {
     return (
@@ -77,27 +68,6 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
               />
               <p className="text-xs text-gray-500 mt-1">Enter Tailwind CSS color class (e.g. bg-red-100)</p>
             </div>
-
-            <div className="flex justify-between items-center mb-2">
-              <label className="block text-sm font-medium">Visible on Homepage</label>
-              <Switch
-                name="isVisible"
-                checked={editForm.isVisible !== false}
-                onCheckedChange={(checked) => handleSwitchChange(checked, 'isVisible')}
-              />
-            </div>
-
-            <div className="mb-2">
-              <label className="block text-sm font-medium mb-1">Display Order</label>
-              <Input
-                type="number"
-                name="displayOrder"
-                value={editForm.displayOrder || 0}
-                onChange={onEditChange}
-                min={0}
-              />
-              <p className="text-xs text-gray-500 mt-1">Lower values appear first (0 is first)</p>
-            </div>
           </div>
           
           <div>
@@ -128,21 +98,12 @@ const CategoryItem: React.FC<CategoryItemProps> = ({
 
   return (
     <div className="border rounded-md p-4 mb-2 flex justify-between items-center">
-      <div className="flex items-center space-x-3">
-        <span className={`text-sm font-medium p-2 rounded ${category.isVisible === false ? 'bg-gray-200 text-gray-500' : 'bg-green-100 text-green-700'}`}>
-          {category.displayOrder !== undefined ? category.displayOrder : '-'}
-        </span>
+      <div className="flex items-center">
         <CategoryIconPreview 
           name={category.name} 
           imageIcon={category.imageIcon}
           bg={category.bg}
         />
-        {category.isVisible === false && (
-          <div className="text-gray-500 flex items-center">
-            <EyeOff className="h-4 w-4 mr-1" />
-            <span className="text-xs">Hidden</span>
-          </div>
-        )}
       </div>
       
       <div className="flex space-x-2">

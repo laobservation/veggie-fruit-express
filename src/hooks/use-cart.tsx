@@ -1,196 +1,172 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import { Product, ProductService } from '@/types/product';
-import React, { createContext, useState, useContext, ReactNode } from 'react';
+import { Product } from '@/types/product';
+import { ReactNode, useState, useEffect } from 'react';
 import CartNotification from '@/components/CartNotification';
+import { ServiceOption } from '@/types/product';
 
 export interface CartItem {
   product: Product;
   quantity: number;
-  selectedServices?: ProductService[];
+  selectedServices?: ServiceOption[];
 }
 
 interface CartState {
   items: CartItem[];
-  cartUpdateCount: number; // Track cart updates for animation
-  isOpen: boolean;
-  showReminder: boolean;
-  addItem: (product: Product, quantity?: number, services?: ProductService[]) => void;
+  showNotification: boolean;
+  notificationItem: CartItem | null;
+  isCartOpen: boolean;
+  cartReminder: boolean;
+  addItem: (product: Product, quantity?: number, selectedServices?: ServiceOption[]) => void;
   removeItem: (productId: string) => void;
-  updateItemQuantity: (productId: string, quantity: number) => void;
-  updateItemServices: (productId: string, services: ProductService[]) => void;
+  updateQuantity: (productId: string, quantity: number) => void;
   clearCart: () => void;
+  getTotalItems: () => number;
   getTotalPrice: () => number;
   getShippingCost: () => number;
-  getTotalItems: () => number;
+  hideNotification: () => void;
   openCart: () => void;
   closeCart: () => void;
-  toggleCart: () => void;
-  toggleCartReminder: (show: boolean) => void;
+  toggleCartReminder: (state: boolean) => void;
 }
 
-export const useCart = create(
-  persist<CartState>(
+export const useCart = create<CartState>()(
+  persist(
     (set, get) => ({
       items: [],
-      cartUpdateCount: 0,
-      isOpen: false,
-      showReminder: false,
-      addItem: (product, quantity = 1, services = []) => {
-        const { items } = get();
-        const existingItem = items.find(item => item.product.id === product.id);
+      showNotification: false,
+      notificationItem: null,
+      isCartOpen: false,
+      cartReminder: false,
+      addItem: (product: Product, quantity = 1, selectedServices = []) => {
+        const currentItems = get().items;
+        const existingItemIndex = currentItems.findIndex(item => item.product.id === product.id);
 
-        set(state => {
-          let newItems;
-
-          if (existingItem) {
-            newItems = items.map(item => {
-              if (item.product.id === product.id) {
-                return {
-                  ...item,
-                  quantity: item.quantity + quantity,
-                  selectedServices: services.length > 0 ? services : item.selectedServices
-                };
+        if (existingItemIndex !== -1) {
+          // If the item exists, check if it has the same services
+          const existingItem = currentItems[existingItemIndex];
+          const hasSameServices = 
+            JSON.stringify(existingItem.selectedServices?.map(s => s.id).sort()) === 
+            JSON.stringify(selectedServices?.map(s => s.id).sort());
+          
+          if (hasSameServices) {
+            // Update quantity for the item with same services
+            const updatedItems = currentItems.map((item, index) => 
+              index === existingItemIndex
+                ? { ...item, quantity: item.quantity + quantity }
+                : item
+            );
+            
+            set({
+              items: updatedItems,
+              showNotification: true,
+              notificationItem: {
+                product,
+                quantity: existingItem.quantity + quantity,
+                selectedServices
               }
-              return item;
             });
           } else {
-            newItems = [...items, { product, quantity, selectedServices: services }];
+            // Add as a new item because services are different
+            set({ 
+              items: [...currentItems, { product, quantity, selectedServices }],
+              showNotification: true,
+              notificationItem: { product, quantity, selectedServices }
+            });
           }
-
-          return { 
-            items: newItems,
-            cartUpdateCount: state.cartUpdateCount + 1 // Increment for animation trigger
-          };
-        });
-      },
-      removeItem: (productId) => {
-        const { items } = get();
-        set({ 
-          items: items.filter(item => item.product.id !== productId),
-          cartUpdateCount: get().cartUpdateCount + 1
-        });
-      },
-      updateItemQuantity: (productId, quantity) => {
-        const { items } = get();
-        if (quantity <= 0) {
+        } else {
+          // If the item doesn't exist, add it
           set({ 
-            items: items.filter(item => item.product.id !== productId),
-            cartUpdateCount: get().cartUpdateCount + 1
+            items: [...currentItems, { product, quantity, selectedServices }],
+            showNotification: true,
+            notificationItem: { product, quantity, selectedServices }
           });
+        }
+      },
+      removeItem: (productId: string) => {
+        const currentItems = get().items;
+        set({
+          items: currentItems.filter(item => item.product.id !== productId),
+        });
+      },
+      updateQuantity: (productId: string, quantity: number) => {
+        const currentItems = get().items;
+        
+        if (quantity <= 0) {
+          get().removeItem(productId);
           return;
         }
-
-        set({ 
-          items: items.map(item => {
-            if (item.product.id === productId) {
-              return { ...item, quantity };
-            }
-            return item;
-          }),
-          cartUpdateCount: get().cartUpdateCount + 1
+        
+        set({
+          items: currentItems.map(item =>
+            item.product.id === productId
+              ? { ...item, quantity }
+              : item
+          ),
         });
       },
-      updateItemServices: (productId, services) => {
-        const { items } = get();
-        set({ 
-          items: items.map(item => {
-            if (item.product.id === productId) {
-              return { ...item, selectedServices: services };
-            }
-            return item;
-          }),
-          cartUpdateCount: get().cartUpdateCount + 1
-        });
+      clearCart: () => set({ items: [] }),
+      getTotalItems: () => {
+        return get().items.reduce((total, item) => total + item.quantity, 0);
       },
-      clearCart: () => set({ items: [], cartUpdateCount: 0 }),
       getTotalPrice: () => {
-        const { items } = get();
-        return items.reduce((total, item) => {
-          // Calculate base product price
-          let itemPrice = item.product.price;
+        const itemsTotal = get().items.reduce((total, item) => {
+          // Calculate product price
+          const productTotal = item.product.price * item.quantity;
           
-          // Add costs of any selected services
-          if (item.selectedServices && item.selectedServices.length > 0) {
-            itemPrice += item.selectedServices.reduce(
-              (serviceTotal, service) => serviceTotal + service.price, 0
-            );
-          }
-          
-          return total + (itemPrice * item.quantity);
+          // Add service costs if any
+          const servicesCost = (item.selectedServices?.reduce((acc, service) => 
+            acc + service.price, 0) || 0) * item.quantity;
+            
+          return total + productTotal + servicesCost;
         }, 0);
+        
+        // Add shipping cost
+        return itemsTotal;
       },
       getShippingCost: () => {
-        return 20; // Fixed at 20DH as mentioned in the header
+        // Fixed shipping cost of 20 DH
+        return get().items.length > 0 ? 20 : 0;
       },
-      getTotalItems: () => {
-        const { items } = get();
-        return items.reduce((total, item) => total + item.quantity, 0);
-      },
-      openCart: () => set({ isOpen: true }),
-      closeCart: () => set({ isOpen: false }),
-      toggleCart: () => set(state => ({ isOpen: !state.isOpen })),
-      toggleCartReminder: (show) => set({ showReminder: show })
+      hideNotification: () => set({ 
+        showNotification: false, 
+        notificationItem: null
+      }),
+      openCart: () => set({ isCartOpen: true }),
+      closeCart: () => set({ isCartOpen: false }),
+      toggleCartReminder: (state: boolean) => set({ cartReminder: state })
     }),
     {
-      name: 'cart-storage'
+      name: 'cart-storage',
     }
   )
 );
 
-// Context for cart notifications
-interface CartNotificationContextProps {
-  showNotification: (product: Product, quantity: number) => void;
-}
-
-const CartNotificationContext = createContext<CartNotificationContextProps | undefined>(undefined);
-
-// Provider component for cart notifications
-export const CartNotificationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [notification, setNotification] = useState<{ product: Product; quantity: number } | null>(null);
-  const { openCart } = useCart();
-
-  const showNotification = (product: Product, quantity: number) => {
-    setNotification({ product, quantity });
-    
-    // Auto-hide after 2 seconds as specifically requested
-    setTimeout(() => {
-      setNotification(null);
-    }, 2000); // Fixed at 2 seconds
-  };
-  
-  const handleCloseNotification = () => {
-    setNotification(null);
-  };
-  
-  const handleViewCart = () => {
-    openCart();
-    setNotification(null);
-  };
+// CartNotificationProvider component to render notifications
+export const CartNotificationProvider = ({ children }: { children: ReactNode }) => {
+  const { 
+    showNotification, 
+    notificationItem, 
+    hideNotification, 
+    openCart
+  } = useCart();
 
   return (
-    <CartNotificationContext.Provider value={{ showNotification }}>
+    <>
       {children}
-      {notification && (
+      
+      {showNotification && notificationItem && (
         <CartNotification
-          product={notification.product}
-          quantity={notification.quantity}
-          onClose={handleCloseNotification}
-          onViewCart={handleViewCart}
-          autoClose={true}
-          autoCloseTime={2000} // 2 seconds auto-close
+          product={notificationItem.product}
+          quantity={notificationItem.quantity}
+          onClose={hideNotification}
+          onViewCart={() => {
+            openCart();
+            hideNotification();
+          }}
         />
       )}
-    </CartNotificationContext.Provider>
+    </>
   );
-};
-
-// Hook to access the cart notification context
-export const useCartNotification = () => {
-  const context = useContext(CartNotificationContext);
-  if (context === undefined) {
-    throw new Error('useCartNotification must be used within a CartNotificationProvider');
-  }
-  return context;
 };

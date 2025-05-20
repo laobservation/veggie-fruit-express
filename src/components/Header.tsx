@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
@@ -8,17 +7,12 @@ import Cart from './Cart';
 import MobileMenu from './MobileMenu';
 import { useIsMobile } from '@/hooks/use-mobile';
 import SearchBar from './SearchBar';
-
 const Header = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isCartAnimating, setIsCartAnimating] = useState(false);
-  const [isScrolled, setIsScrolled] = useState(false);
-  
   const {
     getTotalItems,
-    openCart,
-    cartUpdateCount
+    openCart
   } = useCart();
   const isMobile = useIsMobile();
 
@@ -28,40 +22,10 @@ const Header = () => {
       setIsMobileMenuOpen(false);
     }
   }, [isMobile, isMobileMenuOpen]);
-  
-  // Animate cart icon when items are added
-  useEffect(() => {
-    if (cartUpdateCount > 0) {
-      setIsCartAnimating(true);
-      
-      // Remove animation after it completes
-      const timeout = setTimeout(() => {
-        setIsCartAnimating(false);
-      }, 500);
-      
-      return () => clearTimeout(timeout);
-    }
-  }, [cartUpdateCount]);
-  
-  // Handle scroll for sticky header
-  useEffect(() => {
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY;
-      setIsScrolled(scrollPosition > 10);
-    };
-    
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   const handleCartClick = () => {
     openCart();
-    setIsCartAnimating(true);
-    setTimeout(() => setIsCartAnimating(false), 500);
   };
-
-  return (
-    <header className={`py-[30px] w-full z-50 transition-all duration-300 ${isScrolled ? 'fixed top-0 left-0 right-0 bg-white shadow-md py-4' : 'bg-transparent'}`}>
+  return <header className="bg-transparent py-[30px]">
       <div className="container mx-auto px-4 flex items-center justify-between relative">
         <div className="flex items-center gap-6">
           {isMobile && <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="mr-2 relative z-50 px-0 py-0 mx-[4px] my-0 bg-transparent">
@@ -90,7 +54,7 @@ const Header = () => {
           </div>
           
           <button onClick={handleCartClick} className="relative rounded-full p-2 flex items-center bg-transparent">
-            <ShoppingCart className={`h-5 w-5 text-green-600 ${isCartAnimating ? 'animate-cart-pop' : ''}`} />
+            <ShoppingCart className="h-5 w-5 text-green-600" />
             <span className="text-green-600 font-semibold ml-2">
               {getTotalItems() < 10 ? `0${getTotalItems()}` : getTotalItems()}
             </span>
@@ -99,8 +63,6 @@ const Header = () => {
       </div>
       
       <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
-    </header>
-  );
+    </header>;
 };
-
 export default Header;

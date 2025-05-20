@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCategories } from '@/hooks/use-categories';
 import { getProductsWithStock } from '@/data/products';
 import { useToast } from '@/hooks/use-toast';
@@ -14,8 +14,6 @@ const HomePage: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
   const { categories, loading: categoriesLoading } = useCategories();
-  const [visibleProductsMap, setVisibleProductsMap] = useState<Record<string, number>>({});
-  const categoryRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   // Load products from Supabase
   useEffect(() => {
@@ -40,30 +38,8 @@ const HomePage: React.FC = () => {
     loadProducts();
   }, []);
 
-  // Initialize the visible products start index for each category
-  useEffect(() => {
-    const initialVisibleMap: Record<string, number> = {};
-    
-    categories
-      .filter(cat => cat.isVisible !== false)
-      .forEach(cat => {
-        initialVisibleMap[cat.id] = 0;
-      });
-    
-    setVisibleProductsMap(initialVisibleMap);
-  }, [categories]);
-
-  // Filter categories that should be visible
-  const visibleCategories = categories
-    .filter(cat => cat.isVisible !== false) // Only show categories that are not explicitly hidden
-    .sort((a, b) => {
-      const orderA = a.displayOrder !== undefined ? a.displayOrder : 999;
-      const orderB = b.displayOrder !== undefined ? b.displayOrder : 999;
-      return orderA - orderB;
-    });
-
   // Map categories from database format to our application format
-  const mappedCategories = visibleCategories.map(cat => {
+  const mappedCategories = categories.map(cat => {
     let categoryValue: 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus' = 'vegetable';
     
     // Convert the category name to a value that matches our Product type
@@ -79,33 +55,6 @@ const HomePage: React.FC = () => {
       categoryValue
     };
   });
-
-  // Function to navigate products in a category
-  const navigateCategory = (categoryId: string, direction: 'prev' | 'next') => {
-    const productsPerView = 4; // Number of products visible at once
-    
-    setVisibleProductsMap(prev => {
-      const currentStart = prev[categoryId] || 0;
-      let newStart = 0;
-      
-      const categoryProducts = products.filter(
-        p => mappedCategories.find(c => c.id === categoryId)?.categoryValue === p.category
-      );
-      
-      const maxStart = Math.max(0, categoryProducts.length - productsPerView);
-      
-      if (direction === 'next') {
-        newStart = Math.min(currentStart + productsPerView, maxStart);
-      } else {
-        newStart = Math.max(0, currentStart - productsPerView);
-      }
-      
-      return {
-        ...prev,
-        [categoryId]: newStart
-      };
-    });
-  };
 
   // Default categories if none are found in database
   const defaultCategories = [
@@ -129,19 +78,14 @@ const HomePage: React.FC = () => {
 
       {/* Render a separate section for each category */}
       {categoriesToDisplay.map((category) => (
-        <div key={category.id} ref={el => categoryRefs.current[category.id] = el}>
-          <PopularItemsSection
-            title={category.name}
-            products={products}
-            isLoading={isLoading}
-            showAll={true}
-            category={category.categoryValue}
-            startIndex={visibleProductsMap[category.id] || 0}
-            productsPerView={4}
-            onNext={() => navigateCategory(category.id, 'next')}
-            onPrevious={() => navigateCategory(category.id, 'prev')}
-          />
-        </div>
+        <PopularItemsSection
+          key={category.id}
+          title={category.name}
+          products={products}
+          isLoading={isLoading}
+          showAll={true}
+          category={category.categoryValue}
+        />
       ))}
     </div>
   );

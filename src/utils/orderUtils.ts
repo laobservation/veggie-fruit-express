@@ -1,93 +1,92 @@
 
-import { FormValues, OrderData } from '@/types/delivery';
 import { supabase } from '@/integrations/supabase/client';
+import { FormValues, OrderDetails } from '@/types/delivery';
 import { CartItem } from '@/hooks/use-cart';
-import { Json } from '@/integrations/supabase/types';
+import { toast } from 'sonner';
 
-export async function processOrder(
-  formData: FormValues,
-  cartItems: CartItem[],
-  getSubtotal: () => number,
+export const processOrder = async (
+  data: FormValues,
+  items: CartItem[],
+  getTotalPrice: () => number,
   getShippingCost: () => number
-): Promise<OrderData> {
-  // Create order data object
-  const preferredTime = formData.preferDeliveryTime ? formData.deliveryTime : 'any';
-  const subtotal = getSubtotal();
+): Promise<OrderDetails> => {
+  const subtotal = getTotalPrice();
   const shippingCost = getShippingCost();
-  
-  const orderData: OrderData = {
-    clientName: formData.name,
-    address: formData.address,
-    phone: formData.phone,
-    items: cartItems,
-    preferredTime,
-    deliveryDay: formData.deliveryDay || 'today',
-    subtotal,
-    shippingCost,
-    totalAmount: subtotal + shippingCost
+  const totalAmount = subtotal + shippingCost;
+
+  // Create order details object for thank you page with proper typing
+  const orderDetails: OrderDetails = {
+    name: data.name,
+    address: data.address,
+    phone: data.phone,
+    preferredTime: data.preferDeliveryTime ? data.deliveryTime : '',
+    deliveryDay: data.deliveryDay || '', // Added delivery day
+    totalAmount: totalAmount,
+    subtotal: subtotal,
+    shippingCost: shippingCost,
+    items: items,
+    date: new Date().toISOString()
   };
-  
-  // Save order to database
+
   try {
-    // Convert the cart items to a format compatible with Json type
-    const orderItems = cartItems.map(item => ({
-      id: item.product.id,
-      name: item.product.name,
-      price: item.product.price,
+    // Prepare items data for Supabase with additional validation
+    const itemsData = items.map(item => ({
+      productId: item.product.id,
+      productName: item.product.name,
       quantity: item.quantity,
-      image: item.product.image,
-      unit: item.product.unit,
-      // Convert services to a simpler format that fits Json type
-      services: item.selectedServices ? 
-        item.selectedServices.map(s => ({
-          id: s.id,
-          name: s.name,
-          price: s.price
-        })) : []
+      price: item.product.price,
+      services: item.selectedServices ? item.selectedServices.map(service => ({
+        id: service.id,
+        name: service.name,
+        price: service.price
+      })) : []
     }));
-
-    // Convert phone to number if possible, otherwise pass as string
-    // Since the database expects a number for Phone field
-    let phoneNumber: number | null = null;
-    if (formData.phone) {
-      // Remove any non-digit characters
-      const digitsOnly = formData.phone.replace(/\D/g, '');
-      if (digitsOnly) {
-        phoneNumber = parseInt(digitsOnly, 10);
-        // If parsing fails, keep as null
-        if (isNaN(phoneNumber)) {
-          phoneNumber = null;
-        }
-      }
-    }
-
-    const insertData = {
-      "Client Name": orderData.clientName,
-      "Adresse": orderData.address,
-      "Phone": phoneNumber, // Converted to number or null if invalid
-      order_items: orderItems as unknown as Json,
-      preferred_time: preferredTime,
-      delivery_day: orderData.deliveryDay,
-      subtotal: subtotal,
-      shipping_cost: shippingCost,
-      total_amount: orderData.totalAmount
-    };
     
-    const { data, error } = await supabase
+    console.log("Preparing to save order with data:", {
+      client: data.name,
+      address: data.address,
+      phone: data.phone,
+      deliveryDay: data.deliveryDay,
+      items: itemsData,
+      totals: { subtotal, shippingCost, totalAmount }
+    });
+    
+    // Insert order into database with explicit column names to avoid any mismatch issues
+    const { data: orderData, error } = await supabase
       .from('Orders')
-      .insert(insertData);
-    
+      .insert({
+        'Client Name': data.name.trim(),
+        'Adresse': data.address.trim(),
+        'Phone': data.phone ? parseInt(data.phone.replace(/\D/g, ''), 10) : null,
+        'order_items': itemsData,
+        'total_amount': totalAmount,
+        'shipping_cost': shippingCost,
+        'subtotal': subtotal,
+        'preferred_time': data.preferDeliveryTime ? data.deliveryTime : null,
+        'delivery_day': data.deliveryDay || null, // Added delivery day
+        'status': 'new',
+        'notified': false
+      })
+      .select('id')
+      .single();
+      
     if (error) {
-      console.error('Error saving order:', error);
-      throw error;
+      console.error('Error storing order:', error);
+      throw new Error(`Failed to store order: ${error.message}`);
     }
     
-    console.log('Order saved successfully:', data);
+    if (orderData?.id) {
+      console.log(`Order successfully created with ID: ${orderData.id}`);
+      // Update orderDetails with the order ID
+      orderDetails.orderId = orderData.id;
+    } else {
+      console.warn('Order created but no ID was returned');
+    }
     
-    // Return the order data for thank you page, etc.
-    return orderData;
-  } catch (error) {
-    console.error('Error saving order:', error);
-    throw new Error('Failed to save order to database');
+  } catch (err) {
+    console.error('Error processing order:', err);
+    throw err; // Re-throw to allow handling in calling component
   }
-}
+
+  return orderDetails;
+};

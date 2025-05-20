@@ -13,33 +13,27 @@ export type Database = {
         Row: {
           background_color: string
           created_at: string | null
-          display_order: number | null
           icon: string | null
           id: string
           image_icon: string | null
-          is_visible: boolean | null
           name: string
           updated_at: string | null
         }
         Insert: {
           background_color?: string
           created_at?: string | null
-          display_order?: number | null
           icon?: string | null
           id?: string
           image_icon?: string | null
-          is_visible?: boolean | null
           name: string
           updated_at?: string | null
         }
         Update: {
           background_color?: string
           created_at?: string | null
-          display_order?: number | null
           icon?: string | null
           id?: string
           image_icon?: string | null
-          is_visible?: boolean | null
           name?: string
           updated_at?: string | null
         }
@@ -99,33 +93,6 @@ export type Database = {
           quick_links?: Json | null
           social_links?: Json | null
           updated_at?: string | null
-        }
-        Relationships: []
-      }
-      instagram_posts: {
-        Row: {
-          caption: string
-          created_at: string | null
-          id: string
-          thumbnail_url: string | null
-          updated_at: string | null
-          video_url: string
-        }
-        Insert: {
-          caption: string
-          created_at?: string | null
-          id?: string
-          thumbnail_url?: string | null
-          updated_at?: string | null
-          video_url: string
-        }
-        Update: {
-          caption?: string
-          created_at?: string | null
-          id?: string
-          thumbnail_url?: string | null
-          updated_at?: string | null
-          video_url?: string
         }
         Relationships: []
       }

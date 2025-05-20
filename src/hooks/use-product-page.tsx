@@ -1,218 +1,147 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Product, ProductService } from '@/types/product';
-import { supabase } from '@/integrations/supabase/client';
-import { transformProductFromSupabase } from '@/services/productService';
 import { useCart } from '@/hooks/use-cart';
-import { useCartNotification } from '@/hooks/use-cart';
-import { toast } from '@/hooks/use-toast';
 import { useFavorites } from '@/hooks/use-favorites';
+import { useProductDetails } from '@/hooks/use-product-details';
+import { Product, ServiceOption } from '@/types/product';
+
+// Define service options to be used in the product page
+export const productServiceOptions: ServiceOption[] = [
+  {
+    id: "washed",
+    name: "Légumes lavés et prêts à l'emploi (+10,00 Dh)",
+    nameAr: "خضرة مغسولة و منظفة، وجاهزة للاستعمال",
+    price: 10
+  },
+  {
+    id: "cut",
+    name: "Légumes lavés et coupés (+20,00 Dh)",
+    nameAr: "خضرة مغسولة ومقطعة",
+    price: 20
+  },
+  {
+    id: "bags",
+    name: "Légumes lavés et coupés (Sachets de 500g) (+35,00 Dh)",
+    nameAr: "خضرة مغسولة ومقطعة (فأكياس ��يال 500غ)",
+    price: 35
+  }
+];
 
 export const useProductPage = () => {
-  const { productId } = useParams<{ productId: string }>();
-  const [product, setProduct] = useState<Product | null>(null);
-  const [quantity, setQuantity] = useState(1);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
-  const [selectedServices, setSelectedServices] = useState<ProductService[]>([]);
-  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const { productId } = useParams();
   const navigate = useNavigate();
-  const { addItem } = useCart();
-  const { showNotification } = useCartNotification();
-  const productInfoRef = useRef<HTMLDivElement>(null);
+  const { addItem, openCart } = useCart();
+  const { product, relatedProducts, loading } = useProductDetails(productId);
   const { isFavorite, toggleFavorite } = useFavorites();
-  const favoriteStatus = productId ? isFavorite(productId) : false;
+  const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [totalPrice, setTotalPrice] = useState<number>(0);
+  const productInfoRef = useRef<HTMLDivElement>(null);
   
-  // Derived properties
-  const isPack = product?.category === 'pack';
-  const categoryText = product?.category || '';
-  const categoryPath = `/category/${product?.category || ''}`;
-  const serviceOptions: ProductService[] = [
-    { id: 'sliced', name: 'Tranché', nameAr: 'مقطع', price: 5 },
-    { id: 'peeled', name: 'Épluché', nameAr: 'مقشر', price: 8 }
-  ];
+  useEffect(() => {
+    // Reset scroll position when product changes
+    window.scrollTo(0, 0);
+    // Reset selected service when product changes
+    setSelectedService(null);
+  }, [productId]);
+
+  useEffect(() => {
+    // Calculate total price including selected service
+    if (product) {
+      let servicePrice = 0;
+      if (selectedService) {
+        const service = productServiceOptions.find(s => s.id === selectedService);
+        if (service) {
+          servicePrice = service.price;
+        }
+      }
+      
+      setTotalPrice(product.price + servicePrice);
+    }
+  }, [product, selectedService]);
   
-  // Calculate total price based on product price and selected services
-  const totalPrice = product ? 
-    product.price + (selectedService ? 
-      serviceOptions.find(s => s.id === selectedService)?.price || 0 : 0) : 0;
+  // Add automatic scroll to product info section
+  useEffect(() => {
+    if (!loading && product && productInfoRef.current) {
+      setTimeout(() => {
+        productInfoRef.current?.scrollIntoView({ 
+          behavior: 'smooth', 
+          block: 'center'
+        });
+      }, 500);
+    }
+  }, [loading, product]);
   
-  // Handle favorite button click
+  const handleAddToCart = () => {
+    if (product) {
+      const selectedServices = selectedService 
+        ? [productServiceOptions.find(s => s.id === selectedService)].filter(Boolean) as ServiceOption[]
+        : [];
+      addItem(product, 1, selectedServices);
+    }
+  };
+
   const handleFavoriteClick = () => {
     if (product) {
       toggleFavorite(product);
     }
   };
-  
-  // Handle buy now button click
+
   const handleBuyNow = () => {
-    if (!product) return;
-    
-    // Add to cart first
-    handleAddToCart();
-    
-    // Navigate to checkout
-    navigate('/checkout');
-  };
-  
-  // Fetch product details
-  useEffect(() => {
-    const fetchProduct = async () => {
-      if (!productId) return;
-      
-      setLoading(true);
-      setError(null);
-      
-      try {
-        // Convert productId to number for the database query
-        // If it can't be converted to a number, we'll handle that separately
-        let parsedId: number;
-        
-        try {
-          parsedId = parseInt(productId);
-          if (isNaN(parsedId)) {
-            throw new Error('Invalid product ID');
-          }
-        } catch {
-          throw new Error('Invalid product ID format');
-        }
-        
-        const { data, error } = await supabase
-          .from('Products')
-          .select('*')
-          .eq('id', parsedId)
-          .single();
-        
-        if (error) {
-          throw error;
-        }
-        
-        if (!data) {
-          throw new Error('Product not found');
-        }
-        
-        // Transform the product from database format to our application format
-        const productData = transformProductFromSupabase({
-          ...data,
-          additional_images: data.additional_images || null
-        });
-        
-        setProduct(productData);
-        
-        // Fetch related products in the same category
-        fetchRelatedProducts(productData.category);
-      } catch (err) {
-        console.error('Error fetching product:', err);
-        setError('Failed to load product details.');
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchProduct();
-  }, [productId]);
-  
-  // Fetch related products
-  const fetchRelatedProducts = async (category: string) => {
-    if (!productId) return;
-    
-    try {
-      // Convert productId to number for the database query
-      // Similar to above, handle the case where it's not a valid number
-      let parsedCurrentId: number;
-      
-      try {
-        parsedCurrentId = parseInt(productId);
-        if (isNaN(parsedCurrentId)) {
-          throw new Error('Invalid product ID');
-        }
-      } catch {
-        console.error('Cannot parse product ID for related products query');
-        return;
-      }
-      
-      const { data, error } = await supabase
-        .from('Products')
-        .select('*')
-        .eq('category', category)
-        .neq('id', parsedCurrentId)
-        .limit(4);
-      
-      if (error) {
-        throw error;
-      }
-      
-      setRelatedProducts(
-        data.map(product => transformProductFromSupabase({
-          ...product,
-          additional_images: product.additional_images || null
-        }))
-      );
-    } catch (err) {
-      console.error('Error fetching related products:', err);
+    if (product) {
+      const selectedServices = selectedService 
+        ? [productServiceOptions.find(s => s.id === selectedService)].filter(Boolean) as ServiceOption[]
+        : [];
+      addItem(product, 1, selectedServices);
+      openCart(); // Opens the cart/checkout form
     }
   };
-  
-  // Add to cart function
-  const handleAddToCart = () => {
-    if (!product) return;
-    
-    // Find the selected service object if a service is selected
-    const selectedServiceObjects = selectedService
-      ? serviceOptions.filter(s => s.id === selectedService)
-      : [];
-    
-    addItem(product, quantity, selectedServiceObjects);
-    
-    // Show notification
-    showNotification(product, quantity);
-    
-    // Show success toast
-    toast({
-      title: "Produit ajouté!",
-      description: `${product.name} a été ajouté à votre panier.`,
-      variant: "default",
-    });
+
+  // Helper function to get formatted category text
+  const getCategoryText = (category: string) => {
+    switch(category) {
+      case 'fruit': return 'Fruits';
+      case 'vegetable': return 'Légumes';
+      case 'pack': return 'Packs';
+      case 'drink': return 'Boissons';
+      case 'salade-jus': return 'Salades & Jus';
+      default: return 'Produits';
+    }
   };
-  
-  // Handle service selection
-  const handleServiceSelect = (serviceId: string) => {
-    setSelectedService(serviceId || null);
+
+  // Get category path for linking
+  const getCategoryPath = (category: string) => {
+    switch(category) {
+      case 'fruit': return '/category/fruits';
+      case 'vegetable': return '/category/légumes';
+      case 'pack': return '/category/packs';
+      case 'drink': return '/category/drinks';
+      case 'salade-jus': return '/category/salade-jus';
+      default: return '/';
+    }
   };
-  
-  // Increment quantity
-  const incrementQuantity = () => {
-    setQuantity(prev => prev + 1);
-  };
-  
-  // Decrement quantity
-  const decrementQuantity = () => {
-    setQuantity(prev => (prev > 1 ? prev - 1 : 1));
-  };
-  
+
+  const favoriteStatus = product ? isFavorite(product.id) : false;
+  const isPack = product?.category === 'pack';
+  const categoryText = product ? getCategoryText(product.category) : '';
+  const categoryPath = product ? getCategoryPath(product.category) : '';
+
   return {
     product,
-    loading,
-    error,
     relatedProducts,
-    quantity,
-    selectedServices,
+    loading,
+    navigate,
     selectedService,
     setSelectedService,
-    incrementQuantity,
-    decrementQuantity,
-    handleAddToCart,
-    handleServiceSelect,
     totalPrice,
     productInfoRef,
+    handleAddToCart,
     handleFavoriteClick,
     handleBuyNow,
     favoriteStatus,
     isPack,
     categoryText,
-    serviceOptions,
-    categoryPath
+    categoryPath,
+    serviceOptions: productServiceOptions,
   };
 };

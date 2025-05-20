@@ -1,101 +1,78 @@
 
 import { useState, useEffect } from 'react';
+import { toast } from '@/hooks/use-toast';
 import { supabase, getCategoriesTable } from '@/integrations/supabase/client';
 import { Category } from '@/types/category';
-import { toast } from '@/hooks/use-toast';
 
-interface CategoriesState {
-  categories: Category[];
-  loading: boolean;
-  error: Error | null;
-  fetchCategories: () => Promise<void>;
-}
-
-export function useCategories(): CategoriesState {
+export const useCategories = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<Error | null>(null);
 
-  // Function to map database fields to category interface
-  const mapDbToCategory = (item: any): Category => ({
-    id: item.id,
-    name: item.name,
-    imageIcon: item.image_icon,
-    bg: item.background_color || 'bg-gray-100',
-    isVisible: item.is_visible !== undefined ? item.is_visible : true,
-    displayOrder: item.display_order !== undefined ? item.display_order : 999
-  });
-
+  // Fetch categories from the database
   const fetchCategories = async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const { data: categoriesData, error } = await getCategoriesTable()
-        .select('*');
-
-      if (error) {
-        throw error;
+      const { data, error } = await getCategoriesTable()
+        .select('*')
+        .order('name', { ascending: true });
+      
+      if (error) throw error;
+      
+      // Transform data to match our Category interface
+      if (data && data.length > 0) {
+        const formattedCategories: Category[] = data.map(cat => ({
+          id: cat.id,
+          name: cat.name,
+          imageIcon: cat.image_icon, // Don't manipulate the URL
+          bg: cat.background_color || 'bg-gray-100',
+          path: `/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}` // Format path with proper slug
+        }));
+        
+        setCategories(formattedCategories);
+        console.log('Categories fetched:', formattedCategories);
+      } else {
+        setCategories([]);
       }
-
-      // Sort categories by visibility first, then by display order or name
-      const sortedCategories = categoriesData.sort((a, b) => {
-        // Check if the visibility property exists and prioritize visible categories
-        const aVisible = a.is_visible !== undefined ? a.is_visible : true;
-        const bVisible = b.is_visible !== undefined ? b.is_visible : true;
-        
-        if (aVisible && !bVisible) return -1;
-        if (!aVisible && bVisible) return 1;
-        
-        // If both have the same visibility, check display_order
-        const aOrder = a.display_order !== undefined ? a.display_order : 999;
-        const bOrder = b.display_order !== undefined ? b.display_order : 999;
-        
-        if (aOrder !== bOrder) {
-          return aOrder - bOrder;
-        }
-        
-        // Fallback to sorting by name
-        return a.name.localeCompare(b.name);
-      });
-
-      const mappedCategories = sortedCategories.map(mapDbToCategory);
-      setCategories(mappedCategories);
-    } catch (err) {
-      console.error('Error fetching categories:', err);
-      setError(err instanceof Error ? err : new Error('Failed to fetch categories'));
+    } catch (error) {
+      console.error('Error fetching categories:', error);
       toast({
-        title: "Error",
-        description: "Failed to load categories.",
-        variant: "destructive",
+        title: 'Error',
+        description: 'Failed to load categories',
+        variant: 'destructive'
       });
     } finally {
       setLoading(false);
     }
   };
 
+  // Set up realtime subscription for category changes
   useEffect(() => {
     fetchCategories();
-
-    // Set up real-time subscription for category changes
-    const categoriesSubscription = supabase
-      .channel('public:categories')
+    
+    const channel = supabase
+      .channel('category-changes')
       .on(
         'postgres_changes',
         {
           event: '*',
           schema: 'public',
-          table: 'categories',
+          table: 'categories'
         },
         () => {
-          console.log('Categories changed, refreshing data');
+          console.log('CategoryManager: Detected category change, refreshing...');
           fetchCategories();
         }
       )
       .subscribe();
-
+      
     return () => {
-      supabase.removeChannel(categoriesSubscription);
+      supabase.removeChannel(channel);
     };
   }, []);
 
-  return { categories, loading, error, fetchCategories };
-}
+  return {
+    categories,
+    loading,
+    fetchCategories
+  };
+};
