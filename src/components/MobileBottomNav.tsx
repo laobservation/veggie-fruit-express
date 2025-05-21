@@ -1,7 +1,7 @@
 
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, ShoppingCart, Heart, MessageCircle } from 'lucide-react';
+import { Home, ShoppingCart, Heart, MessageSquare } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
 import { cn } from '@/lib/utils';
 import { useFavorites } from '@/hooks/use-favorites';
@@ -105,7 +105,7 @@ const MobileBottomNav: React.FC = () => {
           className="flex flex-col items-center justify-center text-gray-500"
         >
           <div className="flex items-center justify-center rounded-full w-8 h-8 mb-1 bg-green-500">
-            <MessageCircle className="h-4 w-4 text-white" />
+            <MessageSquare className="h-4 w-4 text-white" />
           </div>
           <span className="text-xs">Contact</span>
         </a>

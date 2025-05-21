@@ -2,7 +2,6 @@
 import { create } from 'zustand';
 import { Product } from '@/types/product';
 import { useEffect } from 'react';
-import { useToast } from "@/components/ui/use-toast";
 
 // Local storage key for favorites
 const FAVORITES_STORAGE_KEY = 'user_favorites';
@@ -123,27 +122,13 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
 // Create a React hook wrapper for the Zustand store
 export const useFavorites = () => {
   const store = useFavoritesStore();
-  const { toast } = useToast();
   
   // Fetch favorites when the hook is first used
   useEffect(() => {
     store.fetchFavorites();
   }, []);
   
-  // Enhanced toggleFavorite with toast notification
-  const toggleFavoriteWithToast = async (product: Product) => {
-    const isFav = store.isFavorite(product.id);
-    await store.toggleFavorite(product);
-    
-    toast({
-      title: isFav ? "Removed from favorites" : "Added to favorites",
-      description: isFav ? `${product.name} has been removed from your favorites` : `${product.name} has been added to your favorites`,
-      duration: 3000
-    });
-  };
-  
   return {
     ...store,
-    toggleFavorite: toggleFavoriteWithToast
   };
 };

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Product } from '@/types/product';
 import { ServiceOption } from '@/types/product';
@@ -35,10 +36,10 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
     }
   };
   return <div className="bg-white rounded-lg p-5 mb-4 shadow-sm mx-0 py-[12px] my-0 px-[12px]">
-      <div className="flex justify-between items-center mb-3">
-        <h1 className="text-2xl font-bold">{product.name}</h1>
-        <div className="text-right">
-          <span className="text-xl font-bold text-green-600 mx-0 text-center my-0 py-0">
+      <div className="flex flex-col items-center mb-3">
+        <h1 className="text-3xl font-bold text-gray-800 mb-2">{product.name}</h1>
+        <div className="text-center">
+          <span className="text-2xl font-bold text-green-600 block">
             {formatPrice(totalPrice)}
           </span>
         </div>
