@@ -79,7 +79,7 @@ export const addArabicText = (doc: jsPDF, text: string, x: number, y: number, op
   // Make sure we have text to process
   if (!text) return;
 
-  // Load the Arabic font if needed
+  // Use right-to-left alignment for Arabic text
   try {
     // Use right-to-left alignment for Arabic text
     const textOptions = { 

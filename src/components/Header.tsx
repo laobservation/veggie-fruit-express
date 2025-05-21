@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
-import { ShoppingCart, Menu, Phone, WhatsApp } from 'lucide-react';
+import { ShoppingCart, Menu, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Cart from './Cart';
 import MobileMenu from './MobileMenu';
@@ -82,7 +82,7 @@ const Header = () => {
               rel="noopener noreferrer"
               className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
             >
-              <WhatsApp className="h-4 w-4" />
+              <Phone className="h-4 w-4" />
               <span>Contact</span>
             </a>
           </div>
