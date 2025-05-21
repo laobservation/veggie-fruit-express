@@ -36,7 +36,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
   };
   return <div className="bg-white rounded-lg p-5 mb-4 shadow-sm mx-0 py-[12px] my-0 px-[12px]">
       <div className="flex flex-col items-center mb-3">
-        <h1 className="font-bold text-gray-800 mb-2 text-2xl">{product.name}</h1>
+        <h1 className="font-bold text-gray-800 mb-2 text-2xl text-center">{product.name}</h1>
         <div className="text-center">
           <span className="text-2xl font-bold text-green-600 block">
             {formatPrice(totalPrice)}
