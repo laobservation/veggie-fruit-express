@@ -1,4 +1,6 @@
 
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@300;400;500;600;700&display=swap');
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -92,6 +94,7 @@
 
   body {
     @apply bg-background text-foreground;
+    font-family: 'Rubik', sans-serif;
   }
 }
 
@@ -108,6 +111,12 @@
   .scrollbar-none::-webkit-scrollbar {
     display: none;
   }
+
+  /* Make sure Arabic text is displayed correctly */
+  .text-arabic {
+    direction: rtl;
+    font-family: 'Rubik', sans-serif;
+  }
 }
 
 .carousel {
@@ -120,4 +129,21 @@
 
 .carousel-item {
   @apply min-w-full;
+}
+
+/* Animation for bottom navigation icon active state */
+@keyframes nav-pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.nav-icon-pulse {
+  animation: nav-pulse 0.5s ease-in-out;
 }

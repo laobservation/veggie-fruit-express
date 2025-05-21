@@ -73,3 +73,25 @@ export const calculateItemTotalWithServices = (item: any) => {
     totalPrice
   };
 };
+
+// Add a utility function to handle Arabic text in PDF
+export const addArabicText = (doc: jsPDF, text: string, x: number, y: number, options?: any): void => {
+  // Make sure we have text to process
+  if (!text) return;
+
+  // Load the Arabic font if needed
+  try {
+    // Use right-to-left alignment for Arabic text
+    const textOptions = { 
+      align: 'right',
+      ...options
+    };
+
+    // Draw the text with RTL alignment
+    doc.text(text, x, y, textOptions);
+  } catch (err) {
+    console.error("Error adding Arabic text:", err);
+    // Fallback to standard text rendering
+    doc.text(text, x, y, options);
+  }
+};
