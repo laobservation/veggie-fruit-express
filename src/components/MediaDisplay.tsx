@@ -56,7 +56,7 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({
       loading={isHero ? "eager" : loading} // Use eager loading for hero/LCP images
       fetchPriority={isHero ? "high" : "auto"} // High priority fetch for LCP
       onError={(e) => {
-        (e.target as HTMLImageElement).src = '/images/placeholder.svg';
+        (e.target as HTMLImageElement).src = '/placeholder.svg';
       }}
     />
   );

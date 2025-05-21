@@ -16,7 +16,7 @@ const ProductActions: React.FC<ProductActionsProps> = ({
     <div className="fixed bottom-0 left-0 right-0 bg-white border-t p-4 flex items-center justify-between mb-20 md:mb-6 z-10">
       <Button 
         variant="outline" 
-        className="flex-1 mr-2 flex items-center justify-center gap-2 border-green-300 hover:bg-green-50" 
+        className="flex-1 mr-2 flex items-center justify-center gap-2 border-green-300 hover:bg-green-50 hover:shadow-md transition-all" 
         onClick={handleAddToCart}
       >
         <ShoppingCart className="h-5 w-5 text-green-600" />
@@ -28,7 +28,8 @@ const ProductActions: React.FC<ProductActionsProps> = ({
         onClick={handleBuyNow} 
         className="flex-1 ml-2 text-white bg-green-600 hover:bg-green-500 font-bold shadow-md hover:shadow-lg transition-all duration-300"
       >
-        Acheter-maintenant
+        <ShoppingBag className="h-5 w-5 mr-2" />
+        <span>Acheter maintenant</span>
       </Button>
     </div>
   );

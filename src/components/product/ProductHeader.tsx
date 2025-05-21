@@ -37,8 +37,8 @@ const ProductHeader: React.FC<ProductHeaderProps> = ({
           >
             <Heart 
               className={cn(
-                "h-5 w-5 transition-colors duration-300", 
-                favoriteStatus ? "fill-red-500 text-red-500" : "text-gray-500"
+                "h-5 w-5 transition-colors duration-300 heart-animation", 
+                favoriteStatus ? "fill-red-500 text-red-500 active" : "text-gray-500"
               )} 
             />
           </button>

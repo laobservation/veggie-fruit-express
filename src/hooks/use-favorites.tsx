@@ -55,6 +55,9 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
     } else {
       await get().addFavorite(product);
     }
+    
+    // Trigger animation via custom event
+    document.dispatchEvent(new CustomEvent('favorites-updated'));
   },
   
   addFavorite: async (product: Product) => {

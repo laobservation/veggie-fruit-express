@@ -100,7 +100,12 @@ const Cart: React.FC<CartProps> = ({
               {items.map((item, index) => (
                 <div key={`${item.product.id}-${index}`} className="flex py-4 border-b">
                   <div className="h-20 w-20 rounded overflow-hidden mr-4">
-                    <img src={item.product.image} alt={item.product.name} className="h-full w-full object-cover" />
+                    <img 
+                      src={item.product.image} 
+                      alt={item.product.name} 
+                      className="h-full w-full object-cover"
+                      loading="lazy"
+                    />
                   </div>
                   
                   <div className="flex-1">

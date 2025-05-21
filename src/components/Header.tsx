@@ -8,6 +8,7 @@ import Cart from './Cart';
 import MobileMenu from './MobileMenu';
 import { useIsMobile } from '@/hooks/use-mobile';
 import SearchBar from './SearchBar';
+import { useFavorites } from '@/hooks/use-favorites';
 
 const Header = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -18,6 +19,8 @@ const Header = () => {
     getTotalItems,
     openCart
   } = useCart();
+
+  const { favorites } = useFavorites();
   
   const isMobile = useIsMobile();
 
@@ -28,9 +31,21 @@ const Header = () => {
     }
   }, [isMobile, isMobileMenuOpen]);
 
+  useEffect(() => {
+    const handleCartUpdated = () => {
+      setIsAnimating(true);
+      setTimeout(() => setIsAnimating(false), 800);
+    };
+
+    document.addEventListener('cart-updated', handleCartUpdated);
+    return () => {
+      document.removeEventListener('cart-updated', handleCartUpdated);
+    };
+  }, []);
+
   const handleCartClick = () => {
     setIsAnimating(true);
-    setTimeout(() => setIsAnimating(false), 300);
+    setTimeout(() => setIsAnimating(false), 800);
     openCart();
   };
 
@@ -65,7 +80,13 @@ const Header = () => {
         {/* Center Logo */}
         <div className="absolute left-1/2 transform -translate-x-1/2 flex items-center justify-center">
           <Link to="/" className="flex items-center">
-            <img src="/lovable-uploads/4c234092-7248-4896-9d9b-9da5909ffbfb.png" alt="Marché Bio Logo" className="h-14 w-auto object-contain" />
+            <img 
+              src="/lovable-uploads/4c234092-7248-4896-9d9b-9da5909ffbfb.png" 
+              alt="Marché Bio Logo" 
+              className="h-14 w-auto object-contain"
+              loading="eager"
+              fetchPriority="high"
+            />
           </Link>
         </div>
         
@@ -89,11 +110,11 @@ const Header = () => {
           
           <button 
             onClick={handleCartClick} 
-            className={`relative rounded-full p-2 flex items-center bg-transparent ${isAnimating ? 'animate-bounce' : ''}`}
+            className="relative rounded-full p-2 flex items-center bg-transparent"
             aria-label="View cart"
           >
             <div className="relative">
-              <ShoppingCart className={`h-5 w-5 text-green-600 ${isAnimating ? 'animate-pulse' : ''}`} />
+              <ShoppingCart className={`h-5 w-5 text-green-600 ${isAnimating ? 'animate-bounce' : ''}`} />
               {getTotalItems() > 0 && (
                 <span className="absolute -top-2 -right-2 flex items-center justify-center bg-green-600 text-white rounded-full w-5 h-5 text-xs font-bold">
                   {getTotalItems()}

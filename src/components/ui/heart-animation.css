@@ -3,20 +3,38 @@
   transform-origin: center;
 }
 
-/* Removing animation */
 .heart-animation.active {
-  animation: none;
+  animation: heart-beat 0.6s ease-in-out;
 }
 
-/* Keep the keyframes definition but we won't use it */
 @keyframes heart-beat {
   0% {
     transform: scale(1);
   }
-  50% {
+  25% {
     transform: scale(1.3);
+  }
+  50% {
+    transform: scale(1);
+  }
+  75% {
+    transform: scale(1.2);
   }
   100% {
     transform: scale(1);
   }
+}
+
+/* For the bounce animation */
+@keyframes bounce {
+  0%, 100% { 
+    transform: translateY(0);
+  }
+  50% { 
+    transform: translateY(-10px);
+  }
+}
+
+.animate-bounce {
+  animation: bounce 0.6s ease-in-out;
 }

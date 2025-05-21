@@ -29,7 +29,6 @@ const ProductPage = () => {
     isPack,
     categoryText,
     serviceOptions,
-    categoryPath,
   } = useProductPage();
   
   // Show loading state or error if product not found
