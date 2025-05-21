@@ -93,6 +93,8 @@ const CartNotification: React.FC<CartNotificationProps> = ({
               src={product.image}
               alt={product.name}
               className="h-full w-full object-cover"
+              loading="eager"
+              fetchPriority="high"
             />
           </div>
           <div>

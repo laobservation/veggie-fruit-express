@@ -116,7 +116,7 @@ const Header = () => {
             <div className="relative">
               <ShoppingCart className={`h-5 w-5 text-green-600 ${isAnimating ? 'animate-bounce' : ''}`} />
               {getTotalItems() > 0 && (
-                <span className="absolute -top-1 -right-1 flex items-center justify-center bg-green-600 text-white rounded-full w-4 h-4 text-xs font-bold">
+                <span className="absolute -top-1 -right-1 flex items-center justify-center bg-green-600 text-white rounded-full w-4 h-4 text-[10px] font-bold">
                   {getTotalItems()}
                 </span>
               )}

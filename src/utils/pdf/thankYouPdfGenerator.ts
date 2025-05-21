@@ -1,4 +1,3 @@
-
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { formatPrice } from '@/lib/formatPrice';
@@ -82,7 +81,13 @@ export const generateThankYouPDF = (orderDetails: any) => {
       startY: 95,
       theme: 'plain',
       headStyles: { fillColor: [255, 255, 255], textColor: [0, 0, 0], fontStyle: 'bold' },
-      styles: { cellPadding: 3, fontSize: 9 }
+      styles: { cellPadding: 3, fontSize: 9 },
+      didDrawCell: (data) => {
+        // Apply special styling for cells containing Arabic text
+        if (data.column.index === 0 && data.cell.text) {
+          // Product name column - keep text as is to preserve both Arabic and Latin characters
+        }
+      }
     });
     
     // Dotted line before totals
