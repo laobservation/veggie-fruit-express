@@ -80,17 +80,28 @@ const Header = () => {
               href="http://wa.me/212649150370"
               target="_blank"
               rel="noopener noreferrer"
-              className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-full text-sm font-medium transition-colors"
+              className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:shadow-lg"
             >
               <Phone className="h-4 w-4" />
               <span>Contact</span>
             </a>
           </div>
           
-          <button onClick={handleCartClick} className={`relative rounded-full p-2 flex items-center bg-transparent ${isAnimating ? 'animate-bounce' : ''}`}>
-            <ShoppingCart className="h-5 w-5 text-green-600" />
-            <span className={`text-green-600 font-semibold ml-2 ${isAnimating ? 'scale-110 transition-transform' : ''}`}>
-              {getTotalItems() < 10 ? `0${getTotalItems()}` : getTotalItems()}
+          <button 
+            onClick={handleCartClick} 
+            className={`relative rounded-full p-2 flex items-center bg-transparent ${isAnimating ? 'animate-bounce' : ''}`}
+            aria-label="View cart"
+          >
+            <div className="relative">
+              <ShoppingCart className={`h-5 w-5 text-green-600 ${isAnimating ? 'animate-pulse' : ''}`} />
+              {getTotalItems() > 0 && (
+                <span className="absolute -top-2 -right-2 flex items-center justify-center bg-green-600 text-white rounded-full w-5 h-5 text-xs font-bold">
+                  {getTotalItems()}
+                </span>
+              )}
+            </div>
+            <span className="text-green-600 font-semibold ml-2 hidden md:inline-block">
+              Panier
             </span>
           </button>
         </div>

@@ -58,10 +58,10 @@ const MobileBottomNav: React.FC = () => {
           className="flex flex-col items-center justify-center text-gray-500" 
           onClick={handleCartClick}
         >
-          <div className={`flex items-center justify-center rounded-full w-8 h-8 mb-1 ${isAnimating ? 'animate-bounce' : ''}`}>
-            <ShoppingCart className="h-5 w-5" />
+          <div className="flex items-center justify-center rounded-full w-8 h-8 mb-1 relative">
+            <ShoppingCart className={`h-5 w-5 ${isAnimating ? 'animate-pulse' : ''}`} />
             {getTotalItems() > 0 && (
-              <span className={`absolute -top-1 -right-1 bg-green-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px] ${isAnimating ? 'scale-110 transition-transform' : ''}`}>
+              <span className="absolute -top-1 -right-1 bg-green-600 text-white rounded-full w-4 h-4 flex items-center justify-center text-[10px]">
                 {getTotalItems()}
               </span>
             )}

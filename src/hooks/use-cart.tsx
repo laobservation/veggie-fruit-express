@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Product } from '@/types/product';
@@ -83,6 +82,9 @@ export const useCart = create<CartState>()(
             notificationItem: { product, quantity, selectedServices }
           });
         }
+        
+        // Trigger animation effect
+        document.dispatchEvent(new CustomEvent('cart-updated'));
       },
       removeItem: (productId: string) => {
         const currentItems = get().items;
