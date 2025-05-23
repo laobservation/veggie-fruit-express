@@ -44,10 +44,11 @@ const Header = () => {
     };
   }, []);
 
-  const handleCartClick = () => {
+  const handleCartClick = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent default navigation
     setIsAnimating(true);
     setTimeout(() => setIsAnimating(false), 600);
-    openCart();
+    openCart(); // Call the openCart function from useCart hook
   };
 
   return (
@@ -111,7 +112,7 @@ const Header = () => {
           
           <button 
             onClick={handleCartClick} 
-            className="relative rounded-full p-2 flex items-center bg-transparent"
+            className="relative rounded-full p-2 flex items-center bg-transparent cursor-pointer"
             aria-label="View cart"
           >
             <div className="relative">

@@ -26,7 +26,10 @@ const MobileBottomNav = () => {
             <span className="text-xs mt-1 text-gray-600">Favoris</span>
           </Link>
           
-          <a href="#" onClick={handleCartClick} className="flex flex-col items-center relative">
+          <button 
+            onClick={handleCartClick} 
+            className="flex flex-col items-center relative bg-transparent border-none cursor-pointer"
+          >
             <ShoppingCart className="h-5 w-5 text-gray-600" />
             {getTotalItems() > 0 && (
               <span className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">
@@ -34,7 +37,7 @@ const MobileBottomNav = () => {
               </span>
             )}
             <span className="text-xs mt-1 text-gray-600">Panier</span>
-          </a>
+          </button>
           
           <Link to="/search" className="flex flex-col items-center">
             <Search className="h-5 w-5 text-gray-600" />
