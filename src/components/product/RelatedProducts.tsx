@@ -21,13 +21,11 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
   const [isPaused, setIsPaused] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
-  const totalSlides = Math.ceil(products.length / 3); // Changed to 3 items per slide
+  const itemsPerSlide = 3;
+  const totalSlides = Math.ceil(products.length / itemsPerSlide);
 
   useEffect(() => {
-    // Start autoplay for carousel
     startAutoplay();
-
-    // Cleanup on unmount
     return () => {
       if (autoplayRef.current) {
         clearInterval(autoplayRef.current);
@@ -40,17 +38,16 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
       clearInterval(autoplayRef.current);
     }
 
-    // Only start autoplay if we have enough products and it's not paused
-    if (products.length > 3 && !isPaused) { // Changed to 3
+    if (products.length > itemsPerSlide && !isPaused) {
       autoplayRef.current = setInterval(() => {
+        setCurrentSlide(prev => (prev + 1) % totalSlides);
         if (carouselRef.current) {
           const nextButton = carouselRef.current.querySelector('[aria-label="Next slide"]');
           if (nextButton && nextButton instanceof HTMLButtonElement) {
             nextButton.click();
-            setCurrentSlide(prev => (prev + 1) % totalSlides);
           }
         }
-      }, 5000); // Slide every 5 seconds
+      }, 4000);
     }
   };
 
@@ -91,41 +88,66 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
         });
       }
     }
+    // Restart autoplay after manual interaction
+    handlePause();
+    setTimeout(() => handleResume(), 1000);
   };
 
   if (products.length === 0) {
     return null;
   }
 
+  const canSlidePrev = totalSlides > 1;
+  const canSlideNext = totalSlides > 1;
+
   return (
     <div className="bg-white rounded-lg p-5 mb-20 shadow-sm">
       <div className="flex justify-between items-center mb-4">
         <h2 className="font-semibold text-lg px-0 mx-0 my-0 py-[6px]">Autres {categoryText}</h2>
         
-        <div className="flex items-center gap-2">
-          <div className="mr-3 flex gap-1">
+        <div className="flex items-center gap-3">
+          {/* Slide indicators */}
+          <div className="flex gap-1">
             {Array.from({ length: totalSlides }).map((_, i) => (
-              <div 
-                key={i} 
-                className={`h-1.5 w-1.5 rounded-full ${i === currentSlide ? 'bg-green-500' : 'bg-gray-300'}`}
+              <button
+                key={i}
+                onClick={() => {
+                  setCurrentSlide(i);
+                  // Manual navigation to specific slide would require more complex carousel control
+                }}
+                className={`h-2 w-2 rounded-full transition-all duration-200 ${
+                  i === currentSlide ? 'bg-green-500 w-4' : 'bg-gray-300'
+                }`}
               />
             ))}
           </div>
           
-          <button 
-            onClick={() => handleManualSlide('prev')} 
-            className="p-1 rounded-full border border-gray-300 hover:bg-gray-100"
-            aria-label="Previous products"
-          >
-            <ChevronLeft size={16} />
-          </button>
-          <button 
-            onClick={() => handleManualSlide('next')} 
-            className="p-1 rounded-full border border-gray-300 hover:bg-gray-100"
-            aria-label="Next products"
-          >
-            <ChevronRight size={16} />
-          </button>
+          <div className="flex gap-2">
+            <button 
+              onClick={() => handleManualSlide('prev')} 
+              disabled={!canSlidePrev}
+              className={`p-2 rounded-full border-2 transition-all duration-200 ${
+                canSlidePrev
+                  ? 'border-green-500 text-green-600 hover:bg-green-50 hover:scale-110 shadow-sm hover:shadow-md'
+                  : 'border-gray-300 text-gray-400 cursor-not-allowed'
+              }`}
+              aria-label="Previous products"
+            >
+              <ChevronLeft size={16} />
+            </button>
+            <button 
+              onClick={() => handleManualSlide('next')} 
+              disabled={!canSlideNext}
+              className={`p-2 rounded-full border-2 transition-all duration-200 ${
+                canSlideNext
+                  ? 'border-green-500 text-green-600 hover:bg-green-50 hover:scale-110 shadow-sm hover:shadow-md'
+                  : 'border-gray-300 text-gray-400 cursor-not-allowed'
+              }`}
+              aria-label="Next products"
+            >
+              <ChevronRight size={16} />
+            </button>
+          </div>
         </div>
       </div>
       
@@ -137,31 +159,35 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
         onTouchEnd={handleResume}
         className="relative"
       >
-        <Carousel opts={{
-          align: "start",
-          loop: true,
-          slidesToScroll: 3, // Changed to 3
-        }}>
+        <Carousel 
+          opts={{
+            align: "start",
+            loop: true,
+            slidesToScroll: itemsPerSlide,
+          }}
+        >
           <CarouselContent>
-            {products.map(relatedProduct => (
-              <CarouselItem key={relatedProduct.id} className="basis-1/3"> {/* Changed to 1/3 */}
-                <div className="cursor-pointer relative p-1" onClick={() => handleProductClick(relatedProduct.id)}>
-                  <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden">
+            {products.map((relatedProduct) => (
+              <CarouselItem key={relatedProduct.id} className="basis-1/3">
+                <div 
+                  className="cursor-pointer relative p-1 hover:scale-105 transition-all duration-200" 
+                  onClick={() => handleProductClick(relatedProduct.id)}
+                >
+                  <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
                     <img 
                       src={relatedProduct.image} 
                       alt={relatedProduct.name} 
                       className="w-full h-full object-cover"
-                      loading="lazy" 
+                      loading="lazy"
+                      decoding="async"
                     />
                   </div>
-                  {/* Product name */}
                   <div className="mt-2 text-sm font-medium text-center truncate">
                     {relatedProduct.name}
                   </div>
-                  {/* Add quick-add button */}
                   <button 
-                    className="absolute bottom-2 right-2 p-1 bg-green-500 rounded-full shadow-md hover:bg-green-600 transition-colors" 
-                    onClick={e => handleAddToCart(e, relatedProduct)} 
+                    className="absolute bottom-2 right-2 p-2 bg-green-500 rounded-full shadow-md hover:bg-green-600 transition-all duration-200 hover:scale-110" 
+                    onClick={(e) => handleAddToCart(e, relatedProduct)} 
                     aria-label="Ajouter au panier"
                   >
                     <Plus className="h-4 w-4 text-white" />
@@ -175,16 +201,6 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
             <CarouselNext className="right-0" />
           </div>
         </Carousel>
-        
-        {/* Swipe hint animation - moved to right white space */}
-        {products.length > 3 && !isPaused && (
-          <div className="absolute top-1/2 right-8 transform -translate-y-1/2 animate-pulse">
-            <div className="flex items-center gap-1">
-              <div className="w-1.5 h-1.5 bg-gray-400 rounded-full"></div>
-              <ChevronRight size={16} className="text-gray-400 animate-bounce" />
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );

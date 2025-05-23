@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Product } from '@/types/product';
 import { formatPrice } from '@/lib/formatPrice';
@@ -7,6 +8,7 @@ import { useCart } from '@/hooks/use-cart';
 import { useFavorites } from '@/hooks/use-favorites';
 import '@/components/ui/plus-animation.css';
 import { Button } from '@/components/ui/button';
+
 interface PopularItemsSectionProps {
   products: Product[];
   isLoading: boolean;
@@ -14,6 +16,7 @@ interface PopularItemsSectionProps {
   title: string;
   category?: string;
 }
+
 const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
   products,
   isLoading,
@@ -21,89 +24,190 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
   title,
   category
 }) => {
-  const {
-    addItem
-  } = useCart();
-  const {
-    isFavorite,
-    toggleFavorite
-  } = useFavorites();
+  const { addItem } = useCart();
+  const { isFavorite, toggleFavorite } = useFavorites();
   const [displayCount, setDisplayCount] = useState(4);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   // Sort products with newest first if showing all
   const sortedProducts = [...products].sort((a, b) => {
-    // Assuming products have some sort of timestamp or ID that reflects order
-    return Number(b.id) - Number(a.id); // Newest first based on ID
+    return Number(b.id) - Number(a.id);
   });
 
   // Filter products by category if specified
   const filteredProducts = category ? sortedProducts.filter(product => product.category === category) : sortedProducts;
 
-  // Determine how many products to display
-  const displayProducts = filteredProducts.slice(0, displayCount);
+  // For sliding functionality, we work with all products but display 4 at a time
+  const itemsPerSlide = 4;
+  const totalSlides = Math.ceil(filteredProducts.length / itemsPerSlide);
+  
+  // Get current slide products
+  const currentSlideProducts = filteredProducts.slice(
+    currentSlide * itemsPerSlide,
+    (currentSlide + 1) * itemsPerSlide
+  );
+
   const hasMoreProducts = displayCount < filteredProducts.length;
+
   const handleAddToCart = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
-
-    // Add item immediately without animation
     addItem(product);
   };
+
   const handleFavoriteClick = (e: React.MouseEvent, product: Product) => {
     e.preventDefault();
     e.stopPropagation();
     toggleFavorite(product);
   };
+
   const handleShowMore = () => {
     setDisplayCount(prev => prev + 4);
   };
+
+  const handlePrevSlide = () => {
+    setCurrentSlide(prev => prev === 0 ? totalSlides - 1 : prev - 1);
+  };
+
+  const handleNextSlide = () => {
+    setCurrentSlide(prev => (prev + 1) % totalSlides);
+  };
+
+  // Auto-slide functionality
+  useEffect(() => {
+    if (filteredProducts.length <= itemsPerSlide) return;
+
+    const interval = setInterval(() => {
+      setCurrentSlide(prev => (prev + 1) % totalSlides);
+    }, 5000);
+
+    return () => clearInterval(interval);
+  }, [filteredProducts.length, totalSlides, itemsPerSlide]);
+
   if (filteredProducts.length === 0 && category) {
-    return null; // Don't render the section if there are no products for this category
+    return null;
   }
-  return <div className="mb-8 px-4 md:px-0">
+
+  const canSlidePrev = totalSlides > 1;
+  const canSlideNext = totalSlides > 1;
+
+  return (
+    <div className="mb-8 px-4 md:px-0">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-800">{title} :</h2>
         <div className="flex gap-2">
-          <button className="p-1 rounded-full border border-gray-300 text-gray-600">
+          <button 
+            onClick={handlePrevSlide}
+            disabled={!canSlidePrev}
+            className={`p-2 rounded-full border-2 transition-all duration-200 ${
+              canSlidePrev 
+                ? 'border-green-500 text-green-600 hover:bg-green-50 hover:scale-110 shadow-sm hover:shadow-md' 
+                : 'border-gray-300 text-gray-400 cursor-not-allowed'
+            }`}
+          >
             <ChevronLeft size={18} />
           </button>
-          <button className="p-1 rounded-full border border-gray-300 text-gray-600">
+          <button 
+            onClick={handleNextSlide}
+            disabled={!canSlideNext}
+            className={`p-2 rounded-full border-2 transition-all duration-200 ${
+              canSlideNext 
+                ? 'border-green-500 text-green-600 hover:bg-green-50 hover:scale-110 shadow-sm hover:shadow-md' 
+                : 'border-gray-300 text-gray-400 cursor-not-allowed'
+            }`}
+          >
             <ChevronRight size={18} />
           </button>
         </div>
       </div>
+
+      {/* Slide indicators */}
+      {totalSlides > 1 && (
+        <div className="flex justify-center mb-4 gap-2">
+          {Array.from({ length: totalSlides }).map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentSlide(index)}
+              className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                index === currentSlide ? 'bg-green-500 w-6' : 'bg-gray-300'
+              }`}
+            />
+          ))}
+        </div>
+      )}
       
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {isLoading ? Array(4).fill(0).map((_, index) => <div key={index} className="bg-white p-4 rounded-lg shadow-sm animate-pulse">
+      <div 
+        ref={containerRef}
+        className="grid grid-cols-2 md:grid-cols-4 gap-3 transition-all duration-500 ease-in-out"
+      >
+        {isLoading ? (
+          Array(4).fill(0).map((_, index) => (
+            <div key={index} className="bg-white p-4 rounded-lg shadow-sm animate-pulse">
               <div className="w-full h-28 bg-gray-200 rounded mb-3"></div>
               <div className="h-4 bg-gray-200 rounded mb-2"></div>
               <div className="h-4 bg-gray-200 rounded w-1/2"></div>
-            </div>) : displayProducts.map(product => <Link key={product.id} to={`/product/${product.id}`} className="bg-white p-4 rounded-lg shadow-sm relative mx-0 my-0 px-[8px] py-[8px]">
-            <button onClick={e => handleFavoriteClick(e, product)} className="absolute top-2 right-2 p-1 rounded-full bg-white/80 z-10">
-              <Heart className={`h-4 w-4 ${isFavorite(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-400'}`} />
-            </button>
-            <div className="flex justify-center mb-3 text-green-500 bg-white px-0 py-0">
-              <img src={product.image} alt={product.name} className="h-28 object-cover" />
             </div>
-            <div className="flex flex-col items-center">
-              <h3 className="text-sm font-medium mb-1 text-center">{product.name}</h3>
-              <div className="flex items-baseline justify-center mb-2">
-                <span className="text-sm text-gray-500 mr-1">{product.unit}</span>
-                <span className="text-sm text-gray-500 mr-1">/</span>
-                <span className="text-lg font-bold text-green-600">{formatPrice(product.price)}</span>
-              </div>
-              <button onClick={e => handleAddToCart(e, product)} aria-label="Ajouter au panier" className="bg-green-500 rounded-full flex items-center px-[15px] mx-0 my-0 py-[5px]">
-                <span className="text-white font-bold text-xs">Ajouter au panier</span>
+          ))
+        ) : (
+          currentSlideProducts.map((product) => (
+            <Link 
+              key={product.id} 
+              to={`/product/${product.id}`} 
+              className="bg-white p-4 rounded-lg shadow-sm relative mx-0 my-0 px-[8px] py-[8px] hover:shadow-md transition-all duration-200 hover:scale-105"
+            >
+              <button 
+                onClick={(e) => handleFavoriteClick(e, product)} 
+                className="absolute top-2 right-2 p-1 rounded-full bg-white/80 z-10 hover:bg-white transition-all duration-200"
+              >
+                <Heart 
+                  className={`h-4 w-4 transition-all duration-200 ${
+                    isFavorite(product.id) ? 'fill-red-500 text-red-500' : 'text-gray-400'
+                  }`} 
+                />
               </button>
-            </div>
-          </Link>)}
+              <div className="flex justify-center mb-3 text-green-500 bg-white px-0 py-0">
+                <img 
+                  src={product.image} 
+                  alt={product.name} 
+                  className="h-28 object-cover"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </div>
+              <div className="flex flex-col items-center">
+                <h3 className="text-sm font-medium mb-1 text-center">{product.name}</h3>
+                <div className="flex items-baseline justify-center mb-2">
+                  <span className="text-sm text-gray-500 mr-1">{product.unit}</span>
+                  <span className="text-sm text-gray-500 mr-1">/</span>
+                  <span className="text-lg font-bold text-green-600">{formatPrice(product.price)}</span>
+                </div>
+                <button 
+                  onClick={(e) => handleAddToCart(e, product)} 
+                  aria-label="Ajouter au panier" 
+                  className="bg-green-500 rounded-full flex items-center px-[15px] mx-0 my-0 py-[5px] hover:bg-green-600 transition-all duration-200 hover:scale-105"
+                >
+                  <span className="text-white font-bold text-xs">Ajouter au panier</span>
+                </button>
+              </div>
+            </Link>
+          ))
+        )}
       </div>
       
-      {hasMoreProducts && <div className="flex justify-center mt-4">
-          <Button onClick={handleShowMore} variant="outline" className="border-green-500 text-base font-medium rounded-2xl bg-white text-green-500">
+      {hasMoreProducts && !showAll && (
+        <div className="flex justify-center mt-4">
+          <Button 
+            onClick={handleShowMore} 
+            variant="outline" 
+            className="border-green-500 text-base font-medium rounded-2xl bg-white text-green-500 hover:bg-green-50 transition-all duration-200 hover:scale-105"
+          >
             Afficher plus
           </Button>
-        </div>}
-    </div>;
+        </div>
+      )}
+    </div>
+  );
 };
+
 export default PopularItemsSection;

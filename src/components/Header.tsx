@@ -14,6 +14,7 @@ const Header = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [quantityAnimating, setQuantityAnimating] = useState(false);
   
   const {
     getTotalItems,
@@ -34,7 +35,9 @@ const Header = () => {
   useEffect(() => {
     const handleCartUpdated = () => {
       setIsAnimating(true);
-      setTimeout(() => setIsAnimating(false), 800);
+      setQuantityAnimating(true);
+      setTimeout(() => setIsAnimating(false), 600);
+      setTimeout(() => setQuantityAnimating(false), 800);
     };
 
     document.addEventListener('cart-updated', handleCartUpdated);
@@ -45,7 +48,7 @@ const Header = () => {
 
   const handleCartClick = () => {
     setIsAnimating(true);
-    setTimeout(() => setIsAnimating(false), 800);
+    setTimeout(() => setIsAnimating(false), 600);
     openCart();
   };
 
@@ -114,9 +117,9 @@ const Header = () => {
             aria-label="View cart"
           >
             <div className="relative">
-              <ShoppingCart className={`h-5 w-5 text-green-600 ${isAnimating ? 'animate-bounce' : ''}`} />
+              <ShoppingCart className={`h-5 w-5 text-green-600 transition-transform duration-300 ${isAnimating ? 'animate-pulse scale-110' : ''}`} />
               {getTotalItems() > 0 && (
-                <span className="absolute -top-1 -right-1 flex items-center justify-center bg-green-600 text-white rounded-full w-4 h-4 text-[10px] font-bold">
+                <span className={`absolute -top-2 -right-2 flex items-center justify-center bg-red-500 text-white rounded-full w-5 h-5 text-[10px] font-bold shadow-lg transition-all duration-300 ${quantityAnimating ? 'animate-bounce scale-125' : ''}`}>
                   {getTotalItems()}
                 </span>
               )}
