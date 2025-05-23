@@ -33,7 +33,6 @@ const ProductGrid: React.FC<ProductGridProps> = ({ products, title, isLoading = 
             <ProductCard 
               key={product.id} 
               product={product} 
-              discountPercentage={0} // Default to 0 since 'discount' doesn't exist on Product
             />
           ))}
         </div>
