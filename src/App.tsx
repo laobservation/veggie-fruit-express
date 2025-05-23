@@ -14,6 +14,7 @@ import { CartNotificationProvider } from '@/hooks/use-cart';
 import { Toaster } from "@/components/ui/sonner";
 import FavoritesPage from '@/pages/FavoritesPage';
 import Cart from '@/components/Cart';
+import SocialMediaSticky from '@/components/SocialMediaSticky';
 
 // Admin Route Protection Component
 const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
@@ -33,10 +34,12 @@ function App() {
     <CartNotificationProvider>
       <div className="flex flex-col min-h-screen">
         <Toaster position="bottom-right" />
+        <SocialMediaSticky />
         <div className="flex-grow">
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/product/:productId" element={<ProductPage />} />
+            <Route path="/product/:productId/:slug" element={<ProductPage />} />
             <Route path="/category/:categoryId" element={<CategoryPage />} />
             <Route path="/favorites" element={<FavoritesPage />} />
             <Route path="/thank-you" element={<ThankYouPage />} />

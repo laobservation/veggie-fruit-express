@@ -4,7 +4,8 @@ import { Product } from '@/types/product';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/hooks/use-cart';
 import { ChevronLeft, ChevronRight, Plus } from 'lucide-react';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious, CarouselApi } from "@/components/ui/carousel";
+import { useEffect } from 'react';
 
 interface RelatedProductsProps {
   products: Product[];
@@ -17,10 +18,22 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
 }) => {
   const navigate = useNavigate();
   const { addItem } = useCart();
-  const carouselRef = useRef<HTMLDivElement>(null);
-  const [currentSlide, setCurrentSlide] = useState(0);
-  const itemsPerSlide = 3;
-  const totalSlides = Math.ceil(products.length / itemsPerSlide);
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    if (!api) {
+      return;
+    }
+
+    setCount(api.scrollSnapList().length);
+    setCurrent(api.selectedScrollSnap() + 1);
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap() + 1);
+    });
+  }, [api]);
 
   const handleAddToCart = (e: React.MouseEvent, product: Product) => {
     e.stopPropagation();
@@ -28,32 +41,34 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
     addItem(product);
   };
 
-  const handleProductClick = (productId: string) => {
-    navigate(`/product/${productId}`);
+  const handleProductClick = (productId: string, productName: string) => {
+    const slug = productName.toLowerCase()
+      .replace(/[àáâãäå]/g, 'a')
+      .replace(/[èéêë]/g, 'e')
+      .replace(/[ìíîï]/g, 'i')
+      .replace(/[òóôõö]/g, 'o')
+      .replace(/[ùúûü]/g, 'u')
+      .replace(/[ç]/g, 'c')
+      .replace(/[^a-z0-9]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '');
+    navigate(`/product/${productId}/${slug}`);
   };
 
-  const handleManualSlide = (direction: 'prev' | 'next') => {
-    if (carouselRef.current) {
-      const button = carouselRef.current.querySelector(`[aria-label="${direction === 'prev' ? 'Previous slide' : 'Next slide'}"]`);
-      if (button && button instanceof HTMLButtonElement) {
-        button.click();
-        setCurrentSlide(prev => {
-          if (direction === 'prev') {
-            return prev === 0 ? totalSlides - 1 : prev - 1;
-          } else {
-            return (prev + 1) % totalSlides;
-          }
-        });
-      }
-    }
+  const scrollPrev = () => {
+    api?.scrollPrev();
+  };
+
+  const scrollNext = () => {
+    api?.scrollNext();
   };
 
   if (products.length === 0) {
     return null;
   }
 
-  const canSlidePrev = totalSlides > 1;
-  const canSlideNext = totalSlides > 1;
+  const canScrollPrev = current > 1;
+  const canScrollNext = current < count;
 
   return (
     <div className="bg-white rounded-lg p-5 mb-20 shadow-sm">
@@ -63,15 +78,12 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
         <div className="flex items-center gap-3">
           {/* Slide indicators */}
           <div className="flex gap-1">
-            {Array.from({ length: totalSlides }).map((_, i) => (
+            {Array.from({ length: count }).map((_, i) => (
               <button
                 key={i}
-                onClick={() => {
-                  setCurrentSlide(i);
-                  // Manual navigation to specific slide would require more complex carousel control
-                }}
+                onClick={() => api?.scrollTo(i)}
                 className={`h-2 w-2 rounded-full transition-all duration-200 ${
-                  i === currentSlide ? 'bg-green-500 w-4' : 'bg-gray-300'
+                  i === current - 1 ? 'bg-green-500 w-4' : 'bg-gray-300'
                 }`}
               />
             ))}
@@ -79,10 +91,10 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
           
           <div className="flex gap-2">
             <button 
-              onClick={() => handleManualSlide('prev')} 
-              disabled={!canSlidePrev}
+              onClick={scrollPrev} 
+              disabled={!canScrollPrev}
               className={`p-1.5 rounded-full border-2 transition-all duration-200 ${
-                canSlidePrev
+                canScrollPrev
                   ? 'border-green-500 text-green-600 hover:bg-green-50 hover:scale-110 shadow-sm hover:shadow-md'
                   : 'border-gray-300 text-gray-400 cursor-not-allowed'
               }`}
@@ -91,10 +103,10 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
               <ChevronLeft size={16} />
             </button>
             <button 
-              onClick={() => handleManualSlide('next')} 
-              disabled={!canSlideNext}
+              onClick={scrollNext} 
+              disabled={!canScrollNext}
               className={`p-1.5 rounded-full border-2 transition-all duration-200 ${
-                canSlideNext
+                canScrollNext
                   ? 'border-green-500 text-green-600 hover:bg-green-50 hover:scale-110 shadow-sm hover:shadow-md'
                   : 'border-gray-300 text-gray-400 cursor-not-allowed'
               }`}
@@ -106,15 +118,12 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
         </div>
       </div>
       
-      <div 
-        ref={carouselRef} 
-        className="relative"
-      >
+      <div className="relative">
         <Carousel 
+          setApi={setApi}
           opts={{
             align: "start",
-            loop: true,
-            slidesToScroll: itemsPerSlide,
+            loop: false,
           }}
         >
           <CarouselContent>
@@ -122,7 +131,7 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
               <CarouselItem key={relatedProduct.id} className="basis-1/3">
                 <div 
                   className="cursor-pointer relative p-1 hover:scale-105 transition-all duration-200" 
-                  onClick={() => handleProductClick(relatedProduct.id)}
+                  onClick={() => handleProductClick(relatedProduct.id, relatedProduct.name)}
                 >
                   <div className="aspect-square bg-gray-50 rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all duration-200">
                     <img 
@@ -147,10 +156,6 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
               </CarouselItem>
             ))}
           </CarouselContent>
-          <div className="hidden">
-            <CarouselPrevious className="left-0" />
-            <CarouselNext className="right-0" />
-          </div>
         </Carousel>
       </div>
     </div>

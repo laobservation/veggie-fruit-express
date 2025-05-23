@@ -117,9 +117,9 @@ const Header = () => {
             aria-label="View cart"
           >
             <div className="relative">
-              <ShoppingCart className={`h-5 w-5 text-green-600 transition-transform duration-300 ${isAnimating ? 'animate-pulse scale-110' : ''}`} />
+              <ShoppingCart className={`h-5 w-5 text-green-600 transition-transform duration-300 ${isAnimating ? 'animate-bounce scale-125' : ''}`} />
               {getTotalItems() > 0 && (
-                <span className={`absolute -top-2 -right-2 flex items-center justify-center bg-red-500 text-white rounded-full w-5 h-5 text-[10px] font-bold shadow-lg transition-all duration-300 ${quantityAnimating ? 'animate-bounce scale-125' : ''}`}>
+                <span className={`absolute -top-3 -right-3 flex items-center justify-center bg-red-500 text-white rounded-full w-6 h-6 text-xs font-bold shadow-lg transition-all duration-300 ${quantityAnimating ? 'animate-pulse scale-110' : ''}`}>
                   {getTotalItems()}
                 </span>
               )}

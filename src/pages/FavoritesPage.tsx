@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react';
 import { useFavorites } from '@/hooks/use-favorites';
 import Header from '@/components/Header';
-import Footer from '@/components/Footer';
+import MobileBottomNav from '@/components/MobileBottomNav';
 import ProductCard from '@/components/ProductCard';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -22,8 +22,8 @@ const FavoritesPage: React.FC = () => {
   const handleClearAll = async () => {
     await clearFavorites();
     toast({
-      title: "Favorites cleared",
-      description: "All items have been removed from your favorites",
+      title: "Favoris effacés",
+      description: "Tous les articles ont été supprimés de vos favoris",
       duration: 3000
     });
   };
@@ -31,25 +31,25 @@ const FavoritesPage: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
-      <main className="flex-grow container mx-auto px-4 py-6">
+      <main className="flex-grow container mx-auto px-4 py-6 pb-32">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">My Favorites</h1>
+          <h1 className="text-2xl font-bold">Mes Favoris</h1>
           {favorites.length > 0 && (
             <Button 
               variant="outline" 
               onClick={handleClearAll}
               className="text-red-500 border-red-500 hover:bg-red-50"
             >
-              Clear All
+              Tout effacer
             </Button>
           )}
         </div>
         
         {favorites.length === 0 ? (
           <div className="text-center py-10">
-            <p className="text-gray-500 mb-6">You haven't added any favorites yet</p>
+            <p className="text-gray-500 mb-6">Vous n'avez ajouté aucun favori pour le moment</p>
             <Button onClick={() => navigate('/')} className="bg-green-500 hover:bg-green-600">
-              Browse Products
+              Parcourir les produits
             </Button>
           </div>
         ) : (
@@ -60,7 +60,7 @@ const FavoritesPage: React.FC = () => {
           </div>
         )}
       </main>
-      <Footer />
+      <MobileBottomNav />
     </div>
   );
 };
