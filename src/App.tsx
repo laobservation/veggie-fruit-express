@@ -10,11 +10,13 @@ import AdminPage from '@/pages/AdminPage';
 import AdminAuthPage from '@/pages/AdminAuthPage';
 import AdminSliderPage from '@/pages/AdminSliderPage';
 import AdminSettingsPage from '@/pages/AdminSettingsPage';
+import AdminSeoPage from '@/pages/AdminSeoPage';
 import { CartNotificationProvider } from '@/hooks/use-cart';
 import { Toaster } from "@/components/ui/sonner";
 import FavoritesPage from '@/pages/FavoritesPage';
 import Cart from '@/components/Cart';
 import SocialMediaSticky from '@/components/SocialMediaSticky';
+import SeoHead from '@/components/SeoHead';
 
 // Admin Route Protection Component
 const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
@@ -33,6 +35,7 @@ function App() {
   return (
     <CartNotificationProvider>
       <div className="flex flex-col min-h-screen">
+        <SeoHead />
         <Toaster position="bottom-right" />
         <SocialMediaSticky />
         <div className="flex-grow">
@@ -59,6 +62,11 @@ function App() {
             <Route path="/admin/settings" element={
               <ProtectedAdminRoute>
                 <AdminSettingsPage />
+              </ProtectedAdminRoute>
+            } />
+            <Route path="/admin/seo" element={
+              <ProtectedAdminRoute>
+                <AdminSeoPage />
               </ProtectedAdminRoute>
             } />
             

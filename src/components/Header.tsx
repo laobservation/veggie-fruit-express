@@ -4,14 +4,12 @@ import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
 import { ShoppingCart, Menu, Phone } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import Cart from './Cart';
 import MobileMenu from './MobileMenu';
 import { useIsMobile } from '@/hooks/use-mobile';
 import SearchBar from './SearchBar';
 import { useFavorites } from '@/hooks/use-favorites';
 
 const Header = () => {
-  const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [quantityAnimating, setQuantityAnimating] = useState(false);
