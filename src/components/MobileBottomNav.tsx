@@ -1,12 +1,14 @@
 
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Heart, Grid3X3, MessageCircle } from 'lucide-react';
+import { Home, Heart, ShoppingCart, MessageCircle } from 'lucide-react';
 import { useFavorites } from '@/hooks/use-favorites';
+import { useCart } from '@/hooks/use-cart';
 
 const MobileBottomNav = () => {
   const location = useLocation();
   const { favorites } = useFavorites();
+  const { getTotalItems } = useCart();
 
   const isActive = (path: string) => {
     if (path === '/') {
@@ -28,9 +30,10 @@ const MobileBottomNav = () => {
       badge: favorites.length > 0 ? favorites.length : null
     },
     { 
-      path: '/category/all', 
-      icon: Grid3X3, 
-      label: 'Catégories' 
+      path: '/cart', 
+      icon: ShoppingCart, 
+      label: 'Panier',
+      badge: getTotalItems() > 0 ? getTotalItems() : null
     },
     { 
       path: 'http://wa.me/212649150370', 

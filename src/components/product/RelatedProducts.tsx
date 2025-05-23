@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Product } from '@/types/product';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '@/hooks/use-cart';
@@ -17,52 +17,10 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
 }) => {
   const navigate = useNavigate();
   const { addItem } = useCart();
-  const autoplayRef = useRef<NodeJS.Timeout | null>(null);
-  const [isPaused, setIsPaused] = useState(false);
   const carouselRef = useRef<HTMLDivElement>(null);
   const [currentSlide, setCurrentSlide] = useState(0);
   const itemsPerSlide = 3;
   const totalSlides = Math.ceil(products.length / itemsPerSlide);
-
-  useEffect(() => {
-    startAutoplay();
-    return () => {
-      if (autoplayRef.current) {
-        clearInterval(autoplayRef.current);
-      }
-    };
-  }, [products]);
-
-  const startAutoplay = () => {
-    if (autoplayRef.current) {
-      clearInterval(autoplayRef.current);
-    }
-
-    if (products.length > itemsPerSlide && !isPaused) {
-      autoplayRef.current = setInterval(() => {
-        setCurrentSlide(prev => (prev + 1) % totalSlides);
-        if (carouselRef.current) {
-          const nextButton = carouselRef.current.querySelector('[aria-label="Next slide"]');
-          if (nextButton && nextButton instanceof HTMLButtonElement) {
-            nextButton.click();
-          }
-        }
-      }, 4000);
-    }
-  };
-
-  const handlePause = () => {
-    setIsPaused(true);
-    if (autoplayRef.current) {
-      clearInterval(autoplayRef.current);
-      autoplayRef.current = null;
-    }
-  };
-
-  const handleResume = () => {
-    setIsPaused(false);
-    startAutoplay();
-  };
 
   const handleAddToCart = (e: React.MouseEvent, product: Product) => {
     e.stopPropagation();
@@ -88,9 +46,6 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
         });
       }
     }
-    // Restart autoplay after manual interaction
-    handlePause();
-    setTimeout(() => handleResume(), 1000);
   };
 
   if (products.length === 0) {
@@ -126,7 +81,7 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
             <button 
               onClick={() => handleManualSlide('prev')} 
               disabled={!canSlidePrev}
-              className={`p-2 rounded-full border-2 transition-all duration-200 ${
+              className={`p-1.5 rounded-full border-2 transition-all duration-200 ${
                 canSlidePrev
                   ? 'border-green-500 text-green-600 hover:bg-green-50 hover:scale-110 shadow-sm hover:shadow-md'
                   : 'border-gray-300 text-gray-400 cursor-not-allowed'
@@ -138,7 +93,7 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
             <button 
               onClick={() => handleManualSlide('next')} 
               disabled={!canSlideNext}
-              className={`p-2 rounded-full border-2 transition-all duration-200 ${
+              className={`p-1.5 rounded-full border-2 transition-all duration-200 ${
                 canSlideNext
                   ? 'border-green-500 text-green-600 hover:bg-green-50 hover:scale-110 shadow-sm hover:shadow-md'
                   : 'border-gray-300 text-gray-400 cursor-not-allowed'
@@ -153,10 +108,6 @@ const RelatedProducts: React.FC<RelatedProductsProps> = ({
       
       <div 
         ref={carouselRef} 
-        onMouseEnter={handlePause} 
-        onMouseLeave={handleResume} 
-        onTouchStart={handlePause} 
-        onTouchEnd={handleResume}
         className="relative"
       >
         <Carousel 

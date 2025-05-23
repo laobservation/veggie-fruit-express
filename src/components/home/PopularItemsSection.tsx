@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Product } from '@/types/product';
 import { formatPrice } from '@/lib/formatPrice';
@@ -74,17 +74,6 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
     setCurrentSlide(prev => (prev + 1) % totalSlides);
   };
 
-  // Auto-slide functionality
-  useEffect(() => {
-    if (filteredProducts.length <= itemsPerSlide) return;
-
-    const interval = setInterval(() => {
-      setCurrentSlide(prev => (prev + 1) % totalSlides);
-    }, 5000);
-
-    return () => clearInterval(interval);
-  }, [filteredProducts.length, totalSlides, itemsPerSlide]);
-
   if (filteredProducts.length === 0 && category) {
     return null;
   }
@@ -100,24 +89,26 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
           <button 
             onClick={handlePrevSlide}
             disabled={!canSlidePrev}
-            className={`p-2 rounded-full border-2 transition-all duration-200 ${
+            className={`p-1.5 rounded-full border-2 transition-all duration-200 ${
               canSlidePrev 
                 ? 'border-green-500 text-green-600 hover:bg-green-50 hover:scale-110 shadow-sm hover:shadow-md' 
                 : 'border-gray-300 text-gray-400 cursor-not-allowed'
             }`}
+            aria-label="Previous products"
           >
-            <ChevronLeft size={18} />
+            <ChevronLeft size={16} />
           </button>
           <button 
             onClick={handleNextSlide}
             disabled={!canSlideNext}
-            className={`p-2 rounded-full border-2 transition-all duration-200 ${
+            className={`p-1.5 rounded-full border-2 transition-all duration-200 ${
               canSlideNext 
                 ? 'border-green-500 text-green-600 hover:bg-green-50 hover:scale-110 shadow-sm hover:shadow-md' 
                 : 'border-gray-300 text-gray-400 cursor-not-allowed'
             }`}
+            aria-label="Next products"
           >
-            <ChevronRight size={18} />
+            <ChevronRight size={16} />
           </button>
         </div>
       </div>
