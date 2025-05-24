@@ -35,10 +35,10 @@ const CategoryList: React.FC<CategoryListProps> = ({
   onToggleVisibility,
   onUpdateDisplayOrder
 }) => {
-  // Sort categories by displayOrder
+  // Sort categories by display_order
   const sortedCategories = [...categories].sort((a, b) => {
-    const orderA = a.displayOrder || 999;
-    const orderB = b.displayOrder || 999;
+    const orderA = a.display_order || 999;
+    const orderB = b.display_order || 999;
     return orderA - orderB;
   });
 

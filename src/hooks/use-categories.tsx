@@ -13,7 +13,19 @@ export const useCategories = () => {
     setLoading(true);
     try {
       const { data, error } = await getCategoriesTable()
-        .select('*')
+        .select(`
+          *,
+          meta_title,
+          meta_description,
+          meta_keywords,
+          canonical_url,
+          robots_directives,
+          structured_data,
+          og_title,
+          og_description,
+          og_image,
+          og_url
+        `)
         .order('display_order', { ascending: true });
       
       if (error) throw error;
@@ -30,16 +42,16 @@ export const useCategories = () => {
           created_at: cat.created_at,
           updated_at: cat.updated_at,
           icon: cat.icon,
-          meta_title: cat.meta_title,
-          meta_description: cat.meta_description,
-          meta_keywords: cat.meta_keywords,
-          canonical_url: cat.canonical_url,
-          robots_directives: cat.robots_directives,
-          structured_data: cat.structured_data,
-          og_title: cat.og_title,
-          og_description: cat.og_description,
-          og_image: cat.og_image,
-          og_url: cat.og_url,
+          meta_title: cat.meta_title || undefined,
+          meta_description: cat.meta_description || undefined,
+          meta_keywords: cat.meta_keywords || undefined,
+          canonical_url: cat.canonical_url || undefined,
+          robots_directives: cat.robots_directives || undefined,
+          structured_data: cat.structured_data || undefined,
+          og_title: cat.og_title || undefined,
+          og_description: cat.og_description || undefined,
+          og_image: cat.og_image || undefined,
+          og_url: cat.og_url || undefined,
         }));
         
         setCategories(formattedCategories);

@@ -24,7 +24,7 @@ const CategoryEditForm: React.FC<CategoryEditFormProps> = ({
     // Create an event-like object and cast it to the expected type
     const event = {
       target: {
-        name: 'isVisible',
+        name: 'is_visible',
         value: checked
       }
     } as unknown as React.ChangeEvent<HTMLInputElement>;
@@ -50,8 +50,8 @@ const CategoryEditForm: React.FC<CategoryEditFormProps> = ({
             <label className="block text-sm font-medium mb-1">Image Icon URL</label>
             <Input
               type="text"
-              name="imageIcon"
-              value={editForm.imageIcon || ''}
+              name="image_icon"
+              value={editForm.image_icon || ''}
               onChange={onEditChange}
               placeholder="https://example.com/image.png"
             />
@@ -64,8 +64,8 @@ const CategoryEditForm: React.FC<CategoryEditFormProps> = ({
             <label className="block text-sm font-medium mb-1">Background Color</label>
             <Input
               type="text"
-              name="bg"
-              value={editForm.bg}
+              name="background_color"
+              value={editForm.background_color}
               onChange={onEditChange}
             />
             <p className="text-xs text-gray-500 mt-1">Enter Tailwind CSS color class (e.g. bg-red-100)</p>
@@ -75,8 +75,8 @@ const CategoryEditForm: React.FC<CategoryEditFormProps> = ({
             <label className="block text-sm font-medium mb-1">Display Order</label>
             <Input
               type="number"
-              name="displayOrder"
-              value={editForm.displayOrder || ''}
+              name="display_order"
+              value={editForm.display_order || ''}
               onChange={onEditChange}
               placeholder="1"
             />
@@ -89,7 +89,7 @@ const CategoryEditForm: React.FC<CategoryEditFormProps> = ({
             </label>
             <Switch 
               id={`visibility-${editForm.id}`}
-              checked={editForm.isVisible || false}
+              checked={editForm.is_visible !== false}
               onCheckedChange={handleVisibilityChange}
             />
           </div>
@@ -101,8 +101,8 @@ const CategoryEditForm: React.FC<CategoryEditFormProps> = ({
             <div className="border p-4 rounded-md">
               <CategoryIconPreview 
                 name={editForm.name} 
-                imageIcon={editForm.imageIcon}
-                bg={editForm.bg}
+                imageIcon={editForm.image_icon}
+                bg={editForm.background_color}
               />
             </div>
           </div>
