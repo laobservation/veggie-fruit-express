@@ -26,7 +26,7 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
 }) => {
   const { addItem } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
-  const [displayCount, setDisplayCount] = useState(8);
+  const [displayCount, setDisplayCount] = useState(4); // Start with 4 products
   const [currentSlide, setCurrentSlide] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -64,7 +64,7 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
   };
 
   const handleShowMore = () => {
-    setDisplayCount(prev => Math.min(prev + 8, filteredProducts.length));
+    setDisplayCount(prev => Math.min(prev + 4, filteredProducts.length)); // Show 4 more products
   };
 
   const handlePrevSlide = () => {
@@ -150,7 +150,7 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
         className={`grid ${showAll ? 'grid-cols-2 md:grid-cols-4 lg:grid-cols-6' : 'grid-cols-2 md:grid-cols-4'} gap-3 transition-all duration-500 ease-in-out`}
       >
         {isLoading ? (
-          Array(showAll ? 8 : 4).fill(0).map((_, index) => (
+          Array(4).fill(0).map((_, index) => ( // Show 4 loading placeholders
             <div key={index} className="bg-white p-4 rounded-lg shadow-sm animate-pulse">
               <div className="w-full h-28 bg-gray-200 rounded mb-3"></div>
               <div className="h-4 bg-gray-200 rounded mb-2"></div>
