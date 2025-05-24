@@ -12,35 +12,65 @@ export type Database = {
       categories: {
         Row: {
           background_color: string
+          canonical_url: string | null
           created_at: string | null
           display_order: number | null
           icon: string | null
           id: string
           image_icon: string | null
           is_visible: boolean | null
+          meta_description: string | null
+          meta_keywords: string | null
+          meta_title: string | null
           name: string
+          og_description: string | null
+          og_image: string | null
+          og_title: string | null
+          og_url: string | null
+          robots_directives: string | null
+          structured_data: Json | null
           updated_at: string | null
         }
         Insert: {
           background_color?: string
+          canonical_url?: string | null
           created_at?: string | null
           display_order?: number | null
           icon?: string | null
           id?: string
           image_icon?: string | null
           is_visible?: boolean | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          meta_title?: string | null
           name: string
+          og_description?: string | null
+          og_image?: string | null
+          og_title?: string | null
+          og_url?: string | null
+          robots_directives?: string | null
+          structured_data?: Json | null
           updated_at?: string | null
         }
         Update: {
           background_color?: string
+          canonical_url?: string | null
           created_at?: string | null
           display_order?: number | null
           icon?: string | null
           id?: string
           image_icon?: string | null
           is_visible?: boolean | null
+          meta_description?: string | null
+          meta_keywords?: string | null
+          meta_title?: string | null
           name?: string
+          og_description?: string | null
+          og_image?: string | null
+          og_title?: string | null
+          og_url?: string | null
+          robots_directives?: string | null
+          structured_data?: Json | null
           updated_at?: string | null
         }
         Relationships: []

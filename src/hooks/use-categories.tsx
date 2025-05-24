@@ -13,19 +13,7 @@ export const useCategories = () => {
     setLoading(true);
     try {
       const { data, error } = await getCategoriesTable()
-        .select(`
-          *,
-          meta_title,
-          meta_description,
-          meta_keywords,
-          canonical_url,
-          robots_directives,
-          structured_data,
-          og_title,
-          og_description,
-          og_image,
-          og_url
-        `)
+        .select('*')
         .order('display_order', { ascending: true });
       
       if (error) throw error;
