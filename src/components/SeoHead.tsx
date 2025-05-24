@@ -4,6 +4,7 @@ import { Helmet } from 'react-helmet-async';
 import { useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState } from 'react';
+import { Json } from '@/integrations/supabase/types';
 
 interface SeoData {
   meta_title: string;
@@ -72,13 +73,18 @@ const SeoHead: React.FC = () => {
         }
         
         if (data) {
+          // Convert Json type to string for structured_data
+          const structuredDataString = typeof data.structured_data === 'string' 
+            ? data.structured_data 
+            : JSON.stringify(data.structured_data || {});
+
           setSeo({
             meta_title: data.meta_title || defaultSeo.meta_title,
             meta_description: data.meta_description || defaultSeo.meta_description,
             meta_keywords: data.meta_keywords || defaultSeo.meta_keywords,
             canonical_url: data.canonical_url || window.location.href,
             robots_directives: data.robots_directives || defaultSeo.robots_directives,
-            structured_data: data.structured_data || defaultSeo.structured_data,
+            structured_data: structuredDataString,
             og_title: data.og_title || data.meta_title || defaultSeo.og_title,
             og_description: data.og_description || data.meta_description || defaultSeo.og_description,
             og_image: data.og_image || defaultSeo.og_image,

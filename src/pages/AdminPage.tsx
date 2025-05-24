@@ -4,7 +4,7 @@ import { ArrowLeft, Home, LogOut, Package, Settings, ShoppingBag, Sliders } from
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dashboard } from '@/components/admin/Dashboard';
+import Dashboard from '@/components/admin/Dashboard';
 import ProductManager from '@/components/admin/ProductManager';
 import OrdersManager from '@/components/admin/OrdersManager';
 import { Button } from '@/components/ui/button';

@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,9 +12,12 @@ import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, PlusCircle, Trash2, Search } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
+import { Tables } from '@/integrations/supabase/types';
 
-interface SeoEntry {
-  id: string;
+type SeoEntry = Tables<'seo_settings'>;
+
+interface SeoFormData {
+  id?: string;
   page_slug: string;
   route: string;
   meta_title: string;
@@ -32,11 +36,11 @@ interface SeoEntry {
   twitter_image: string;
   include_in_sitemap: boolean;
   language_code: string;
-  created_at: string;
-  updated_at: string;
 }
 
-const defaultSeoEntry: Partial<SeoEntry> = {
+const defaultSeoEntry: SeoFormData = {
+  page_slug: '',
+  route: '',
   meta_title: '',
   meta_description: '',
   meta_keywords: '',
@@ -58,7 +62,7 @@ const defaultSeoEntry: Partial<SeoEntry> = {
 const SeoManager = () => {
   const [seoEntries, setSeoEntries] = useState<SeoEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [selectedEntry, setSelectedEntry] = useState<SeoEntry | null>(null);
+  const [selectedEntry, setSelectedEntry] = useState<SeoFormData | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [isSaving, setIsSaving] = useState(false);
@@ -87,13 +91,39 @@ const SeoManager = () => {
     }
   };
   
+  const convertEntryToFormData = (entry: SeoEntry): SeoFormData => {
+    return {
+      id: entry.id,
+      page_slug: entry.page_slug,
+      route: entry.route,
+      meta_title: entry.meta_title || '',
+      meta_description: entry.meta_description || '',
+      meta_keywords: entry.meta_keywords || '',
+      canonical_url: entry.canonical_url || '',
+      robots_directives: entry.robots_directives || 'index, follow',
+      structured_data: typeof entry.structured_data === 'string' 
+        ? entry.structured_data 
+        : JSON.stringify(entry.structured_data || {}),
+      og_title: entry.og_title || '',
+      og_description: entry.og_description || '',
+      og_image: entry.og_image || '',
+      og_url: entry.og_url || '',
+      twitter_card: entry.twitter_card || 'summary',
+      twitter_title: entry.twitter_title || '',
+      twitter_description: entry.twitter_description || '',
+      twitter_image: entry.twitter_image || '',
+      include_in_sitemap: entry.include_in_sitemap !== false,
+      language_code: entry.language_code || 'fr'
+    };
+  };
+  
   const handleNewEntry = () => {
-    setSelectedEntry({ ...defaultSeoEntry, id: '', page_slug: '', route: '' } as SeoEntry);
+    setSelectedEntry({ ...defaultSeoEntry });
     setIsDialogOpen(true);
   };
   
   const handleEditEntry = (entry: SeoEntry) => {
-    setSelectedEntry(entry);
+    setSelectedEntry(convertEntryToFormData(entry));
     setIsDialogOpen(true);
   };
   
@@ -116,38 +146,53 @@ const SeoManager = () => {
     }
   };
   
-  const handleSave = async (data: Partial<SeoEntry>) => {
+  const handleSave = async (data: SeoFormData) => {
     setIsSaving(true);
     
     try {
+      // Prepare data for database - convert structured_data back to JSON
+      const dbData = {
+        page_slug: data.page_slug,
+        route: data.route,
+        meta_title: data.meta_title,
+        meta_description: data.meta_description,
+        meta_keywords: data.meta_keywords,
+        canonical_url: data.canonical_url,
+        robots_directives: data.robots_directives,
+        structured_data: JSON.parse(data.structured_data || '{}'),
+        og_title: data.og_title,
+        og_description: data.og_description,
+        og_image: data.og_image,
+        og_url: data.og_url,
+        twitter_card: data.twitter_card,
+        twitter_title: data.twitter_title,
+        twitter_description: data.twitter_description,
+        twitter_image: data.twitter_image,
+        include_in_sitemap: data.include_in_sitemap,
+        language_code: data.language_code,
+        updated_at: new Date().toISOString()
+      };
+
       if (selectedEntry?.id) {
         // Update existing entry
         const { error } = await supabase
           .from('seo_settings')
-          .update({
-            ...data,
-            updated_at: new Date().toISOString()
-          })
+          .update(dbData)
           .eq('id', selectedEntry.id);
         
         if (error) throw error;
         
         toast.success('SEO entry updated successfully');
         
-        // Update local state
-        setSeoEntries(entries => 
-          entries.map(entry => 
-            entry.id === selectedEntry.id ? { ...entry, ...data, updated_at: new Date().toISOString() } : entry
-          )
-        );
+        // Refresh the list
+        fetchSeoEntries();
       } else {
         // Create new entry
         const { data: newEntry, error } = await supabase
           .from('seo_settings')
           .insert({
-            ...data,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
+            ...dbData,
+            created_at: new Date().toISOString()
           })
           .select();
         
@@ -155,10 +200,8 @@ const SeoManager = () => {
         
         toast.success('SEO entry created successfully');
         
-        // Update local state
-        if (newEntry && newEntry.length > 0) {
-          setSeoEntries([...seoEntries, newEntry[0]]);
-        }
+        // Refresh the list
+        fetchSeoEntries();
       }
       
       setIsDialogOpen(false);
@@ -173,7 +216,7 @@ const SeoManager = () => {
   const filteredEntries = seoEntries.filter(entry => 
     entry.page_slug.toLowerCase().includes(searchTerm.toLowerCase()) || 
     entry.route.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    entry.meta_title.toLowerCase().includes(searchTerm.toLowerCase())
+    (entry.meta_title && entry.meta_title.toLowerCase().includes(searchTerm.toLowerCase()))
   );
   
   return (
