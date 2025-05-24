@@ -68,7 +68,23 @@ const Footer = () => {
         }
         
         if (data) {
-          // Ensure proper typing
+          // Safely parse contact_info
+          let contactInfo: ContactInfo = {
+            email: 'contact@marchebiomobile.com',
+            phone: '+212 612345678',
+            address: 'Extention Zerhounia N236, Marrakech, Maroc'
+          };
+          
+          if (data.contact_info && typeof data.contact_info === 'object' && !Array.isArray(data.contact_info)) {
+            const contactData = data.contact_info as Record<string, any>;
+            contactInfo = {
+              email: String(contactData.email || contactInfo.email),
+              phone: String(contactData.phone || contactInfo.phone),
+              address: String(contactData.address || contactInfo.address)
+            };
+          }
+          
+          // Safely parse quick_links
           const quickLinks = Array.isArray(data.quick_links) 
             ? data.quick_links.map((link: any) => ({
                 title: String(link.title || ''),
@@ -76,21 +92,16 @@ const Footer = () => {
               }))
             : [];
           
-          const socialLinks = typeof data.social_links === 'object' && data.social_links !== null
-            ? data.social_links as SocialLinks
-            : { facebook: '#', twitter: '#', instagram: '#' };
-          
-          const contactInfo = typeof data.contact_info === 'object' && data.contact_info !== null
-            ? {
-                email: String(data.contact_info.email || ''),
-                phone: String(data.contact_info.phone || ''),
-                address: String(data.contact_info.address || '')
-              }
-            : {
-                email: 'contact@marchebiomobile.com',
-                phone: '+212 612345678',
-                address: 'Extention Zerhounia N236, Marrakech, Maroc'
-              };
+          // Safely parse social_links
+          let socialLinks: SocialLinks = { facebook: '#', twitter: '#', instagram: '#' };
+          if (data.social_links && typeof data.social_links === 'object' && !Array.isArray(data.social_links)) {
+            const socialData = data.social_links as Record<string, any>;
+            socialLinks = {
+              facebook: String(socialData.facebook || '#'),
+              twitter: String(socialData.twitter || '#'),
+              instagram: String(socialData.instagram || '#')
+            };
+          }
           
           setSettings({
             company_name: data.company_name || 'Marché Bio',
