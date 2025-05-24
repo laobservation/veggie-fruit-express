@@ -11,11 +11,34 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2, PlusCircle, Trash2, Search } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogTrigger } from '@/components/ui/dialog';
-import { Tables } from '@/integrations/supabase/types';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 
-type SeoEntry = Tables<'seo_settings'>;
+// Database types from Supabase
+interface DatabaseSeoEntry {
+  id: string;
+  page_slug: string;
+  route: string;
+  meta_title: string | null;
+  meta_description: string | null;
+  meta_keywords: string | null;
+  canonical_url: string | null;
+  robots_directives: string | null;
+  structured_data: any; // JSON type from Supabase
+  og_title: string | null;
+  og_description: string | null;
+  og_image: string | null;
+  og_url: string | null;
+  twitter_card: string | null;
+  twitter_title: string | null;
+  twitter_description: string | null;
+  twitter_image: string | null;
+  include_in_sitemap: boolean | null;
+  language_code: string | null;
+  created_at: string;
+  updated_at: string;
+}
 
+// Form data interface
 interface SeoFormData {
   id?: string;
   page_slug: string;
@@ -60,7 +83,7 @@ const defaultSeoEntry: SeoFormData = {
 };
 
 const SeoManager = () => {
-  const [seoEntries, setSeoEntries] = useState<SeoEntry[]>([]);
+  const [seoEntries, setSeoEntries] = useState<DatabaseSeoEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [selectedEntry, setSelectedEntry] = useState<SeoFormData | null>(null);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -91,7 +114,7 @@ const SeoManager = () => {
     }
   };
   
-  const convertEntryToFormData = (entry: SeoEntry): SeoFormData => {
+  const convertDatabaseToFormData = (entry: DatabaseSeoEntry): SeoFormData => {
     return {
       id: entry.id,
       page_slug: entry.page_slug,
@@ -122,8 +145,8 @@ const SeoManager = () => {
     setIsDialogOpen(true);
   };
   
-  const handleEditEntry = (entry: SeoEntry) => {
-    setSelectedEntry(convertEntryToFormData(entry));
+  const handleEditEntry = (entry: DatabaseSeoEntry) => {
+    setSelectedEntry(convertDatabaseToFormData(entry));
     setIsDialogOpen(true);
   };
   
@@ -154,23 +177,22 @@ const SeoManager = () => {
       const dbData = {
         page_slug: data.page_slug,
         route: data.route,
-        meta_title: data.meta_title,
-        meta_description: data.meta_description,
-        meta_keywords: data.meta_keywords,
-        canonical_url: data.canonical_url,
-        robots_directives: data.robots_directives,
+        meta_title: data.meta_title || null,
+        meta_description: data.meta_description || null,
+        meta_keywords: data.meta_keywords || null,
+        canonical_url: data.canonical_url || null,
+        robots_directives: data.robots_directives || null,
         structured_data: JSON.parse(data.structured_data || '{}'),
-        og_title: data.og_title,
-        og_description: data.og_description,
-        og_image: data.og_image,
-        og_url: data.og_url,
-        twitter_card: data.twitter_card,
-        twitter_title: data.twitter_title,
-        twitter_description: data.twitter_description,
-        twitter_image: data.twitter_image,
+        og_title: data.og_title || null,
+        og_description: data.og_description || null,
+        og_image: data.og_image || null,
+        og_url: data.og_url || null,
+        twitter_card: data.twitter_card || null,
+        twitter_title: data.twitter_title || null,
+        twitter_description: data.twitter_description || null,
+        twitter_image: data.twitter_image || null,
         include_in_sitemap: data.include_in_sitemap,
-        language_code: data.language_code,
-        updated_at: new Date().toISOString()
+        language_code: data.language_code || null
       };
 
       if (selectedEntry?.id) {
@@ -183,27 +205,19 @@ const SeoManager = () => {
         if (error) throw error;
         
         toast.success('SEO entry updated successfully');
-        
-        // Refresh the list
-        fetchSeoEntries();
       } else {
         // Create new entry
-        const { data: newEntry, error } = await supabase
+        const { error } = await supabase
           .from('seo_settings')
-          .insert({
-            ...dbData,
-            created_at: new Date().toISOString()
-          })
-          .select();
+          .insert(dbData);
         
         if (error) throw error;
         
         toast.success('SEO entry created successfully');
-        
-        // Refresh the list
-        fetchSeoEntries();
       }
       
+      // Refresh the list
+      fetchSeoEntries();
       setIsDialogOpen(false);
     } catch (error) {
       console.error('Error saving SEO entry:', error);
@@ -285,13 +299,13 @@ const SeoManager = () => {
                     <div>
                       <span className="text-gray-500">Title:</span>
                     </div>
-                    <div className="truncate" title={entry.meta_title}>
+                    <div className="truncate" title={entry.meta_title || ''}>
                       {entry.meta_title || 'Not set'}
                     </div>
                     <div>
                       <span className="text-gray-500">Description:</span>
                     </div>
-                    <div className="truncate" title={entry.meta_description}>
+                    <div className="truncate" title={entry.meta_description || ''}>
                       {entry.meta_description || 'Not set'}
                     </div>
                     <div className="col-span-2 mt-2">
@@ -325,8 +339,8 @@ const SeoManager = () => {
 interface SeoEntryDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  entry: SeoEntry | null;
-  onSave: (data: Partial<SeoEntry>) => void;
+  entry: SeoFormData | null;
+  onSave: (data: SeoFormData) => void;
   isSaving: boolean;
 }
 
@@ -337,7 +351,7 @@ const SeoEntryDialog: React.FC<SeoEntryDialogProps> = ({
   onSave,
   isSaving
 }) => {
-  const [formData, setFormData] = useState<Partial<SeoEntry>>(defaultSeoEntry);
+  const [formData, setFormData] = useState<SeoFormData>(defaultSeoEntry);
   const [activeTab, setActiveTab] = useState('basic');
   
   // Reset form when entry changes
@@ -399,7 +413,7 @@ const SeoEntryDialog: React.FC<SeoEntryDialogProps> = ({
                   <Input
                     id="page_slug"
                     name="page_slug"
-                    value={formData.page_slug || ''}
+                    value={formData.page_slug}
                     onChange={handleInputChange}
                     placeholder="e.g. Home, About Us, Contact"
                     maxLength={100}
@@ -412,7 +426,7 @@ const SeoEntryDialog: React.FC<SeoEntryDialogProps> = ({
                   <Input
                     id="route"
                     name="route"
-                    value={formData.route || ''}
+                    value={formData.route}
                     onChange={handleInputChange}
                     placeholder="e.g. /, /about, /contact"
                     maxLength={100}
@@ -427,13 +441,13 @@ const SeoEntryDialog: React.FC<SeoEntryDialogProps> = ({
                   <Input
                     id="meta_title"
                     name="meta_title"
-                    value={formData.meta_title || ''}
+                    value={formData.meta_title}
                     onChange={handleInputChange}
                     placeholder="Meta title (70 characters max)"
                     maxLength={70}
                   />
                   <span className="absolute right-3 top-1/2 transform -translate-y-1/2 text-xs text-gray-400">
-                    {(formData.meta_title?.length || 0)}/70
+                    {formData.meta_title.length}/70
                   </span>
                 </div>
               </div>
@@ -444,14 +458,14 @@ const SeoEntryDialog: React.FC<SeoEntryDialogProps> = ({
                   <Textarea
                     id="meta_description"
                     name="meta_description"
-                    value={formData.meta_description || ''}
+                    value={formData.meta_description}
                     onChange={handleInputChange}
                     placeholder="Meta description (160 characters max)"
                     maxLength={160}
                     rows={3}
                   />
                   <span className="absolute right-3 bottom-3 text-xs text-gray-400">
-                    {(formData.meta_description?.length || 0)}/160
+                    {formData.meta_description.length}/160
                   </span>
                 </div>
               </div>
@@ -461,7 +475,7 @@ const SeoEntryDialog: React.FC<SeoEntryDialogProps> = ({
                 <Input
                   id="meta_keywords"
                   name="meta_keywords"
-                  value={formData.meta_keywords || ''}
+                  value={formData.meta_keywords}
                   onChange={handleInputChange}
                   placeholder="Comma-separated keywords"
                 />
@@ -472,7 +486,7 @@ const SeoEntryDialog: React.FC<SeoEntryDialogProps> = ({
                 <Input
                   id="canonical_url"
                   name="canonical_url"
-                  value={formData.canonical_url || ''}
+                  value={formData.canonical_url}
                   onChange={handleInputChange}
                   placeholder="https://example.com/canonical-page"
                 />
@@ -481,7 +495,7 @@ const SeoEntryDialog: React.FC<SeoEntryDialogProps> = ({
               <div className="flex items-center space-x-2">
                 <Switch
                   id="include_in_sitemap"
-                  checked={formData.include_in_sitemap !== false}
+                  checked={formData.include_in_sitemap}
                   onCheckedChange={(checked) => handleSwitchChange(checked, 'include_in_sitemap')}
                 />
                 <Label htmlFor="include_in_sitemap">Include in Sitemap</Label>
@@ -494,7 +508,7 @@ const SeoEntryDialog: React.FC<SeoEntryDialogProps> = ({
                 <Input
                   id="og_title"
                   name="og_title"
-                  value={formData.og_title || ''}
+                  value={formData.og_title}
                   onChange={handleInputChange}
                   placeholder="Open Graph title"
                 />
@@ -505,7 +519,7 @@ const SeoEntryDialog: React.FC<SeoEntryDialogProps> = ({
                 <Textarea
                   id="og_description"
                   name="og_description"
-                  value={formData.og_description || ''}
+                  value={formData.og_description}
                   onChange={handleInputChange}
                   placeholder="Open Graph description"
                   rows={3}
@@ -517,7 +531,7 @@ const SeoEntryDialog: React.FC<SeoEntryDialogProps> = ({
                 <Input
                   id="og_image"
                   name="og_image"
-                  value={formData.og_image || ''}
+                  value={formData.og_image}
                   onChange={handleInputChange}
                   placeholder="https://example.com/image.jpg"
                 />
@@ -528,7 +542,7 @@ const SeoEntryDialog: React.FC<SeoEntryDialogProps> = ({
                 <Input
                   id="og_url"
                   name="og_url"
-                  value={formData.og_url || ''}
+                  value={formData.og_url}
                   onChange={handleInputChange}
                   placeholder="https://example.com/page"
                 />
@@ -539,7 +553,7 @@ const SeoEntryDialog: React.FC<SeoEntryDialogProps> = ({
               <div>
                 <Label htmlFor="twitter_card">Twitter Card Type</Label>
                 <Select
-                  value={formData.twitter_card || 'summary'}
+                  value={formData.twitter_card}
                   onValueChange={(value) => handleSelectChange(value, 'twitter_card')}
                 >
                   <SelectTrigger id="twitter_card">
@@ -559,7 +573,7 @@ const SeoEntryDialog: React.FC<SeoEntryDialogProps> = ({
                 <Input
                   id="twitter_title"
                   name="twitter_title"
-                  value={formData.twitter_title || ''}
+                  value={formData.twitter_title}
                   onChange={handleInputChange}
                   placeholder="Twitter card title"
                 />
@@ -570,7 +584,7 @@ const SeoEntryDialog: React.FC<SeoEntryDialogProps> = ({
                 <Textarea
                   id="twitter_description"
                   name="twitter_description"
-                  value={formData.twitter_description || ''}
+                  value={formData.twitter_description}
                   onChange={handleInputChange}
                   placeholder="Twitter card description"
                   rows={3}
@@ -582,7 +596,7 @@ const SeoEntryDialog: React.FC<SeoEntryDialogProps> = ({
                 <Input
                   id="twitter_image"
                   name="twitter_image"
-                  value={formData.twitter_image || ''}
+                  value={formData.twitter_image}
                   onChange={handleInputChange}
                   placeholder="https://example.com/image.jpg"
                 />
@@ -593,7 +607,7 @@ const SeoEntryDialog: React.FC<SeoEntryDialogProps> = ({
               <div>
                 <Label htmlFor="robots_directives">Robots Directives</Label>
                 <Select
-                  value={formData.robots_directives || 'index, follow'}
+                  value={formData.robots_directives}
                   onValueChange={(value) => handleSelectChange(value, 'robots_directives')}
                 >
                   <SelectTrigger id="robots_directives">
@@ -613,7 +627,7 @@ const SeoEntryDialog: React.FC<SeoEntryDialogProps> = ({
                 <Textarea
                   id="structured_data"
                   name="structured_data"
-                  value={formData.structured_data || '{}'}
+                  value={formData.structured_data}
                   onChange={handleInputChange}
                   placeholder="{}"
                   rows={5}
@@ -626,7 +640,7 @@ const SeoEntryDialog: React.FC<SeoEntryDialogProps> = ({
                 <Input
                   id="language_code"
                   name="language_code"
-                  value={formData.language_code || ''}
+                  value={formData.language_code}
                   onChange={handleInputChange}
                   placeholder="fr"
                 />
