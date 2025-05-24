@@ -26,6 +26,9 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
     e.preventDefault();
     e.stopPropagation();
     toggleFavorite(product);
+    
+    // Dispatch custom event for favorite animation
+    document.dispatchEvent(new CustomEvent('favorite-updated'));
   };
 
   // Create SEO-friendly slug from product name

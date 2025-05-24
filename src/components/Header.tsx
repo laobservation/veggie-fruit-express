@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
-import { ShoppingCart, Menu, Phone } from 'lucide-react';
+import { ShoppingCart, Menu, Phone, Heart } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Cart from './Cart';
 import MobileMenu from './MobileMenu';
@@ -15,6 +15,7 @@ const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
   const [quantityAnimating, setQuantityAnimating] = useState(false);
+  const [favoriteAnimating, setFavoriteAnimating] = useState(false);
   
   const {
     getTotalItems,
@@ -40,9 +41,17 @@ const Header = () => {
       setTimeout(() => setQuantityAnimating(false), 800);
     };
 
+    const handleFavoriteUpdated = () => {
+      setFavoriteAnimating(true);
+      setTimeout(() => setFavoriteAnimating(false), 600);
+    };
+
     document.addEventListener('cart-updated', handleCartUpdated);
+    document.addEventListener('favorite-updated', handleFavoriteUpdated);
+    
     return () => {
       document.removeEventListener('cart-updated', handleCartUpdated);
+      document.removeEventListener('favorite-updated', handleFavoriteUpdated);
     };
   }, []);
 
@@ -110,16 +119,32 @@ const Header = () => {
               <span>Contact</span>
             </a>
           </div>
+
+          {/* Favorites Button */}
+          <Link to="/favorites" className="relative rounded-full p-2 flex items-center bg-transparent">
+            <div className="relative">
+              <Heart className={`h-5 w-5 text-red-500 transition-all duration-300 ${favoriteAnimating ? 'animate-bounce scale-125' : ''} ${favorites.length > 0 ? 'fill-current' : ''}`} />
+              {favorites.length > 0 && (
+                <span className="absolute -top-2 -right-2 flex items-center justify-center bg-red-500 text-white rounded-full w-4 h-4 text-xs font-bold shadow-sm">
+                  {favorites.length}
+                </span>
+              )}
+            </div>
+            <span className="text-red-500 font-semibold ml-2 hidden md:inline-block">
+              Favoris
+            </span>
+          </Link>
           
+          {/* Cart Button */}
           <button 
             onClick={handleCartClick} 
             className="relative rounded-full p-2 flex items-center bg-transparent"
             aria-label="View cart"
           >
             <div className="relative">
-              <ShoppingCart className={`h-5 w-5 text-green-600 transition-transform duration-300 ${isAnimating ? 'animate-bounce scale-125' : ''}`} />
+              <ShoppingCart className={`h-5 w-5 text-green-600 transition-all duration-300 ease-in-out ${isAnimating ? 'animate-bounce scale-125' : ''}`} />
               {getTotalItems() > 0 && (
-                <span className={`absolute -top-3 -right-3 flex items-center justify-center bg-red-500 text-white rounded-full w-6 h-6 text-xs font-bold shadow-lg transition-all duration-300 ${quantityAnimating ? 'animate-pulse scale-110' : ''}`}>
+                <span className={`absolute -top-2 -right-2 flex items-center justify-center bg-red-500 text-white rounded-full w-4 h-4 text-xs font-bold shadow-sm transition-all duration-200 ease-in-out ${quantityAnimating ? 'animate-pulse scale-110' : ''}`}>
                   {getTotalItems()}
                 </span>
               )}

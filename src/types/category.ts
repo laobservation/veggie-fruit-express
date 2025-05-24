@@ -1,19 +1,24 @@
 
-// Define the Category interface
 export interface Category {
   id: string;
   name: string;
-  imageIcon: string | null;
-  bg: string;
-  path?: string;
-  isVisible?: boolean; // Control visibility on frontend
-  displayOrder?: number; // Control order of categories
-}
-
-export interface NewCategoryFormData extends Omit<Category, 'id' | 'path'> {
-  name: string;
-  imageIcon: string | null;
-  bg: string;
-  isVisible: boolean;
-  displayOrder?: number;
+  icon?: string;
+  image_icon?: string;
+  background_color: string;
+  display_order?: number;
+  is_visible?: boolean;
+  created_at?: string;
+  updated_at?: string;
+  
+  // SEO fields
+  meta_title?: string;
+  meta_description?: string;
+  meta_keywords?: string;
+  canonical_url?: string;
+  robots_directives?: string;
+  structured_data?: any;
+  og_title?: string;
+  og_description?: string;
+  og_image?: string;
+  og_url?: string;
 }

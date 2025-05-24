@@ -7,6 +7,8 @@ import { Product } from '@/types/product';
 import { useProductForm } from '@/hooks/use-product-form';
 import ProductDetails from './products/ProductDetails';
 import MediaSelector from './products/MediaSelector';
+import ProductSeoFields from './products/ProductSeoFields';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface ProductFormProps {
   product: Product;
@@ -39,8 +41,18 @@ const ProductForm: React.FC<ProductFormProps> = ({
   } = useProductForm(product);
 
   const handleSubmit = () => {
-    // No longer forcing categoryLink to true, using the value from the form
-    onSave(formData, mediaType);
+    // Parse structured_data if it's a string
+    let finalFormData = { ...formData };
+    if (typeof formData.structured_data === 'string') {
+      try {
+        finalFormData.structured_data = JSON.parse(formData.structured_data);
+      } catch (error) {
+        console.error('Invalid JSON in structured_data:', error);
+        finalFormData.structured_data = {};
+      }
+    }
+    
+    onSave(finalFormData, mediaType);
   };
 
   return (
@@ -51,36 +63,56 @@ const ProductForm: React.FC<ProductFormProps> = ({
         </DialogTitle>
       </DialogHeader>
       
-      <div className="grid gap-4 py-4">
-        <ProductDetails
-          name={formData.name}
-          price={formData.price}
-          stock={formData.stock}
-          category={formData.category}
-          unit={formData.unit}
-          description={formData.description}
-          featured={formData.featured}
-          categoryLink={formData.categoryLink}
-          categories={categories}
-          loadingCategories={loadingCategories}
-          onInputChange={handleInputChange}
-          onSelectChange={handleSelectChange}
-          onCheckboxChange={handleCheckboxChange}
-        />
-        
-        <MediaSelector
-          mediaType={mediaType}
-          setMediaType={setMediaType}
-          imageUrl={formData.image}
-          videoUrl={formData.videoUrl}
-          additionalImages={formData.additionalImages}
-          onImageChange={handleInputChange}
-          onVideoChange={handleInputChange}
-          onAddAdditionalImage={handleAddAdditionalImage}
-          onRemoveAdditionalImage={handleRemoveAdditionalImage}
-          additionalImageUrl={additionalImageUrl}
-          setAdditionalImageUrl={setAdditionalImageUrl}
-        />
+      <div className="grid gap-4 py-4 max-h-[70vh] overflow-y-auto">
+        <Tabs defaultValue="details" className="w-full">
+          <TabsList className="grid w-full grid-cols-3">
+            <TabsTrigger value="details">Détails</TabsTrigger>
+            <TabsTrigger value="media">Média</TabsTrigger>
+            <TabsTrigger value="seo">SEO</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="details">
+            <ProductDetails
+              name={formData.name}
+              price={formData.price}
+              stock={formData.stock}
+              category={formData.category}
+              unit={formData.unit}
+              description={formData.description}
+              featured={formData.featured}
+              categoryLink={formData.categoryLink}
+              categories={categories}
+              loadingCategories={loadingCategories}
+              onInputChange={handleInputChange}
+              onSelectChange={handleSelectChange}
+              onCheckboxChange={handleCheckboxChange}
+            />
+          </TabsContent>
+          
+          <TabsContent value="media">
+            <MediaSelector
+              mediaType={mediaType}
+              setMediaType={setMediaType}
+              imageUrl={formData.image}
+              videoUrl={formData.videoUrl}
+              additionalImages={formData.additionalImages}
+              onImageChange={handleInputChange}
+              onVideoChange={handleInputChange}
+              onAddAdditionalImage={handleAddAdditionalImage}
+              onRemoveAdditionalImage={handleRemoveAdditionalImage}
+              additionalImageUrl={additionalImageUrl}
+              setAdditionalImageUrl={setAdditionalImageUrl}
+            />
+          </TabsContent>
+          
+          <TabsContent value="seo">
+            <ProductSeoFields
+              formData={formData}
+              handleInputChange={handleInputChange}
+              handleSelectChange={handleSelectChange}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
       
       <DialogFooter>

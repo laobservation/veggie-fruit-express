@@ -1,23 +1,21 @@
 
-// Fix the import conflict between Lucide and React Router
-import { ArrowLeft, Home, LogOut, Package, Settings, ShoppingBag, Sliders } from 'lucide-react';
+import { ArrowLeft, Home, LogOut, Package, Settings, ShoppingBag, Sliders, Search } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Dashboard } from '@/components/admin/Dashboard';
+import Dashboard from '@/components/admin/Dashboard';
 import ProductManager from '@/components/admin/ProductManager';
 import OrdersManager from '@/components/admin/OrdersManager';
+import SeoManager from '@/components/admin/SeoManager';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
-// Define the AdminPage component
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const navigate = useNavigate();
   const { toast } = useToast();
   
   const handleLogout = () => {
-    // Clear admin authentication
     sessionStorage.removeItem('adminAuth');
     toast({
       title: "Déconnexion réussie",
@@ -62,7 +60,7 @@ const AdminPage = () => {
       </div>
       
       <Tabs defaultValue="dashboard" className="w-full" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-3 mb-8">
+        <TabsList className="grid grid-cols-4 mb-8">
           <TabsTrigger value="dashboard">
             <Home className="h-4 w-4 mr-2" />
             Tableau de bord
@@ -74,6 +72,10 @@ const AdminPage = () => {
           <TabsTrigger value="orders">
             <ShoppingBag className="h-4 w-4 mr-2" />
             Commandes
+          </TabsTrigger>
+          <TabsTrigger value="seo">
+            <Search className="h-4 w-4 mr-2" />
+            SEO
           </TabsTrigger>
         </TabsList>
         
@@ -87,6 +89,10 @@ const AdminPage = () => {
         
         <TabsContent value="orders">
           <OrdersManager />
+        </TabsContent>
+        
+        <TabsContent value="seo">
+          <SeoManager />
         </TabsContent>
       </Tabs>
     </div>
