@@ -23,11 +23,23 @@ export const useCategories = () => {
         const formattedCategories: Category[] = data.map(cat => ({
           id: cat.id,
           name: cat.name,
-          imageIcon: cat.image_icon, // Don't manipulate the URL
-          bg: cat.background_color || 'bg-gray-100',
-          path: `/category/${cat.name.toLowerCase().replace(/\s+/g, '-')}`, // Format path with proper slug
-          isVisible: cat.is_visible !== false, // Default to visible if not specified
-          displayOrder: cat.display_order || 999
+          image_icon: cat.image_icon,
+          background_color: cat.background_color || 'bg-gray-100',
+          is_visible: cat.is_visible !== false,
+          display_order: cat.display_order || 999,
+          created_at: cat.created_at,
+          updated_at: cat.updated_at,
+          icon: cat.icon,
+          meta_title: cat.meta_title,
+          meta_description: cat.meta_description,
+          meta_keywords: cat.meta_keywords,
+          canonical_url: cat.canonical_url,
+          robots_directives: cat.robots_directives,
+          structured_data: cat.structured_data,
+          og_title: cat.og_title,
+          og_description: cat.og_description,
+          og_image: cat.og_image,
+          og_url: cat.og_url,
         }));
         
         setCategories(formattedCategories);

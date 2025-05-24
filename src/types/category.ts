@@ -22,3 +22,11 @@ export interface Category {
   og_image?: string;
   og_url?: string;
 }
+
+export interface NewCategoryFormData {
+  name: string;
+  imageIcon: string;
+  bg: string;
+  isVisible: boolean;
+  displayOrder: number;
+}

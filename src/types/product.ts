@@ -25,3 +25,10 @@ export interface Product {
   og_image?: string;
   og_url?: string;
 }
+
+export interface ServiceOption {
+  id: string;
+  name: string;
+  nameAr: string;
+  price: number;
+}

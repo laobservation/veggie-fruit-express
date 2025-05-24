@@ -71,12 +71,15 @@ export const useCategoryEdit = () => {
 
   // Toggle visibility of a category without entering edit mode
   const handleToggleVisibility = async (id: string, isVisible: boolean) => {
-    const updatedCategory = {
+    // Create a partial update object
+    const partialUpdate = {
       id,
-      isVisible
+      name: '', // Required field, will be ignored in the service
+      background_color: '', // Required field, will be ignored in the service
+      is_visible: isVisible
     } as Category;
     
-    const success = await updateCategory(updatedCategory);
+    const success = await updateCategory(partialUpdate);
     
     if (success) {
       toast({
@@ -88,12 +91,15 @@ export const useCategoryEdit = () => {
 
   // Update display order of a category
   const handleUpdateDisplayOrder = async (id: string, displayOrder: number) => {
-    const updatedCategory = {
+    // Create a partial update object
+    const partialUpdate = {
       id,
-      displayOrder
+      name: '', // Required field, will be ignored in the service
+      background_color: '', // Required field, will be ignored in the service
+      display_order: displayOrder
     } as Category;
     
-    const success = await updateCategory(updatedCategory);
+    const success = await updateCategory(partialUpdate);
     
     if (success) {
       toast({

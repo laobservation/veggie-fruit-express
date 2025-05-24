@@ -60,35 +60,38 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
                   {loading ? (
                     <li className="animate-pulse h-8 bg-gray-100 rounded-lg"></li>
                   ) : (
-                    categories.map(category => (
-                      <li key={category.id}>
-                        <Link
-                          to={category.path}
-                          className="flex items-center p-2 text-gray-700 hover:bg-lime-100 rounded-lg hover:text-green-600 transition-colors"
-                          onClick={onClose}
-                        >
-                          <div className={`w-8 h-8 rounded-full mr-3 flex items-center justify-center ${category.bg.replace("-100", "-200")}`}>
-                            {category.imageIcon ? (
-                              <img 
-                                src={category.imageIcon} 
-                                alt={category.name} 
-                                className="w-5 h-5 object-contain"
-                                onError={(e) => {
-                                  (e.target as HTMLImageElement).style.display = 'none';
-                                  const parent = (e.target as HTMLImageElement).parentNode;
-                                  if (parent instanceof HTMLElement) {
-                                    parent.innerHTML = `<span class="text-sm">${category.name.charAt(0)}</span>`;
-                                  }
-                                }}
-                              />
-                            ) : (
-                              <span className="text-sm">{category.name.charAt(0)}</span>
-                            )}
-                          </div>
-                          <span className="font-medium text-neutral-600">{category.name}</span>
-                        </Link>
-                      </li>
-                    ))
+                    categories.map(category => {
+                      const categoryPath = `/category/${category.name.toLowerCase().replace(/\s+/g, '-')}`;
+                      return (
+                        <li key={category.id}>
+                          <Link
+                            to={categoryPath}
+                            className="flex items-center p-2 text-gray-700 hover:bg-lime-100 rounded-lg hover:text-green-600 transition-colors"
+                            onClick={onClose}
+                          >
+                            <div className={`w-8 h-8 rounded-full mr-3 flex items-center justify-center ${category.background_color.replace("-100", "-200")}`}>
+                              {category.image_icon ? (
+                                <img 
+                                  src={category.image_icon} 
+                                  alt={category.name} 
+                                  className="w-5 h-5 object-contain"
+                                  onError={(e) => {
+                                    (e.target as HTMLImageElement).style.display = 'none';
+                                    const parent = (e.target as HTMLImageElement).parentNode;
+                                    if (parent instanceof HTMLElement) {
+                                      parent.innerHTML = `<span class="text-sm">${category.name.charAt(0)}</span>`;
+                                    }
+                                  }}
+                                />
+                              ) : (
+                                <span className="text-sm">{category.name.charAt(0)}</span>
+                              )}
+                            </div>
+                            <span className="font-medium text-neutral-600">{category.name}</span>
+                          </Link>
+                        </li>
+                      );
+                    })
                   )}
                 </ul>
               </li>

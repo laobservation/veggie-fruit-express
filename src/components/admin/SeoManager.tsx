@@ -12,6 +12,31 @@ import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/types/product';
 import { Category } from '@/types/category';
 
+interface DatabaseProduct {
+  additional_images: string[];
+  category: string;
+  created_at: string;
+  description: string;
+  id: number;
+  image_url: string;
+  link_to_category: boolean;
+  media_type: string;
+  name: string;
+  price: number;
+  stock: number;
+  unit: string;
+  meta_title?: string;
+  meta_description?: string;
+  meta_keywords?: string;
+  canonical_url?: string;
+  robots_directives?: string;
+  structured_data?: any;
+  og_title?: string;
+  og_description?: string;
+  og_image?: string;
+  og_url?: string;
+}
+
 const SeoManager: React.FC = () => {
   const { toast } = useToast();
   const [products, setProducts] = useState<Product[]>([]);
@@ -32,7 +57,32 @@ const SeoManager: React.FC = () => {
         supabase.from('categories').select('*')
       ]);
 
-      if (productsData.data) setProducts(productsData.data as Product[]);
+      if (productsData.data) {
+        // Transform database products to app products
+        const transformedProducts: Product[] = productsData.data.map((dbProduct: DatabaseProduct) => ({
+          id: dbProduct.id.toString(),
+          name: dbProduct.name,
+          category: dbProduct.category as any,
+          price: dbProduct.price,
+          image: dbProduct.image_url,
+          description: dbProduct.description,
+          unit: dbProduct.unit,
+          stock: dbProduct.stock,
+          additionalImages: dbProduct.additional_images,
+          meta_title: dbProduct.meta_title,
+          meta_description: dbProduct.meta_description,
+          meta_keywords: dbProduct.meta_keywords,
+          canonical_url: dbProduct.canonical_url,
+          robots_directives: dbProduct.robots_directives,
+          structured_data: dbProduct.structured_data,
+          og_title: dbProduct.og_title,
+          og_description: dbProduct.og_description,
+          og_image: dbProduct.og_image,
+          og_url: dbProduct.og_url,
+        }));
+        setProducts(transformedProducts);
+      }
+      
       if (categoriesData.data) setCategories(categoriesData.data as Category[]);
     } catch (error) {
       console.error('Error loading data:', error);
@@ -51,7 +101,7 @@ const SeoManager: React.FC = () => {
       const { error } = await supabase
         .from('Products')
         .update(seoData)
-        .eq('id', productId);
+        .eq('id', parseInt(productId));
 
       if (error) throw error;
 

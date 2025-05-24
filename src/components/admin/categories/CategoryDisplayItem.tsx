@@ -22,12 +22,12 @@ const CategoryDisplayItem: React.FC<CategoryDisplayItemProps> = ({
   onUpdateDisplayOrder
 }) => {
   const handleMoveUp = () => {
-    const currentOrder = category.displayOrder || 999;
+    const currentOrder = category.display_order || 999;
     onUpdateDisplayOrder(category.id, Math.max(1, currentOrder - 1));
   };
 
   const handleMoveDown = () => {
-    const currentOrder = category.displayOrder || 999;
+    const currentOrder = category.display_order || 999;
     onUpdateDisplayOrder(category.id, currentOrder + 1);
   };
 
@@ -39,7 +39,7 @@ const CategoryDisplayItem: React.FC<CategoryDisplayItemProps> = ({
             <Button variant="ghost" size="sm" onClick={handleMoveUp} className="px-1">
               <ChevronUp className="h-4 w-4" />
             </Button>
-            <span className="text-xs text-center">{category.displayOrder || 999}</span>
+            <span className="text-xs text-center">{category.display_order || 999}</span>
             <Button variant="ghost" size="sm" onClick={handleMoveDown} className="px-1">
               <ChevronDown className="h-4 w-4" />
             </Button>
@@ -47,18 +47,18 @@ const CategoryDisplayItem: React.FC<CategoryDisplayItemProps> = ({
           
           <CategoryIconPreview 
             name={category.name} 
-            imageIcon={category.imageIcon}
-            bg={category.bg}
+            imageIcon={category.image_icon}
+            bg={category.background_color}
           />
           
           <div className="flex items-center space-x-4">
             <Switch 
               id={`visibility-toggle-${category.id}`}
-              checked={category.isVisible !== false}
+              checked={category.is_visible !== false}
               onCheckedChange={(checked) => onToggleVisibility(category.id, checked)}
             />
-            <span className={`text-sm ${category.isVisible === false ? 'text-gray-400' : ''}`}>
-              {category.isVisible === false ? 'Hidden' : 'Visible'}
+            <span className={`text-sm ${category.is_visible === false ? 'text-gray-400' : ''}`}>
+              {category.is_visible === false ? 'Hidden' : 'Visible'}
             </span>
           </div>
         </div>

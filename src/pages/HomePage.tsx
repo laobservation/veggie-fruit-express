@@ -39,7 +39,7 @@ const HomePage: React.FC = () => {
   }, []);
 
   // Map categories from database format to our application format, filtering out hidden categories
-  const visibleCategories = categories.filter(cat => cat.isVisible !== false);
+  const visibleCategories = categories.filter(cat => cat.is_visible !== false);
   
   const mappedCategories = visibleCategories.map(cat => {
     let categoryValue: 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus' = 'vegetable';
