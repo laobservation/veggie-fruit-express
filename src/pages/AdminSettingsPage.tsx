@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import CustomersList from '@/components/admin/CustomersList';
 import FooterEditor from '@/components/admin/FooterEditor';
 import CategoryManager from '@/components/admin/CategoryManager';
+import HomeSeoManager from '@/components/admin/HomeSeoManager';
 
 const AdminSettingsPage = () => {
   const [activeTab, setActiveTab] = useState("categories");
@@ -25,9 +26,10 @@ const AdminSettingsPage = () => {
       </div>
       
       <Tabs defaultValue="categories" className="w-full" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-3 mb-8">
+        <TabsList className="grid grid-cols-4 mb-8">
           <TabsTrigger value="categories">Categories</TabsTrigger>
           <TabsTrigger value="footer">Footer</TabsTrigger>
+          <TabsTrigger value="homeseo">Home SEO</TabsTrigger>
           <TabsTrigger value="customers">Customers</TabsTrigger>
         </TabsList>
         
@@ -51,6 +53,18 @@ const AdminSettingsPage = () => {
             </CardHeader>
             <CardContent>
               <FooterEditor />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="homeseo">
+          <Card>
+            <CardHeader>
+              <CardTitle>Homepage SEO</CardTitle>
+              <CardDescription>Optimize your homepage for search engines</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <HomeSeoManager />
             </CardContent>
           </Card>
         </TabsContent>

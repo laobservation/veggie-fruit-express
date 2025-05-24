@@ -19,7 +19,8 @@ const Header = () => {
   
   const {
     getTotalItems,
-    openCart
+    openCart,
+    isCartOpen: cartOpen
   } = useCart();
 
   const { favorites } = useFavorites();
@@ -135,7 +136,7 @@ const Header = () => {
             </span>
           </Link>
           
-          {/* Cart Button */}
+          {/* Cart Button - Fixed to properly open cart */}
           <button 
             onClick={handleCartClick} 
             className="relative rounded-full p-2 flex items-center bg-transparent"

@@ -26,7 +26,7 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
 }) => {
   const { addItem } = useCart();
   const { isFavorite, toggleFavorite } = useFavorites();
-  const [displayCount, setDisplayCount] = useState(4);
+  const [displayCount, setDisplayCount] = useState(8);
   const [currentSlide, setCurrentSlide] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -38,15 +38,16 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
   // Filter products by category if specified
   const filteredProducts = category ? sortedProducts.filter(product => product.category === category) : sortedProducts;
 
-  // For sliding functionality, we work with all products but display 4 at a time
+  // For sliding functionality when showAll is false, we work with limited products
+  // For grid display when showAll is true, we show more products
+  const productsToShow = showAll ? filteredProducts.slice(0, displayCount) : filteredProducts;
   const itemsPerSlide = 4;
-  const totalSlides = Math.ceil(filteredProducts.length / itemsPerSlide);
+  const totalSlides = Math.ceil(productsToShow.length / itemsPerSlide);
   
-  // Get current slide products
-  const currentSlideProducts = filteredProducts.slice(
-    currentSlide * itemsPerSlide,
-    (currentSlide + 1) * itemsPerSlide
-  );
+  // Get current slide products for sliding mode
+  const currentSlideProducts = showAll 
+    ? productsToShow 
+    : productsToShow.slice(currentSlide * itemsPerSlide, (currentSlide + 1) * itemsPerSlide);
 
   const hasMoreProducts = displayCount < filteredProducts.length;
 
@@ -63,7 +64,7 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
   };
 
   const handleShowMore = () => {
-    setDisplayCount(prev => prev + 4);
+    setDisplayCount(prev => Math.min(prev + 8, filteredProducts.length));
   };
 
   const handlePrevSlide = () => {
@@ -92,43 +93,45 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
     return null;
   }
 
-  const canSlidePrev = totalSlides > 1;
-  const canSlideNext = totalSlides > 1;
+  const canSlidePrev = !showAll && totalSlides > 1;
+  const canSlideNext = !showAll && totalSlides > 1;
 
   return (
     <div className="mb-8 px-4 md:px-0">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-800">{title} :</h2>
-        <div className="flex gap-2">
-          <button 
-            onClick={handlePrevSlide}
-            disabled={!canSlidePrev}
-            className={`p-1 rounded-full border-2 transition-all duration-200 ${
-              canSlidePrev 
-                ? 'border-green-500 text-green-600 hover:bg-green-50 hover:scale-110 shadow-sm hover:shadow-md' 
-                : 'border-gray-300 text-gray-400 cursor-not-allowed'
-            }`}
-            aria-label="Previous products"
-          >
-            <ChevronLeft size={14} />
-          </button>
-          <button 
-            onClick={handleNextSlide}
-            disabled={!canSlideNext}
-            className={`p-1 rounded-full border-2 transition-all duration-200 ${
-              canSlideNext 
-                ? 'border-green-500 text-green-600 hover:bg-green-50 hover:scale-110 shadow-sm hover:shadow-md' 
-                : 'border-gray-300 text-gray-400 cursor-not-allowed'
-            }`}
-            aria-label="Next products"
-          >
-            <ChevronRight size={14} />
-          </button>
-        </div>
+        {!showAll && (
+          <div className="flex gap-2">
+            <button 
+              onClick={handlePrevSlide}
+              disabled={!canSlidePrev}
+              className={`p-1 rounded-full border-2 transition-all duration-200 ${
+                canSlidePrev 
+                  ? 'border-green-500 text-green-600 hover:bg-green-50 hover:scale-110 shadow-sm hover:shadow-md' 
+                  : 'border-gray-300 text-gray-400 cursor-not-allowed'
+              }`}
+              aria-label="Previous products"
+            >
+              <ChevronLeft size={14} />
+            </button>
+            <button 
+              onClick={handleNextSlide}
+              disabled={!canSlideNext}
+              className={`p-1 rounded-full border-2 transition-all duration-200 ${
+                canSlideNext 
+                  ? 'border-green-500 text-green-600 hover:bg-green-50 hover:scale-110 shadow-sm hover:shadow-md' 
+                  : 'border-gray-300 text-gray-400 cursor-not-allowed'
+              }`}
+              aria-label="Next products"
+            >
+              <ChevronRight size={14} />
+            </button>
+          </div>
+        )}
       </div>
 
-      {/* Slide indicators */}
-      {totalSlides > 1 && (
+      {/* Slide indicators - only for non-showAll mode */}
+      {!showAll && totalSlides > 1 && (
         <div className="flex justify-center mb-4 gap-2">
           {Array.from({ length: totalSlides }).map((_, index) => (
             <button
@@ -144,10 +147,10 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
       
       <div 
         ref={containerRef}
-        className="grid grid-cols-2 md:grid-cols-4 gap-3 transition-all duration-500 ease-in-out"
+        className={`grid ${showAll ? 'grid-cols-2 md:grid-cols-4 lg:grid-cols-6' : 'grid-cols-2 md:grid-cols-4'} gap-3 transition-all duration-500 ease-in-out`}
       >
         {isLoading ? (
-          Array(4).fill(0).map((_, index) => (
+          Array(showAll ? 8 : 4).fill(0).map((_, index) => (
             <div key={index} className="bg-white p-4 rounded-lg shadow-sm animate-pulse">
               <div className="w-full h-28 bg-gray-200 rounded mb-3"></div>
               <div className="h-4 bg-gray-200 rounded mb-2"></div>
@@ -203,7 +206,7 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
         )}
       </div>
       
-      {hasMoreProducts && !showAll && (
+      {hasMoreProducts && showAll && (
         <div className="flex justify-center mt-4">
           <Button 
             onClick={handleShowMore} 

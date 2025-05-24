@@ -1,126 +1,239 @@
 
-import { useEffect, useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { Facebook, Instagram, Twitter } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
-import { FooterSettings, defaultFooterSettings, ContactInfo, SocialLinks } from '@/types/footer';
+
+interface QuickLink {
+  title: string;
+  url: string;
+}
+
+interface SocialLinks {
+  facebook: string;
+  twitter: string;
+  instagram: string;
+  [key: string]: string;
+}
+
+interface ContactInfo {
+  email: string;
+  phone: string;
+  address: string;
+}
+
+interface FooterSettings {
+  company_name: string;
+  description: string;
+  copyright_text: string;
+  quick_links: QuickLink[];
+  social_links: SocialLinks;
+  contact_info: ContactInfo;
+}
 
 const Footer = () => {
-  const [footerData, setFooterData] = useState<FooterSettings>(defaultFooterSettings);
-  const [loading, setLoading] = useState(true);
+  const [settings, setSettings] = useState<FooterSettings>({
+    company_name: 'Marché Bio',
+    description: 'Livraison de fruits et légumes bio à domicile',
+    copyright_text: '© 2025 Marché Bio. All rights reserved.',
+    quick_links: [
+      { title: 'Accueil', url: '/' },
+      { title: 'Fruits', url: '/category/fruits' },
+      { title: 'Légumes', url: '/category/vegetables' }
+    ],
+    social_links: {
+      facebook: '#',
+      twitter: '#',
+      instagram: '#'
+    },
+    contact_info: {
+      email: 'contact@marchebiomobile.com',
+      phone: '+212 612345678',
+      address: 'Extention Zerhounia N236, Marrakech, Maroc'
+    }
+  });
 
   useEffect(() => {
-    async function loadFooterSettings() {
+    const fetchFooterSettings = async () => {
       try {
         const { data, error } = await supabase
           .from('footer_settings')
           .select('*')
-          .maybeSingle();
-        
+          .eq('id', 1)
+          .single();
+          
         if (error) {
           console.error('Error fetching footer settings:', error);
           return;
         }
         
         if (data) {
-          // Map database columns (snake_case) to our FooterSettings type (camelCase)
-          const mappedData: FooterSettings = {
-            id: data.id,
-            companyName: data.company_name || defaultFooterSettings.companyName,
-            description: data.description || defaultFooterSettings.description,
-            copyrightText: data.copyright_text || defaultFooterSettings.copyrightText,
-            contactInfo: data.contact_info as unknown as ContactInfo || defaultFooterSettings.contactInfo,
-            socialLinks: data.social_links as unknown as SocialLinks || defaultFooterSettings.socialLinks,
-          };
+          // Ensure proper typing
+          const quickLinks = Array.isArray(data.quick_links) 
+            ? data.quick_links.map((link: any) => ({
+                title: String(link.title || ''),
+                url: String(link.url || '')
+              }))
+            : [];
           
-          setFooterData(mappedData);
+          const socialLinks = typeof data.social_links === 'object' && data.social_links !== null
+            ? data.social_links as SocialLinks
+            : { facebook: '#', twitter: '#', instagram: '#' };
+          
+          const contactInfo = typeof data.contact_info === 'object' && data.contact_info !== null
+            ? {
+                email: String(data.contact_info.email || ''),
+                phone: String(data.contact_info.phone || ''),
+                address: String(data.contact_info.address || '')
+              }
+            : {
+                email: 'contact@marchebiomobile.com',
+                phone: '+212 612345678',
+                address: 'Extention Zerhounia N236, Marrakech, Maroc'
+              };
+          
+          setSettings({
+            company_name: data.company_name || 'Marché Bio',
+            description: data.description || 'Livraison de fruits et légumes bio à domicile',
+            copyright_text: data.copyright_text || '© 2025 Marché Bio. All rights reserved.',
+            quick_links: quickLinks,
+            social_links: socialLinks,
+            contact_info: contactInfo
+          });
         }
       } catch (error) {
-        console.error('Error loading footer settings:', error);
-      } finally {
-        setLoading(false);
+        console.error('Error fetching footer settings:', error);
       }
-    }
-
-    loadFooterSettings();
+    };
     
-    // Subscribe to realtime updates
-    const footerChannel = supabase
-      .channel('footer-changes')
+    fetchFooterSettings();
+    
+    // Set up realtime subscription for settings changes
+    const channel = supabase
+      .channel('footer-settings-changes')
       .on(
         'postgres_changes',
         {
-          event: '*',
+          event: 'UPDATE',
           schema: 'public',
-          table: 'footer_settings'
+          table: 'footer_settings',
+          filter: 'id=eq.1'
         },
         () => {
-          loadFooterSettings();
+          fetchFooterSettings();
         }
       )
       .subscribe();
-
+      
     return () => {
-      supabase.removeChannel(footerChannel);
+      supabase.removeChannel(channel);
     };
   }, []);
 
   return (
-    <footer className="bg-veggie-light pt-8 pb-4">
+    <footer className="bg-gray-800 text-white pt-12 pb-8">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
+          {/* Company Info */}
           <div>
-            <h3 className="text-lg font-semibold text-veggie-dark mb-4">{footerData.companyName}</h3>
-            <p className="text-gray-600 mb-4">
-              {footerData.description}
-            </p>
+            <h3 className="text-xl font-semibold mb-4">{settings.company_name}</h3>
+            <p className="mb-4 text-gray-300">{settings.description}</p>
             <div className="flex space-x-4">
-              {footerData.socialLinks?.facebook && (
-                <a href={footerData.socialLinks.facebook} className="text-veggie-primary hover:text-veggie-dark" target="_blank" rel="noopener noreferrer">
-                  <span className="sr-only">Facebook</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-facebook"><path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 0 1 1-1h3z"/></svg>
-                </a>
-              )}
-              {footerData.socialLinks?.instagram && (
-                <a href={footerData.socialLinks.instagram} className="text-veggie-primary hover:text-veggie-dark" target="_blank" rel="noopener noreferrer">
-                  <span className="sr-only">Instagram</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-instagram"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
-                </a>
-              )}
-              {footerData.socialLinks?.twitter && (
-                <a href={footerData.socialLinks.twitter} className="text-veggie-primary hover:text-veggie-dark" target="_blank" rel="noopener noreferrer">
-                  <span className="sr-only">Twitter</span>
-                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-twitter"><path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z"/></svg>
-                </a>
-              )}
+              <a 
+                href={settings.social_links.facebook} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-300 hover:text-white transition-colors"
+              >
+                <Facebook size={20} />
+                <span className="sr-only">Facebook</span>
+              </a>
+              <a 
+                href={settings.social_links.twitter} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-300 hover:text-white transition-colors"
+              >
+                <Twitter size={20} />
+                <span className="sr-only">Twitter</span>
+              </a>
+              <a 
+                href={settings.social_links.instagram} 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-gray-300 hover:text-white transition-colors"
+              >
+                <Instagram size={20} />
+                <span className="sr-only">Instagram</span>
+              </a>
             </div>
           </div>
-          
+
+          {/* Quick Links */}
           <div>
-            <h3 className="text-lg font-semibold text-veggie-dark mb-4">Contact Us</h3>
-            <ul className="space-y-2 text-gray-600">
-              {footerData.contactInfo?.phone && (
-                <li className="flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-veggie-primary"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
-                  <span>{footerData.contactInfo.phone}</span>
+            <h3 className="text-xl font-semibold mb-4">Liens Rapides</h3>
+            <ul className="space-y-2">
+              {settings.quick_links.map((link, index) => (
+                <li key={index}>
+                  <Link 
+                    to={link.url} 
+                    className="text-gray-300 hover:text-white transition-colors"
+                  >
+                    {link.title}
+                  </Link>
                 </li>
-              )}
-              {footerData.contactInfo?.email && (
-                <li className="flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-veggie-primary"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
-                  <span>{footerData.contactInfo.email}</span>
-                </li>
-              )}
-              {footerData.contactInfo?.address && (
-                <li className="flex items-center gap-2">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-veggie-primary"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"></path><circle cx="12" cy="10" r="3"></circle></svg>
-                  <span>{footerData.contactInfo.address}</span>
-                </li>
-              )}
+              ))}
             </ul>
           </div>
+
+          {/* Contact Info */}
+          <div>
+            <h3 className="text-xl font-semibold mb-4">Contact</h3>
+            <address className="not-italic text-gray-300">
+              <p className="mb-2">{settings.contact_info.address}</p>
+              <p className="mb-2">
+                <a 
+                  href={`mailto:${settings.contact_info.email}`}
+                  className="hover:text-white transition-colors"
+                >
+                  {settings.contact_info.email}
+                </a>
+              </p>
+              <p>
+                <a 
+                  href={`tel:${settings.contact_info.phone}`}
+                  className="hover:text-white transition-colors"
+                >
+                  {settings.contact_info.phone}
+                </a>
+              </p>
+            </address>
+          </div>
+
+          {/* Newsletter - Static section */}
+          <div className="lg:col-span-1">
+            <h3 className="text-xl font-semibold mb-4">Newsletter</h3>
+            <p className="text-gray-300 mb-4">Inscrivez-vous à notre newsletter pour recevoir nos dernières nouvelles.</p>
+            <form className="flex flex-wrap gap-2">
+              <input
+                type="email"
+                placeholder="Votre email"
+                className="flex-grow px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
+                required
+              />
+              <button
+                type="submit"
+                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition-colors"
+              >
+                S'inscrire
+              </button>
+            </form>
+          </div>
         </div>
-        
-        <div className="border-t border-gray-200 mt-8 pt-4 text-center text-gray-500 text-sm">
-          <p>{footerData.copyrightText}</p>
+
+        {/* Copyright */}
+        <div className="border-t border-gray-700 mt-12 pt-6 text-center text-gray-400">
+          <p>{settings.copyright_text}</p>
         </div>
       </div>
     </footer>
