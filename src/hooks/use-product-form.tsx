@@ -96,25 +96,15 @@ export const useProductForm = (product: Product) => {
     if (field === 'category') {
       // Find the selected category to get the proper mapping
       const selectedCategory = categories.find(cat => cat.value === value);
-      let categoryValue = value;
+      let categoryValue: 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus' = 'vegetable'; // Default value
       
       // Map to valid database category values
       if (selectedCategory) {
         const categoryName = selectedCategory.name.toLowerCase();
-        if (categoryName.includes('fruit')) {
-          categoryValue = 'fruit';
-        } else if (categoryName.includes('légume') || categoryName.includes('vegetable')) {
-          categoryValue = 'vegetable';
-        } else if (categoryName.includes('pack')) {
-          categoryValue = 'pack';
-        } else if (categoryName.includes('boisson') || categoryName.includes('drink')) {
-          categoryValue = 'drink';
-        } else if (categoryName.includes('salade') || categoryName.includes('jus')) {
-          categoryValue = 'salade-jus';
-        } else {
-          // Default mapping based on category name
-          categoryValue = mapCategoryNameToValue(categoryName);
-        }
+        categoryValue = mapCategoryNameToValue(categoryName);
+      } else {
+        // Fallback mapping if category not found
+        categoryValue = mapCategoryNameToValue(value);
       }
       
       console.log(`Setting category from ${value} to ${categoryValue} with categoryLink=true`);
@@ -133,7 +123,7 @@ export const useProductForm = (product: Product) => {
     }
   };
   
-  // FIXED: Enhanced mapping function that handles all category names
+  // FIXED: Enhanced mapping function that handles all category names and returns proper type
   const mapCategoryNameToValue = (name: string): 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus' => {
     const lowerName = name.toLowerCase();
     
