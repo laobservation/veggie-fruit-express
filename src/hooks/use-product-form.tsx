@@ -70,7 +70,7 @@ export const useProductForm = (product: Product) => {
       const formattedCategories = data.map(cat => ({
         id: cat.id,
         name: cat.name,
-        // Convert name to lowercase and handle special cases
+        // Convert name to lowercase and handle special cases - ensure proper mapping
         value: getCategoryValue(cat.name.toLowerCase())
       }));
       
@@ -82,14 +82,25 @@ export const useProductForm = (product: Product) => {
     }
   };
   
-  // Helper to map UI category names to database category values
+  // Helper to map UI category names to database category values - FIXED MAPPING
   const getCategoryValue = (name: string): string => {
-    // Map special cases
+    // Map special cases - ensure consistent mapping between UI and database
     const mapping: Record<string, string> = {
       'fruits': 'fruit',
+      'fruit': 'fruit',
       'légumes': 'vegetable',
+      'légume': 'vegetable',
+      'vegetable': 'vegetable',
+      'vegetables': 'vegetable',
       'salades & jus': 'salade-jus',
-      'salade & jus': 'salade-jus'
+      'salade & jus': 'salade-jus',
+      'salade-jus': 'salade-jus',
+      'packs': 'pack',
+      'pack': 'pack',
+      'boissons': 'drink',
+      'boisson': 'drink',
+      'drinks': 'drink',
+      'drink': 'drink'
     };
     
     return mapping[name.toLowerCase()] || name.toLowerCase();
@@ -104,10 +115,12 @@ export const useProductForm = (product: Product) => {
   };
   
   const handleSelectChange = (value: string, field: string) => {
-    // If changing category, also set categoryLink to true
+    // If changing category, ensure proper mapping and set categoryLink to true
     if (field === 'category') {
-      // Map the category value to a valid type
+      // Map the category value to a valid type and ensure it's correctly assigned
       const categoryValue = validateCategoryValue(value);
+      
+      console.log(`Setting category from ${value} to ${categoryValue} with categoryLink=true`);
       
       // Always set categoryLink to true when a category is selected
       setFormData({
@@ -115,7 +128,6 @@ export const useProductForm = (product: Product) => {
         [field]: categoryValue,
         categoryLink: true
       });
-      console.log(`Category set to ${categoryValue} with categoryLink=true`);
     } else {
       setFormData({
         ...formData,
@@ -124,7 +136,7 @@ export const useProductForm = (product: Product) => {
     }
   };
   
-  // Helper to validate and ensure proper category values
+  // Helper to validate and ensure proper category values - ENHANCED VALIDATION
   const validateCategoryValue = (value: string): 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus' => {
     // Define valid categories
     const validCategories: ('fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus')[] = [
@@ -136,21 +148,29 @@ export const useProductForm = (product: Product) => {
       return value as 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus';
     }
     
-    // Map common variations
+    // Map common variations - ENSURE CORRECT MAPPING
     const categoryMap: Record<string, 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus'> = {
       'fruits': 'fruit',
+      'fruit': 'fruit',
       'légumes': 'vegetable',
       'légume': 'vegetable',
       'vegetables': 'vegetable',
+      'vegetable': 'vegetable',
       'packs': 'pack',
+      'pack': 'pack',
       'drinks': 'drink',
+      'drink': 'drink',
       'boissons': 'drink',
+      'boisson': 'drink',
       'salade-jus': 'salade-jus',
       'salades & jus': 'salade-jus',
       'salade & jus': 'salade-jus'
     };
     
-    return categoryMap[value.toLowerCase()] || 'vegetable'; // Default to vegetable
+    const mappedValue = categoryMap[value.toLowerCase()];
+    console.log(`Mapping category value: ${value} -> ${mappedValue || 'vegetable'}`);
+    
+    return mappedValue || 'vegetable'; // Default to vegetable
   };
   
   const handleCheckboxChange = (checked: boolean, field: string) => {

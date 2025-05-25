@@ -147,10 +147,10 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
       
       <div 
         ref={containerRef}
-        className={`grid ${showAll ? 'grid-cols-2 md:grid-cols-4 lg:grid-cols-6' : 'grid-cols-2 md:grid-cols-4'} gap-3 transition-all duration-500 ease-in-out`}
+        className={`grid ${showAll ? 'grid-cols-2 md:grid-cols-6' : 'grid-cols-2 md:grid-cols-4'} gap-3 transition-all duration-500 ease-in-out`}
       >
         {isLoading ? (
-          Array(4).fill(0).map((_, index) => ( // Show 4 loading placeholders
+          Array(6).fill(0).map((_, index) => ( // Show 6 loading placeholders for desktop
             <div key={index} className="bg-white p-4 rounded-lg shadow-sm animate-pulse">
               <div className="w-full h-28 bg-gray-200 rounded mb-3"></div>
               <div className="h-4 bg-gray-200 rounded mb-2"></div>

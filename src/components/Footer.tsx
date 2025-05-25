@@ -1,190 +1,125 @@
 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Facebook, Instagram, Twitter } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import { FooterSettings } from '@/types/footer';
 
-interface QuickLink {
-  title: string;
-  url: string;
-}
-
-interface SocialLinks {
-  facebook: string;
-  twitter: string;
-  instagram: string;
-  [key: string]: string;
-}
-
-interface ContactInfo {
-  email: string;
-  phone: string;
-  address: string;
-}
-
-interface FooterSettings {
-  company_name: string;
-  description: string;
-  copyright_text: string;
-  quick_links: QuickLink[];
-  social_links: SocialLinks;
-  contact_info: ContactInfo;
-}
-
-const Footer = () => {
-  const [settings, setSettings] = useState<FooterSettings>({
-    company_name: 'Marché Bio',
-    description: 'Livraison de fruits et légumes bio à domicile',
-    copyright_text: '© 2025 Marché Bio. All rights reserved.',
-    quick_links: [
-      { title: 'Accueil', url: '/' },
-      { title: 'Fruits', url: '/category/fruits' },
-      { title: 'Légumes', url: '/category/vegetables' }
-    ],
-    social_links: {
-      facebook: '#',
-      twitter: '#',
-      instagram: '#'
-    },
-    contact_info: {
-      email: 'contact@marchebiomobile.com',
-      phone: '+212 612345678',
-      address: 'Extention Zerhounia N236, Marrakech, Maroc'
-    }
-  });
+const Footer: React.FC = () => {
+  const [footerSettings, setFooterSettings] = useState<FooterSettings | null>(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchFooterSettings = async () => {
-      try {
-        const { data, error } = await supabase
-          .from('footer_settings')
-          .select('*')
-          .eq('id', 1)
-          .single();
-          
-        if (error) {
-          console.error('Error fetching footer settings:', error);
-          return;
-        }
-        
-        if (data) {
-          // Safely parse contact_info
-          let contactInfo: ContactInfo = {
-            email: 'contact@marchebiomobile.com',
-            phone: '+212 612345678',
-            address: 'Extention Zerhounia N236, Marrakech, Maroc'
-          };
-          
-          if (data.contact_info && typeof data.contact_info === 'object' && !Array.isArray(data.contact_info)) {
-            const contactData = data.contact_info as Record<string, any>;
-            contactInfo = {
-              email: String(contactData.email || contactInfo.email),
-              phone: String(contactData.phone || contactInfo.phone),
-              address: String(contactData.address || contactInfo.address)
-            };
-          }
-          
-          // Safely parse quick_links
-          const quickLinks = Array.isArray(data.quick_links) 
-            ? data.quick_links.map((link: any) => ({
-                title: String(link.title || ''),
-                url: String(link.url || '')
-              }))
-            : [];
-          
-          // Safely parse social_links
-          let socialLinks: SocialLinks = { facebook: '#', twitter: '#', instagram: '#' };
-          if (data.social_links && typeof data.social_links === 'object' && !Array.isArray(data.social_links)) {
-            const socialData = data.social_links as Record<string, any>;
-            socialLinks = {
-              facebook: String(socialData.facebook || '#'),
-              twitter: String(socialData.twitter || '#'),
-              instagram: String(socialData.instagram || '#')
-            };
-          }
-          
-          setSettings({
-            company_name: data.company_name || 'Marché Bio',
-            description: data.description || 'Livraison de fruits et légumes bio à domicile',
-            copyright_text: data.copyright_text || '© 2025 Marché Bio. All rights reserved.',
-            quick_links: quickLinks,
-            social_links: socialLinks,
-            contact_info: contactInfo
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching footer settings:', error);
-      }
-    };
-    
     fetchFooterSettings();
-    
-    // Set up realtime subscription for settings changes
-    const channel = supabase
-      .channel('footer-settings-changes')
-      .on(
-        'postgres_changes',
-        {
-          event: 'UPDATE',
-          schema: 'public',
-          table: 'footer_settings',
-          filter: 'id=eq.1'
-        },
-        () => {
-          fetchFooterSettings();
-        }
-      )
-      .subscribe();
-      
-    return () => {
-      supabase.removeChannel(channel);
-    };
   }, []);
 
+  const fetchFooterSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('footer_settings')
+        .select('*')
+        .eq('id', 1)
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error fetching footer settings:', error);
+        return;
+      }
+
+      if (data) {
+        // FIXED: Proper type handling with safe property access
+        const contactInfo = data.contact_info && typeof data.contact_info === 'object' && !Array.isArray(data.contact_info) 
+          ? data.contact_info as Record<string, any>
+          : {};
+          
+        const socialLinks = data.social_links && typeof data.social_links === 'object' && !Array.isArray(data.social_links)
+          ? data.social_links as Record<string, any>
+          : {};
+          
+        const quickLinks = Array.isArray(data.quick_links) 
+          ? data.quick_links as Array<{ title: string; url: string }>
+          : [];
+
+        setFooterSettings({
+          id: data.id,
+          companyName: data.company_name || 'Marché Bio',
+          description: data.description || 'Fresh fruits and vegetables delivered right to your doorstep.',
+          copyrightText: data.copyright_text || `© ${new Date().getFullYear()} Marché Bio. All rights reserved.`,
+          contactInfo: {
+            email: contactInfo.email || 'contact@marchebiomobile.com',
+            phone: contactInfo.phone || '+212 649150370',
+            address: contactInfo.address || 'Meknès, Maroc'
+          },
+          socialLinks: {
+            facebook: socialLinks.facebook || '',
+            instagram: socialLinks.instagram || '',
+            twitter: socialLinks.twitter || ''
+          },
+          quickLinks: quickLinks.length > 0 ? quickLinks : [
+            { title: 'Accueil', url: '/' },
+            { title: 'Fruits', url: '/category/fruits' },
+            { title: 'Légumes', url: '/category/légumes' }
+          ]
+        });
+      }
+    } catch (error) {
+      console.error('Error in fetchFooterSettings:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <footer className="bg-gray-800 text-white py-8 hidden md:block">
+        <div className="container mx-auto px-4">
+          <div className="animate-pulse">
+            <div className="h-4 bg-gray-600 rounded w-1/4 mb-4"></div>
+            <div className="h-3 bg-gray-600 rounded w-1/2 mb-2"></div>
+            <div className="h-3 bg-gray-600 rounded w-1/3"></div>
+          </div>
+        </div>
+      </footer>
+    );
+  }
+
+  if (!footerSettings) {
+    return null;
+  }
+
   return (
-    <footer className="bg-gray-800 text-white pt-12 pb-8">
+    <footer className="bg-gray-800 text-white py-8 hidden md:block">
       <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
-          <div>
-            <h3 className="text-xl font-semibold mb-4">{settings.company_name}</h3>
-            <p className="mb-4 text-gray-300">{settings.description}</p>
-            <div className="flex space-x-4">
-              <a 
-                href={settings.social_links.facebook} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-white transition-colors"
-              >
-                <Facebook size={20} />
-                <span className="sr-only">Facebook</span>
-              </a>
-              <a 
-                href={settings.social_links.twitter} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-white transition-colors"
-              >
-                <Twitter size={20} />
-                <span className="sr-only">Twitter</span>
-              </a>
-              <a 
-                href={settings.social_links.instagram} 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-gray-300 hover:text-white transition-colors"
-              >
-                <Instagram size={20} />
-                <span className="sr-only">Instagram</span>
-              </a>
+          <div className="col-span-1 md:col-span-2">
+            <h3 className="text-xl font-bold mb-4">{footerSettings.companyName}</h3>
+            <p className="text-gray-300 mb-4">
+              {footerSettings.description}
+            </p>
+            <div className="space-y-2">
+              {footerSettings.contactInfo?.email && (
+                <p className="text-sm">
+                  <span className="font-medium">Email:</span> {footerSettings.contactInfo.email}
+                </p>
+              )}
+              {footerSettings.contactInfo?.phone && (
+                <p className="text-sm">
+                  <span className="font-medium">Téléphone:</span> {footerSettings.contactInfo.phone}
+                </p>
+              )}
+              {footerSettings.contactInfo?.address && (
+                <p className="text-sm">
+                  <span className="font-medium">Adresse:</span> {footerSettings.contactInfo.address}
+                </p>
+              )}
             </div>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="text-xl font-semibold mb-4">Liens Rapides</h3>
+            <h4 className="text-lg font-semibold mb-4">Liens rapides</h4>
             <ul className="space-y-2">
-              {settings.quick_links.map((link, index) => (
+              {footerSettings.quickLinks?.map((link, index) => (
                 <li key={index}>
                   <Link 
                     to={link.url} 
@@ -197,54 +132,48 @@ const Footer = () => {
             </ul>
           </div>
 
-          {/* Contact Info */}
+          {/* Social Links */}
           <div>
-            <h3 className="text-xl font-semibold mb-4">Contact</h3>
-            <address className="not-italic text-gray-300">
-              <p className="mb-2">{settings.contact_info.address}</p>
-              <p className="mb-2">
+            <h4 className="text-lg font-semibold mb-4">Suivez-nous</h4>
+            <div className="flex space-x-4">
+              {footerSettings.socialLinks?.facebook && (
                 <a 
-                  href={`mailto:${settings.contact_info.email}`}
-                  className="hover:text-white transition-colors"
+                  href={footerSettings.socialLinks.facebook} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-white transition-colors"
                 >
-                  {settings.contact_info.email}
+                  Facebook
                 </a>
-              </p>
-              <p>
+              )}
+              {footerSettings.socialLinks?.instagram && (
                 <a 
-                  href={`tel:${settings.contact_info.phone}`}
-                  className="hover:text-white transition-colors"
+                  href={footerSettings.socialLinks.instagram} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-white transition-colors"
                 >
-                  {settings.contact_info.phone}
+                  Instagram
                 </a>
-              </p>
-            </address>
-          </div>
-
-          {/* Newsletter - Static section */}
-          <div className="lg:col-span-1">
-            <h3 className="text-xl font-semibold mb-4">Newsletter</h3>
-            <p className="text-gray-300 mb-4">Inscrivez-vous à notre newsletter pour recevoir nos dernières nouvelles.</p>
-            <form className="flex flex-wrap gap-2">
-              <input
-                type="email"
-                placeholder="Votre email"
-                className="flex-grow px-4 py-2 rounded bg-gray-700 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-green-500"
-                required
-              />
-              <button
-                type="submit"
-                className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded transition-colors"
-              >
-                S'inscrire
-              </button>
-            </form>
+              )}
+              {footerSettings.socialLinks?.twitter && (
+                <a 
+                  href={footerSettings.socialLinks.twitter} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-gray-300 hover:text-white transition-colors"
+                >
+                  Twitter
+                </a>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Copyright */}
-        <div className="border-t border-gray-700 mt-12 pt-6 text-center text-gray-400">
-          <p>{settings.copyright_text}</p>
+        <div className="border-t border-gray-700 mt-8 pt-8 text-center">
+          <p className="text-gray-300 text-sm">
+            {footerSettings.copyrightText}
+          </p>
         </div>
       </div>
     </footer>

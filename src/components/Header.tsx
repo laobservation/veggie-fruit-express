@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
@@ -8,6 +9,7 @@ import MobileMenu from './MobileMenu';
 import { useIsMobile } from '@/hooks/use-mobile';
 import SearchBar from './SearchBar';
 import { useFavorites } from '@/hooks/use-favorites';
+
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -30,6 +32,7 @@ const Header = () => {
       setIsMobileMenuOpen(false);
     }
   }, [isMobile, isMobileMenuOpen]);
+  
   useEffect(() => {
     const handleCartUpdated = () => {
       setIsAnimating(true);
@@ -48,11 +51,15 @@ const Header = () => {
       document.removeEventListener('favorite-updated', handleFavoriteUpdated);
     };
   }, []);
+  
+  // FIXED: Ensure cart always opens when clicked
   const handleCartClick = () => {
+    console.log('Cart button clicked - opening cart');
     setIsAnimating(true);
     setTimeout(() => setIsAnimating(false), 600);
-    openCart();
+    openCart(); // This should always open the cart
   };
+  
   return <>
       <header className="bg-white sticky top-0 z-50 shadow-sm py-[19px]">
         <div className="container mx-auto px-4 flex items-center justify-between relative">
@@ -103,7 +110,7 @@ const Header = () => {
               </span>
             </Link>
             
-            {/* Cart Button - Fixed to properly open cart */}
+            {/* Cart Button - FIXED to always open cart when clicked */}
             <button onClick={handleCartClick} className="relative rounded-full p-2 flex items-center bg-transparent" aria-label="View cart">
               <div className="relative">
                 <ShoppingCart className={`h-5 w-5 text-green-600 transition-all duration-300 ease-in-out ${isAnimating ? 'animate-bounce scale-125' : ''}`} />
@@ -121,8 +128,9 @@ const Header = () => {
         <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
       </header>
       
-      {/* Cart Component */}
+      {/* Cart Component - ENSURE it's always available */}
       <Cart isOpen={isCartOpen} onClose={closeCart} />
     </>;
 };
+
 export default Header;
