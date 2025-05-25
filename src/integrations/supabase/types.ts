@@ -75,36 +75,6 @@ export type Database = {
         }
         Relationships: []
       }
-      customer_videos: {
-        Row: {
-          created_at: string
-          id: string
-          platform: string
-          thumbnail_url: string | null
-          title: string
-          updated_at: string
-          video_url: string
-        }
-        Insert: {
-          created_at?: string
-          id?: string
-          platform: string
-          thumbnail_url?: string | null
-          title: string
-          updated_at?: string
-          video_url: string
-        }
-        Update: {
-          created_at?: string
-          id?: string
-          platform?: string
-          thumbnail_url?: string | null
-          title?: string
-          updated_at?: string
-          video_url?: string
-        }
-        Relationships: []
-      }
       favorites: {
         Row: {
           created_at: string

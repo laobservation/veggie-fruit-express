@@ -25,7 +25,7 @@ export function useFooterSettings() {
       }
       
       if (data) {
-        // Proper type handling with safe property access
+        // FIXED: Proper type handling with safe property access and type assertions
         const contactInfo = data.contact_info && typeof data.contact_info === 'object' && !Array.isArray(data.contact_info) 
           ? data.contact_info as ContactInfo
           : defaultFooterSettings.contactInfo!;
@@ -34,12 +34,9 @@ export function useFooterSettings() {
           ? data.social_links as SocialLinks
           : defaultFooterSettings.socialLinks!;
           
-        // Proper handling of Json[] to QuickLink[] conversion with type safety
+        // FIXED: Proper handling of Json[] to QuickLink[] conversion
         const quickLinks = Array.isArray(data.quick_links) 
-          ? (data.quick_links as any[]).map(link => ({
-              title: link.title || '',
-              url: link.url || ''
-            })) as QuickLink[]
+          ? (data.quick_links as unknown as QuickLink[])
           : defaultFooterSettings.quickLinks!;
 
         setFooterSettings({
@@ -69,19 +66,19 @@ export function useFooterSettings() {
     setFooterSettings(newSettings);
   };
   
-  // Save footer settings with proper type conversion for Supabase
+  // FIXED: Save footer settings with proper type conversion for Supabase
   const saveFooterSettings = async () => {
     setSaveLoading(true);
     try {
-      // Create proper JSON objects for Supabase storage with type assertion
+      // Convert types to Json for Supabase storage - cast as unknown first then to Json
       const settingsToSave = {
         id: 1, // Always use ID 1 for the single settings record
         company_name: footerSettings.companyName || defaultFooterSettings.companyName,
         description: footerSettings.description || defaultFooterSettings.description,
         copyright_text: footerSettings.copyrightText || defaultFooterSettings.copyrightText,
-        contact_info: footerSettings.contactInfo || defaultFooterSettings.contactInfo,
-        social_links: footerSettings.socialLinks || defaultFooterSettings.socialLinks,
-        quick_links: footerSettings.quickLinks || defaultFooterSettings.quickLinks,
+        contact_info: (footerSettings.contactInfo || defaultFooterSettings.contactInfo) as unknown as any,
+        social_links: (footerSettings.socialLinks || defaultFooterSettings.socialLinks) as unknown as any,
+        quick_links: (footerSettings.quickLinks || defaultFooterSettings.quickLinks) as unknown as any,
         updated_at: new Date().toISOString(),
       };
       
@@ -89,7 +86,7 @@ export function useFooterSettings() {
       
       const { error } = await supabase
         .from('footer_settings')
-        .upsert(settingsToSave as any, { onConflict: 'id' });
+        .upsert(settingsToSave, { onConflict: 'id' });
       
       if (error) {
         console.error('Error saving footer settings:', error);

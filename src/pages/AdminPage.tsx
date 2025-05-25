@@ -1,5 +1,5 @@
 
-import { ArrowLeft, Home, LogOut, Package, Settings, ShoppingBag, Sliders, Search, Grid3X3, Image, Video, Edit, FileText } from 'lucide-react';
+import { ArrowLeft, Home, LogOut, Package, Settings, ShoppingBag, Sliders, Search } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,57 +7,14 @@ import Dashboard from '@/components/admin/Dashboard';
 import ProductManager from '@/components/admin/ProductManager';
 import OrdersManager from '@/components/admin/OrdersManager';
 import SeoManager from '@/components/admin/SeoManager';
-import CategoryManager from '@/components/admin/CategoryManager';
-import SliderManager from '@/components/admin/SliderManager';
-import WebsiteSettings from '@/components/admin/WebsiteSettings';
-import FooterEditor from '@/components/admin/FooterEditor';
-import ContentEditor from '@/components/admin/ContentEditor';
-import CustomerExperienceManager from '@/components/admin/CustomerExperienceManager';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 
 const AdminPage = () => {
-  const [activeTab, setActiveTab] = useState('products');
+  const [activeTab, setActiveTab] = useState("dashboard");
   const navigate = useNavigate();
   const { toast } = useToast();
-
-  const tabs = [
-    { id: 'products', label: 'Produits', icon: Package },
-    { id: 'orders', label: 'Commandes', icon: ShoppingBag },
-    { id: 'categories', label: 'Catégories', icon: Grid3X3 },
-    { id: 'slider', label: 'Slider', icon: Image },
-    { id: 'settings', label: 'Paramètres', icon: Settings },
-    { id: 'footer', label: 'Footer', icon: FileText },
-    { id: 'seo', label: 'SEO', icon: Search },
-    { id: 'customer-experience', label: 'Expérience Client', icon: Video },
-    { id: 'content', label: 'Contenu', icon: Edit },
-  ];
-
-  const renderContent = () => {
-    switch (activeTab) {
-      case 'products':
-        return <ProductManager />;
-      case 'orders':
-        return <OrdersManager />;
-      case 'categories':
-        return <CategoryManager />;
-      case 'slider':
-        return <SliderManager />;
-      case 'settings':
-        return <WebsiteSettings />;
-      case 'footer':
-        return <FooterEditor />;
-      case 'seo':
-        return <SeoManager />;
-      case 'customer-experience':
-        return <CustomerExperienceManager />;
-      case 'content':
-        return <ContentEditor />;
-      default:
-        return <ProductManager />;
-    }
-  };
-
+  
   const handleLogout = () => {
     sessionStorage.removeItem('adminAuth');
     toast({
@@ -102,21 +59,41 @@ const AdminPage = () => {
         </div>
       </div>
       
-      <Tabs defaultValue="products" className="w-full" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-9 mb-8">
-          {tabs.map(tab => (
-            <TabsTrigger key={tab.id} value={tab.id}>
-              <tab.icon className="h-4 w-4 mr-2" />
-              {tab.label}
-            </TabsTrigger>
-          ))}
+      <Tabs defaultValue="dashboard" className="w-full" value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid grid-cols-4 mb-8">
+          <TabsTrigger value="dashboard">
+            <Home className="h-4 w-4 mr-2" />
+            Tableau de bord
+          </TabsTrigger>
+          <TabsTrigger value="products">
+            <Package className="h-4 w-4 mr-2" />
+            Produits
+          </TabsTrigger>
+          <TabsTrigger value="orders">
+            <ShoppingBag className="h-4 w-4 mr-2" />
+            Commandes
+          </TabsTrigger>
+          <TabsTrigger value="seo">
+            <Search className="h-4 w-4 mr-2" />
+            SEO
+          </TabsTrigger>
         </TabsList>
         
-        {tabs.map(tab => (
-          <TabsContent key={tab.id} value={tab.id}>
-            {renderContent()}
-          </TabsContent>
-        ))}
+        <TabsContent value="dashboard">
+          <Dashboard />
+        </TabsContent>
+        
+        <TabsContent value="products">
+          <ProductManager />
+        </TabsContent>
+        
+        <TabsContent value="orders">
+          <OrdersManager />
+        </TabsContent>
+        
+        <TabsContent value="seo">
+          <SeoManager />
+        </TabsContent>
       </Tabs>
     </div>
   );

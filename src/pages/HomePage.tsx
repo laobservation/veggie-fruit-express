@@ -10,7 +10,6 @@ import { supabase } from '@/integrations/supabase/client';
 import PromotionSlider from '@/components/home/PromotionSlider';
 import CategoriesSection from '@/components/home/CategoriesSection';
 import PopularItemsSection from '@/components/home/PopularItemsSection';
-import CustomerExperienceSection from '@/components/home/CustomerExperienceSection';
 
 interface HomeSEO {
   meta_title: string;
@@ -160,9 +159,6 @@ const HomePage: React.FC = () => {
           category={category.categoryValue}
         />
       ))}
-
-      {/* Customer Experience Section */}
-      <CustomerExperienceSection />
     </div>
   );
 };

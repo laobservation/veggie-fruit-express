@@ -70,8 +70,8 @@ export const useProductForm = (product: Product) => {
       const formattedCategories = data.map(cat => ({
         id: cat.id,
         name: cat.name,
-        // Use the database name directly as value to ensure proper mapping
-        value: mapCategoryNameToValue(cat.name.toLowerCase())
+        // FIXED: Use the database name directly as value - this ensures all categories work
+        value: cat.name.toLowerCase()
       }));
       
       console.log('Formatted categories for product form:', formattedCategories);
@@ -92,12 +92,22 @@ export const useProductForm = (product: Product) => {
   };
   
   const handleSelectChange = (value: string, field: string) => {
+    // FIXED: If changing category, map the selected category name properly
     if (field === 'category') {
-      // Find the selected category to ensure proper mapping
+      // Find the selected category to get the proper mapping
       const selectedCategory = categories.find(cat => cat.value === value);
-      let categoryValue = mapCategoryNameToValue(value);
+      let categoryValue: 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus' = 'vegetable'; // Default value
       
-      console.log(`Setting category to: ${categoryValue} with categoryLink=true`);
+      // Map to valid database category values
+      if (selectedCategory) {
+        const categoryName = selectedCategory.name.toLowerCase();
+        categoryValue = mapCategoryNameToValue(categoryName);
+      } else {
+        // Fallback mapping if category not found
+        categoryValue = mapCategoryNameToValue(value);
+      }
+      
+      console.log(`Setting category from ${value} to ${categoryValue} with categoryLink=true`);
       
       // Always set categoryLink to true when a category is selected
       setFormData({
@@ -113,7 +123,7 @@ export const useProductForm = (product: Product) => {
     }
   };
   
-  // Enhanced mapping function that handles all category names and returns proper type
+  // FIXED: Enhanced mapping function that handles all category names and returns proper type
   const mapCategoryNameToValue = (name: string): 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus' => {
     const lowerName = name.toLowerCase();
     
