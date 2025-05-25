@@ -5,7 +5,7 @@ import { ShoppingCart, Search, Heart, Menu, X } from 'lucide-react';
 import { useCart } from '@/hooks/use-cart';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useCategories } from '@/hooks/use-categories';
-import { useMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { supabase } from '@/integrations/supabase/client';
 import MobileMenu from './MobileMenu';
 import Cart from './Cart';
@@ -19,7 +19,7 @@ const Header: React.FC = () => {
   const { items } = useCart();
   const { favorites } = useFavorites();
   const { categories } = useCategories();
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isCartOpen, setIsCartOpen] = useState(false);
@@ -121,25 +121,27 @@ const Header: React.FC = () => {
       <header className="bg-white shadow-md sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
-            <Link to="/" className="text-2xl font-bold text-green-600">
-              {settings.site_name}
-            </Link>
-            
-            {/* Desktop Categories Navigation */}
-            <nav className="hidden lg:flex items-center space-x-8">
-              <Link to="/" className="text-gray-700 hover:text-green-600 transition-colors font-medium">
-                Accueil
+            <div className="flex items-center space-x-8">
+              <Link to="/" className="text-2xl font-bold text-green-600">
+                {settings.site_name}
               </Link>
-              {visibleCategories.map((category) => (
-                <Link 
-                  key={category.id}
-                  to={getCategoryUrl(category.name)}
-                  className="text-gray-700 hover:text-green-600 transition-colors font-medium"
-                >
-                  {category.name}
+              
+              {/* Desktop Categories Navigation */}
+              <nav className="hidden lg:flex items-center space-x-6">
+                <Link to="/" className="text-gray-700 hover:text-green-600 transition-colors font-medium">
+                  Accueil
                 </Link>
-              ))}
-            </nav>
+                {visibleCategories.map((category) => (
+                  <Link 
+                    key={category.id}
+                    to={getCategoryUrl(category.name)}
+                    className="text-gray-700 hover:text-green-600 transition-colors font-medium"
+                  >
+                    {category.name}
+                  </Link>
+                ))}
+              </nav>
+            </div>
             
             <div className="flex items-center space-x-4">
               <SearchBar />
