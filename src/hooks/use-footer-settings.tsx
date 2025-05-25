@@ -70,15 +70,15 @@ export function useFooterSettings() {
   const saveFooterSettings = async () => {
     setSaveLoading(true);
     try {
-      // Convert types to Json for Supabase storage
+      // Convert types to Json for Supabase storage - cast as unknown first then to Json
       const settingsToSave = {
         id: 1, // Always use ID 1 for the single settings record
         company_name: footerSettings.companyName || defaultFooterSettings.companyName,
         description: footerSettings.description || defaultFooterSettings.description,
         copyright_text: footerSettings.copyrightText || defaultFooterSettings.copyrightText,
-        contact_info: footerSettings.contactInfo || defaultFooterSettings.contactInfo,
-        social_links: footerSettings.socialLinks || defaultFooterSettings.socialLinks,
-        quick_links: footerSettings.quickLinks || defaultFooterSettings.quickLinks,
+        contact_info: (footerSettings.contactInfo || defaultFooterSettings.contactInfo) as unknown as any,
+        social_links: (footerSettings.socialLinks || defaultFooterSettings.socialLinks) as unknown as any,
+        quick_links: (footerSettings.quickLinks || defaultFooterSettings.quickLinks) as unknown as any,
         updated_at: new Date().toISOString(),
       };
       
