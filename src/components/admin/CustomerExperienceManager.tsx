@@ -38,7 +38,8 @@ const CustomerExperienceManager: React.FC = () => {
 
   const fetchVideos = async () => {
     try {
-      const { data, error } = await supabase
+      // Use type assertion since the table isn't in the generated types yet
+      const { data, error } = await (supabase as any)
         .from('customer_videos')
         .select('*')
         .order('created_at', { ascending: false });
@@ -63,7 +64,7 @@ const CustomerExperienceManager: React.FC = () => {
     
     try {
       if (editingVideo) {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('customer_videos')
           .update(formData)
           .eq('id', editingVideo.id);
@@ -75,7 +76,7 @@ const CustomerExperienceManager: React.FC = () => {
           description: "Vidéo mise à jour avec succès"
         });
       } else {
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('customer_videos')
           .insert([formData]);
         
@@ -121,7 +122,7 @@ const CustomerExperienceManager: React.FC = () => {
     if (!confirm('Êtes-vous sûr de vouloir supprimer cette vidéo ?')) return;
     
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('customer_videos')
         .delete()
         .eq('id', id);

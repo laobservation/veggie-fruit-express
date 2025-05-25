@@ -73,15 +73,15 @@ export function useFooterSettings() {
   const saveFooterSettings = async () => {
     setSaveLoading(true);
     try {
-      // Create proper JSON objects for Supabase storage
+      // Create proper JSON objects for Supabase storage with type assertion
       const settingsToSave = {
         id: 1, // Always use ID 1 for the single settings record
         company_name: footerSettings.companyName || defaultFooterSettings.companyName,
         description: footerSettings.description || defaultFooterSettings.description,
         copyright_text: footerSettings.copyrightText || defaultFooterSettings.copyrightText,
-        contact_info: JSON.parse(JSON.stringify(footerSettings.contactInfo || defaultFooterSettings.contactInfo)),
-        social_links: JSON.parse(JSON.stringify(footerSettings.socialLinks || defaultFooterSettings.socialLinks)),
-        quick_links: JSON.parse(JSON.stringify(footerSettings.quickLinks || defaultFooterSettings.quickLinks)),
+        contact_info: footerSettings.contactInfo || defaultFooterSettings.contactInfo,
+        social_links: footerSettings.socialLinks || defaultFooterSettings.socialLinks,
+        quick_links: footerSettings.quickLinks || defaultFooterSettings.quickLinks,
         updated_at: new Date().toISOString(),
       };
       
@@ -89,7 +89,7 @@ export function useFooterSettings() {
       
       const { error } = await supabase
         .from('footer_settings')
-        .upsert(settingsToSave, { onConflict: 'id' });
+        .upsert(settingsToSave as any, { onConflict: 'id' });
       
       if (error) {
         console.error('Error saving footer settings:', error);

@@ -1,4 +1,5 @@
-import { ArrowLeft, Home, LogOut, Package, Settings, ShoppingBag, Sliders, Search, Grid3X3, Image, Video, Edit } from 'lucide-react';
+
+import { ArrowLeft, Home, LogOut, Package, Settings, ShoppingBag, Sliders, Search, Grid3X3, Image, Video, Edit, FileText } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -17,6 +18,8 @@ import { useToast } from '@/hooks/use-toast';
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = useState('products');
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
   const tabs = [
     { id: 'products', label: 'Produits', icon: Package },
@@ -100,7 +103,7 @@ const AdminPage = () => {
       </div>
       
       <Tabs defaultValue="products" className="w-full" value={activeTab} onValueChange={setActiveTab}>
-        <TabsList className="grid grid-cols-4 mb-8">
+        <TabsList className="grid grid-cols-9 mb-8">
           {tabs.map(tab => (
             <TabsTrigger key={tab.id} value={tab.id}>
               <tab.icon className="h-4 w-4 mr-2" />
@@ -109,9 +112,11 @@ const AdminPage = () => {
           ))}
         </TabsList>
         
-        <TabsContent value="products">
-          {renderContent()}
-        </TabsContent>
+        {tabs.map(tab => (
+          <TabsContent key={tab.id} value={tab.id}>
+            {renderContent()}
+          </TabsContent>
+        ))}
       </Tabs>
     </div>
   );

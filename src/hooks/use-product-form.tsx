@@ -95,14 +95,7 @@ export const useProductForm = (product: Product) => {
     if (field === 'category') {
       // Find the selected category to ensure proper mapping
       const selectedCategory = categories.find(cat => cat.value === value);
-      let categoryValue: 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus' = 'vegetable';
-      
-      if (selectedCategory) {
-        categoryValue = selectedCategory.value as 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus';
-      } else {
-        // Direct mapping if category not found in list
-        categoryValue = value as 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus';
-      }
+      let categoryValue = mapCategoryNameToValue(value);
       
       console.log(`Setting category to: ${categoryValue} with categoryLink=true`);
       

@@ -22,7 +22,8 @@ const CustomerExperienceSection: React.FC = () => {
 
   const fetchCustomerVideos = async () => {
     try {
-      const { data, error } = await supabase
+      // Use type assertion since the table isn't in the generated types yet
+      const { data, error } = await (supabase as any)
         .from('customer_videos')
         .select('*')
         .order('created_at', { ascending: false })
