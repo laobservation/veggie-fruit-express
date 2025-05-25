@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { toast } from 'sonner'; 
 import { supabase } from '@/integrations/supabase/client';
 import { FooterSettings, defaultFooterSettings, ContactInfo, SocialLinks, QuickLink } from '@/types/footer';
-import { Json } from '@/integrations/supabase/types';
 
 export function useFooterSettings() {
   const [footerSettings, setFooterSettings] = useState<FooterSettings>(defaultFooterSettings);
@@ -17,71 +16,47 @@ export function useFooterSettings() {
       const { data, error } = await supabase
         .from('footer_settings')
         .select('*')
+        .eq('id', 1)
         .maybeSingle();
       
       if (error) {
         console.error('Error fetching footer settings:', error);
-        if (error.code === 'PGRST116') {
-          // Table doesn't exist or no data found
-          await initializeFooterSettings();
-        } else {
-          throw new Error('Failed to fetch footer settings');
-        }
-        return;
+        throw new Error('Failed to fetch footer settings');
       }
       
       if (data) {
-        // Map database columns (snake_case) to our FooterSettings type (camelCase)
-        const mappedData: FooterSettings = {
+        // FIXED: Proper type handling with safe property access
+        const contactInfo = data.contact_info && typeof data.contact_info === 'object' && !Array.isArray(data.contact_info) 
+          ? data.contact_info as ContactInfo
+          : defaultFooterSettings.contactInfo!;
+          
+        const socialLinks = data.social_links && typeof data.social_links === 'object' && !Array.isArray(data.social_links)
+          ? data.social_links as SocialLinks
+          : defaultFooterSettings.socialLinks!;
+          
+        const quickLinks = Array.isArray(data.quick_links) 
+          ? data.quick_links as QuickLink[]
+          : defaultFooterSettings.quickLinks!;
+
+        setFooterSettings({
           id: data.id,
           companyName: data.company_name || defaultFooterSettings.companyName,
           description: data.description || defaultFooterSettings.description,
           copyrightText: data.copyright_text || defaultFooterSettings.copyrightText,
-          contactInfo: data.contact_info as unknown as ContactInfo || defaultFooterSettings.contactInfo,
-          socialLinks: data.social_links as unknown as SocialLinks || defaultFooterSettings.socialLinks,
-          quickLinks: data.quick_links as unknown as QuickLink[] || defaultFooterSettings.quickLinks,
-        };
-        
-        setFooterSettings(mappedData);
+          contactInfo,
+          socialLinks,
+          quickLinks
+        });
       } else {
-        // No settings found, initialize
-        await initializeFooterSettings();
+        // No settings found, initialize with defaults
+        setFooterSettings(defaultFooterSettings);
       }
     } catch (error) {
-      console.error('Error in fetching footer settings:', error);
+      console.error('Error in fetchFooterSettings:', error);
       toast.error('Failed to load footer settings');
+      setFooterSettings(defaultFooterSettings);
     } finally {
       setLoading(false);
-    }
-  };
-  
-  // Initialize settings table if it doesn't exist
-  const initializeFooterSettings = async () => {
-    try {
-      console.log('Initializing footer settings...');
-      
-      const { error } = await supabase
-        .from('footer_settings')
-        .insert([{
-          id: 1, // Always use ID 1 for the single settings record
-          company_name: defaultFooterSettings.companyName,
-          description: defaultFooterSettings.description,
-          copyright_text: defaultFooterSettings.copyrightText,
-          contact_info: defaultFooterSettings.contactInfo as unknown as Json,
-          social_links: defaultFooterSettings.socialLinks as unknown as Json,
-          quick_links: defaultFooterSettings.quickLinks as unknown as Json,
-        }]);
-      
-      if (error) {
-        console.error('Error creating footer settings:', error);
-        throw error;
-      }
-      
-      setFooterSettings(defaultFooterSettings);
-      toast.success('Footer settings initialized successfully');
-    } catch (error) {
-      console.error('Error initializing footer settings:', error);
-      toast.error('Failed to initialize footer settings');
     }
   };
   
@@ -90,31 +65,35 @@ export function useFooterSettings() {
     setFooterSettings(newSettings);
   };
   
-  // Save footer settings to the database
+  // FIXED: Save footer settings with proper error handling and type conversion
   const saveFooterSettings = async () => {
     setSaveLoading(true);
     try {
-      // Map our FooterSettings type (camelCase) to database columns (snake_case)
-      const dbData = {
+      // Ensure all required fields have values
+      const settingsToSave = {
         id: 1, // Always use ID 1 for the single settings record
-        company_name: footerSettings.companyName,
-        description: footerSettings.description,
-        copyright_text: footerSettings.copyrightText,
-        contact_info: footerSettings.contactInfo as unknown as Json,
-        social_links: footerSettings.socialLinks as unknown as Json,
-        quick_links: footerSettings.quickLinks as unknown as Json,
+        company_name: footerSettings.companyName || defaultFooterSettings.companyName,
+        description: footerSettings.description || defaultFooterSettings.description,
+        copyright_text: footerSettings.copyrightText || defaultFooterSettings.copyrightText,
+        contact_info: footerSettings.contactInfo || defaultFooterSettings.contactInfo,
+        social_links: footerSettings.socialLinks || defaultFooterSettings.socialLinks,
+        quick_links: footerSettings.quickLinks || defaultFooterSettings.quickLinks,
         updated_at: new Date().toISOString(),
       };
       
+      console.log('Saving footer settings:', settingsToSave);
+      
       const { error } = await supabase
         .from('footer_settings')
-        .upsert(dbData);
+        .upsert(settingsToSave, { onConflict: 'id' });
       
       if (error) {
         console.error('Error saving footer settings:', error);
+        toast.error(`Failed to save footer settings: ${error.message}`);
         throw error;
       }
       
+      toast.success('Footer settings saved successfully!');
       return true;
     } catch (error) {
       console.error('Error saving footer settings:', error);
