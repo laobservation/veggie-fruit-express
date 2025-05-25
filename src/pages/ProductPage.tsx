@@ -20,6 +20,8 @@ const ProductPage = () => {
     loading,
     selectedService,
     setSelectedService,
+    quantity,
+    setQuantity,
     totalPrice,
     productInfoRef,
     handleAddToCart,
@@ -61,7 +63,7 @@ const ProductPage = () => {
               <ProductImage product={product} />
             )}
             
-            {/* Product Info - Now includes description above product actions */}
+            {/* Product Info - Now includes quantity selector and description above product actions */}
             <div ref={productInfoRef}>
               <ProductInfo
                 product={product}
@@ -70,6 +72,8 @@ const ProductPage = () => {
                 serviceOptions={serviceOptions}
                 selectedService={selectedService}
                 setSelectedService={setSelectedService}
+                quantity={quantity}
+                setQuantity={setQuantity}
               />
             </div>
             

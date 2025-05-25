@@ -23,7 +23,7 @@ export const productServiceOptions: ServiceOption[] = [
   {
     id: "bags",
     name: "Légumes lavés et coupés (Sachets de 500g) (+35,00 Dh)",
-    nameAr: "خضرة مغسولة ومقطعة (فأكياس ��يال 500غ)",
+    nameAr: "خضرة مغسولة ومقطعة (فأكياس ديال 500غ)",
     price: 35
   }
 ];
@@ -35,18 +35,20 @@ export const useProductPage = () => {
   const { product, relatedProducts, loading } = useProductDetails(productId);
   const { isFavorite, toggleFavorite } = useFavorites();
   const [selectedService, setSelectedService] = useState<string | null>(null);
+  const [quantity, setQuantity] = useState<number>(1); // NEW: Add quantity state
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const productInfoRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     // Reset scroll position when product changes
     window.scrollTo(0, 0);
-    // Reset selected service when product changes
+    // Reset selected service and quantity when product changes
     setSelectedService(null);
+    setQuantity(1);
   }, [productId]);
 
   useEffect(() => {
-    // Calculate total price including selected service
+    // Calculate total price including selected service and quantity
     if (product) {
       let servicePrice = 0;
       if (selectedService) {
@@ -56,9 +58,9 @@ export const useProductPage = () => {
         }
       }
       
-      setTotalPrice(product.price + servicePrice);
+      setTotalPrice((product.price + servicePrice) * quantity);
     }
-  }, [product, selectedService]);
+  }, [product, selectedService, quantity]);
   
   // Add automatic scroll to product info section
   useEffect(() => {
@@ -77,13 +79,16 @@ export const useProductPage = () => {
       const selectedServices = selectedService 
         ? [productServiceOptions.find(s => s.id === selectedService)].filter(Boolean) as ServiceOption[]
         : [];
-      addItem(product, 1, selectedServices);
+      addItem(product, quantity, selectedServices); // Use selected quantity
     }
   };
 
   const handleFavoriteClick = () => {
     if (product) {
       toggleFavorite(product);
+      
+      // Dispatch custom event for favorite animation
+      document.dispatchEvent(new CustomEvent('favorite-updated'));
     }
   };
 
@@ -92,7 +97,7 @@ export const useProductPage = () => {
       const selectedServices = selectedService 
         ? [productServiceOptions.find(s => s.id === selectedService)].filter(Boolean) as ServiceOption[]
         : [];
-      addItem(product, 1, selectedServices);
+      addItem(product, quantity, selectedServices); // Use selected quantity
       openCart(); // Opens the cart/checkout form
     }
   };
@@ -133,6 +138,8 @@ export const useProductPage = () => {
     navigate,
     selectedService,
     setSelectedService,
+    quantity, // NEW: Export quantity
+    setQuantity, // NEW: Export setQuantity
     totalPrice,
     productInfoRef,
     handleAddToCart,

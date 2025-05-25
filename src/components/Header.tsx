@@ -9,6 +9,7 @@ import MobileMenu from './MobileMenu';
 import { useIsMobile } from '@/hooks/use-mobile';
 import SearchBar from './SearchBar';
 import { useFavorites } from '@/hooks/use-favorites';
+import { useCategories } from '@/hooks/use-categories';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -24,6 +25,7 @@ const Header = () => {
   const {
     favorites
   } = useFavorites();
+  const { categories } = useCategories();
   const isMobile = useIsMobile();
 
   // Close mobile menu when resizing to desktop
@@ -52,13 +54,17 @@ const Header = () => {
     };
   }, []);
   
-  // FIXED: Ensure cart always opens when clicked
   const handleCartClick = () => {
     console.log('Cart button clicked - opening cart');
     setIsAnimating(true);
     setTimeout(() => setIsAnimating(false), 600);
-    openCart(); // This should always open the cart
+    openCart();
   };
+
+  // Filter visible categories and limit to 4 for desktop display
+  const visibleCategories = categories
+    .filter(cat => cat.is_visible !== false)
+    .slice(0, 4);
   
   return <>
       <header className="bg-white sticky top-0 z-50 shadow-sm py-[19px]">
@@ -68,6 +74,21 @@ const Header = () => {
                 {!isMobileMenuOpen ? <Menu className="h-6 w-6 text-gray-700 mx-0 my-0 px-0 py-0 text-base font-semibold" /> : <span className="h-6 w-6 text-gray-700">✕</span>}
                 <span className="sr-only">Menu</span>
               </Button>}
+            
+            {/* Desktop Categories - Left side */}
+            {!isMobile && (
+              <div className="flex items-center gap-4">
+                {visibleCategories.map((category) => (
+                  <Link
+                    key={category.id}
+                    to={`/category/${category.name.toLowerCase()}`}
+                    className="text-gray-700 hover:text-green-600 transition-colors duration-200 font-medium"
+                  >
+                    {category.name}
+                  </Link>
+                ))}
+              </div>
+            )}
             
             <div className="hidden md:block">
               <div className="flex flex-col">
@@ -97,11 +118,11 @@ const Header = () => {
               </a>
             </div>
 
-            {/* Favorites Button */}
+            {/* Favorites Button with Animation */}
             <Link to="/favorites" className="relative rounded-full p-2 flex items-center bg-transparent">
               <div className="relative">
                 <Heart className={`h-5 w-5 text-red-500 transition-all duration-300 ${favoriteAnimating ? 'animate-bounce scale-125' : ''} ${favorites.length > 0 ? 'fill-current' : ''}`} />
-                {favorites.length > 0 && <span className="absolute -top-2 -right-2 flex items-center justify-center bg-red-500 text-white rounded-full w-4 h-4 text-xs font-bold shadow-sm">
+                {favorites.length > 0 && <span className={`absolute -top-2 -right-2 flex items-center justify-center bg-red-500 text-white rounded-full w-4 h-4 text-xs font-bold shadow-sm transition-all duration-300 ${favoriteAnimating ? 'animate-pulse scale-110' : ''}`}>
                     {favorites.length}
                   </span>}
               </div>
@@ -110,7 +131,7 @@ const Header = () => {
               </span>
             </Link>
             
-            {/* Cart Button - FIXED to always open cart when clicked */}
+            {/* Cart Button */}
             <button onClick={handleCartClick} className="relative rounded-full p-2 flex items-center bg-transparent" aria-label="View cart">
               <div className="relative">
                 <ShoppingCart className={`h-5 w-5 text-green-600 transition-all duration-300 ease-in-out ${isAnimating ? 'animate-bounce scale-125' : ''}`} />
@@ -128,7 +149,6 @@ const Header = () => {
         <MobileMenu isOpen={isMobileMenuOpen} onClose={() => setIsMobileMenuOpen(false)} />
       </header>
       
-      {/* Cart Component - ENSURE it's always available */}
       <Cart isOpen={isCartOpen} onClose={closeCart} />
     </>;
 };

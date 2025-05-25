@@ -1,7 +1,5 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
-import { Json } from "@/integrations/supabase/types";
 
 // Update the type definition to match Supabase's actual structure
 export type SupabaseProduct = {
@@ -28,12 +26,12 @@ export interface ExtendedProduct extends Product {
 export const transformProductForSupabase = (product: ExtendedProduct): Omit<SupabaseProduct, 'id' | 'created_at'> => {
   return {
     name: product.name,
-    category: product.category,
+    category: product.category, // FIXED: Use the category directly without transformation
     price: product.price,
     image_url: product.videoUrl && product.videoUrl.trim() !== '' ? product.videoUrl : product.image,
     description: product.description,
     unit: product.unit,
-    link_to_category: Boolean(product.categoryLink), // Always use Boolean conversion for consistency
+    link_to_category: Boolean(product.categoryLink),
     media_type: product.videoUrl && product.videoUrl.trim() !== '' ? 'video' : 'image',
     stock: product.stock || 0,
     additional_images: product.additionalImages || null
@@ -46,33 +44,20 @@ export const transformProductFromSupabase = (product: SupabaseProduct): Extended
     throw new Error('Invalid product data from database');
   }
   
-  // Map category from database to local format with broader type support
-  let category: 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus' = 'vegetable';
-  
-  // Handle category mapping - extended to support salade-jus
-  if (product.category === 'fruit') {
-    category = 'fruit';
-  } else if (product.category === 'vegetable') {
-    category = 'vegetable';
-  } else if (product.category === 'pack') {
-    category = 'pack';
-  } else if (product.category === 'drink') {
-    category = 'drink';
-  } else if (product.category === 'salade-jus') {
-    category = 'salade-jus';
-  }
+  // FIXED: Use the category directly from database
+  const category = product.category as 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus' || 'vegetable';
   
   return {
-    id: String(product.id), // Convert number to string for compatibility
+    id: String(product.id),
     name: product.name || '',
-    category: category, // Force to correct type with expanded options
+    category: category,
     price: product.price || 0,
     image: product.image_url || '',
     description: product.description || '',
     unit: product.unit || 'kg',
-    categoryLink: Boolean(product.link_to_category), // Ensure it's always a boolean
+    categoryLink: Boolean(product.link_to_category),
     videoUrl: product.media_type === 'video' ? product.image_url : undefined,
-    featured: true, // Always default to true since it doesn't exist in DB
+    featured: true,
     stock: product.stock || 0,
     additionalImages: product.additional_images || []
   };
