@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/hooks/use-cart';
@@ -9,6 +10,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import SearchBar from './SearchBar';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useCategories } from '@/hooks/use-categories';
+
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -34,6 +36,7 @@ const Header = () => {
       setIsMobileMenuOpen(false);
     }
   }, [isMobile, isMobileMenuOpen]);
+  
   useEffect(() => {
     const handleCartUpdated = () => {
       setIsAnimating(true);
@@ -52,6 +55,7 @@ const Header = () => {
       document.removeEventListener('favorite-updated', handleFavoriteUpdated);
     };
   }, []);
+  
   const handleCartClick = () => {
     console.log('Cart button clicked - opening cart');
     setIsAnimating(true);
@@ -73,6 +77,7 @@ const Header = () => {
     if (pathName === 'drink') pathName = 'drinks';
     return `/category/${pathName}`;
   };
+  
   return <>
       <header className="bg-white sticky top-0 z-50 shadow-sm py-[19px]">
         <div className="container mx-auto px-4 flex items-center justify-between relative">
@@ -84,7 +89,15 @@ const Header = () => {
             
             {/* Desktop Categories - Left side */}
             {!isMobile && <div className="flex items-center gap-4">
-                {visibleCategories.map(category => {})}
+                {visibleCategories.map(category => (
+                  <Link
+                    key={category.id}
+                    to={getCategoryPath(category.name)}
+                    className="text-gray-700 hover:text-green-600 font-medium transition-colors"
+                  >
+                    {category.name}
+                  </Link>
+                ))}
               </div>}
             
             <div className="hidden md:block">
@@ -149,4 +162,5 @@ const Header = () => {
       <Cart isOpen={isCartOpen} onClose={closeCart} />
     </>;
 };
+
 export default Header;
