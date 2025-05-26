@@ -74,7 +74,9 @@ const HomePage: React.FC = () => {
       try {
         const products = await getProductsWithStock();
         // Fix product types to ensure compatibility
-        setProducts(fixProductImportType(products));
+        const fixedProducts = fixProductImportType(products);
+        console.log('Loaded products:', fixedProducts);
+        setProducts(fixedProducts);
       } catch (error) {
         console.error('Error loading products:', error);
         toast({
@@ -98,11 +100,13 @@ const HomePage: React.FC = () => {
     
     // Convert the category name to a value that matches our Product type
     const lowerName = cat.name.toLowerCase();
-    if (lowerName.includes('fruit')) categoryValue = 'fruit';
-    else if (lowerName.includes('légume') || lowerName.includes('legume') || lowerName.includes('vegetable')) categoryValue = 'vegetable';
-    else if (lowerName.includes('pack')) categoryValue = 'pack';
-    else if (lowerName.includes('boisson') || lowerName.includes('drink')) categoryValue = 'drink';
-    else if (lowerName.includes('salade') || lowerName.includes('jus')) categoryValue = 'salade-jus';
+    if (lowerName === 'fruit' || lowerName.includes('fruit')) categoryValue = 'fruit';
+    else if (lowerName === 'vegetable' || lowerName === 'légume' || lowerName.includes('legume')) categoryValue = 'vegetable';
+    else if (lowerName === 'pack' || lowerName.includes('pack')) categoryValue = 'pack';
+    else if (lowerName === 'drink' || lowerName === 'boisson' || lowerName.includes('boisson')) categoryValue = 'drink';
+    else if (lowerName === 'salade-jus' || lowerName.includes('salade') || lowerName.includes('jus')) categoryValue = 'salade-jus';
+    
+    console.log(`Mapping category "${cat.name}" to "${categoryValue}"`);
     
     return {
       ...cat,
@@ -155,7 +159,7 @@ const HomePage: React.FC = () => {
           title={category.name}
           products={products}
           isLoading={isLoading}
-          showAll={true}
+          showAll={false}
           category={category.categoryValue}
         />
       ))}

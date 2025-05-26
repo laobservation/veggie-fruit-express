@@ -23,6 +23,30 @@ export interface ExtendedProduct extends Product {
   stock?: number;
 }
 
+// Helper function to map database category to our application category types
+const mapDatabaseToAppCategory = (dbCategory: string | null): 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus' => {
+  if (!dbCategory) return 'vegetable';
+  
+  const category = dbCategory.toLowerCase();
+  
+  // Direct mapping for exact matches
+  if (category === 'fruit') return 'fruit';
+  if (category === 'vegetable') return 'vegetable';
+  if (category === 'pack') return 'pack';
+  if (category === 'drink') return 'drink';
+  if (category === 'salade-jus') return 'salade-jus';
+  
+  // Fuzzy matching for similar terms
+  if (category.includes('fruit')) return 'fruit';
+  if (category.includes('légume') || category.includes('legume')) return 'vegetable';
+  if (category.includes('pack')) return 'pack';
+  if (category.includes('boisson') || category.includes('drink')) return 'drink';
+  if (category.includes('salade') || category.includes('jus')) return 'salade-jus';
+  
+  // Default fallback
+  return 'vegetable';
+};
+
 // Transform local product data format to Supabase format
 export const transformProductForSupabase = (product: ExtendedProduct): Omit<SupabaseProduct, 'id' | 'created_at'> => {
   return {
@@ -45,8 +69,8 @@ export const transformProductFromSupabase = (product: SupabaseProduct): Extended
     throw new Error('Invalid product data from database');
   }
   
-  // Ensure proper category mapping
-  const category = product.category as 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus' || 'vegetable';
+  // Use the mapping function to ensure proper category assignment
+  const category = mapDatabaseToAppCategory(product.category);
   
   return {
     id: String(product.id),
@@ -94,6 +118,7 @@ export const fetchProductsByCategory = async (category: string): Promise<Extende
     
     // Map URL category to database category
     const dbCategory = mapUrlToDatabaseCategory(category);
+    console.log('Mapped to database category:', dbCategory);
     
     const { data, error } = await supabase
       .from('Products')
@@ -213,8 +238,8 @@ export const fixProductImportType = (products: any[]): Product[] => {
   return products.map(product => ({
     ...product,
     id: String(product.id),
-    // Support extended categories
-    category: product.category as 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus',
+    // Use the mapping function to ensure consistent category assignment
+    category: mapDatabaseToAppCategory(product.category),
     featured: true, // Always set featured to true since it doesn't exist in DB
     categoryLink: Boolean(product.link_to_category), // Ensure proper conversion
     additionalImages: product.additional_images || []
