@@ -11,6 +11,7 @@ interface PopularItemsSectionProps {
   isLoading: boolean;
   showAll?: boolean;
   category: 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus';
+  onShowMore?: () => void;
 }
 
 const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
@@ -18,7 +19,8 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
   products,
   isLoading,
   showAll = false,
-  category
+  category,
+  onShowMore
 }) => {
   console.log(`PopularItemsSection: Filtering products for category "${category}"`);
   console.log('All products:', products.map(p => ({ 
@@ -89,14 +91,40 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
       ) : displayProducts.length === 0 ? (
         <p className="text-center text-gray-500 py-8">Aucun produit trouvé dans cette catégorie.</p>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-          {displayProducts.map((product) => (
-            <ProductCard 
-              key={product.id} 
-              product={product} 
-            />
-          ))}
-        </div>
+        <>
+          <div className="grid grid-cols-2 md:grid-cols-6 gap-4">
+            {displayProducts.map((product) => (
+              <ProductCard 
+                key={product.id} 
+                product={product} 
+              />
+            ))}
+          </div>
+          
+          {/* Show More Button - Only show if there are more products to display and we're not showing all */}
+          {!showAll && categoryProducts.length > 6 && onShowMore && (
+            <div className="flex justify-center mt-6">
+              <button
+                onClick={onShowMore}
+                className="relative inline-flex items-center px-8 py-3 text-white font-semibold rounded-lg
+                         bg-gradient-to-br from-green-500 via-green-600 to-green-700
+                         shadow-lg shadow-green-500/25 hover:shadow-xl hover:shadow-green-500/40
+                         transform hover:scale-105 active:scale-95 transition-all duration-200
+                         border border-green-400/30 hover:border-green-300/50
+                         before:absolute before:inset-0 before:rounded-lg before:bg-gradient-to-r 
+                         before:from-white/20 before:to-transparent before:opacity-0 hover:before:opacity-100
+                         before:transition-opacity before:duration-300"
+              >
+                <span className="relative z-10 flex items-center gap-2">
+                  Afficher plus
+                  <ChevronRight className="w-4 h-4" />
+                </span>
+                {/* 3D effect highlight */}
+                <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-white/40 to-transparent rounded-t-lg"></div>
+              </button>
+            </div>
+          )}
+        </>
       )}
     </section>
   );

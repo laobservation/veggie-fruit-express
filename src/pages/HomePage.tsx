@@ -27,6 +27,7 @@ const HomePage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [seo, setSeo] = useState<HomeSEO | null>(null);
+  const [showMoreItems, setShowMoreItems] = useState<{[key: string]: boolean}>({});
   const { toast } = useToast();
   const { categories, loading: categoriesLoading } = useCategories();
 
@@ -92,21 +93,41 @@ const HomePage: React.FC = () => {
     loadProducts();
   }, []);
 
+  // Improved category mapping function with exact matching
+  const mapCategoryToValue = (categoryName: string): 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus' => {
+    const lowerName = categoryName.toLowerCase().trim();
+    
+    console.log(`Mapping category: "${categoryName}" (lowercase: "${lowerName}")`);
+    
+    // Exact match first, then partial matches
+    if (lowerName === 'fruit' || lowerName === 'fruits') return 'fruit';
+    if (lowerName === 'légume' || lowerName === 'légumes' || lowerName === 'vegetable' || lowerName === 'vegetables') return 'vegetable';
+    if (lowerName === 'pack' || lowerName === 'packs') return 'pack';
+    if (lowerName === 'drink' || lowerName === 'drinks' || lowerName === 'boisson' || lowerName === 'boissons') return 'drink';
+    if (lowerName === 'salade-jus' || lowerName === 'salades-jus' || lowerName === 'salade & jus') return 'salade-jus';
+    
+    // For special categories like "Légumes préparés", treat as separate from "Légumes"
+    if (lowerName.includes('préparés') || lowerName.includes('prepares')) return 'pack';
+    
+    // Fallback to partial matches only if no exact match
+    if (lowerName.includes('fruit')) return 'fruit';
+    if (lowerName.includes('legume') || lowerName.includes('légume')) return 'vegetable';
+    if (lowerName.includes('pack')) return 'pack';
+    if (lowerName.includes('boisson') || lowerName.includes('drink')) return 'drink';
+    if (lowerName.includes('salade') || lowerName.includes('jus')) return 'salade-jus';
+    
+    // Default fallback
+    console.log(`No specific mapping found for "${categoryName}", defaulting to vegetable`);
+    return 'vegetable';
+  };
+
   // Map categories from database format to our application format, filtering out hidden categories
   const visibleCategories = categories.filter(cat => cat.is_visible !== false);
   
   const mappedCategories = visibleCategories.map(cat => {
-    let categoryValue: 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus' = 'vegetable';
+    const categoryValue = mapCategoryToValue(cat.name);
     
-    // Convert the category name to a value that matches our Product type
-    const lowerName = cat.name.toLowerCase();
-    if (lowerName === 'fruit' || lowerName.includes('fruit')) categoryValue = 'fruit';
-    else if (lowerName === 'vegetable' || lowerName === 'légume' || lowerName.includes('legume')) categoryValue = 'vegetable';
-    else if (lowerName === 'pack' || lowerName.includes('pack')) categoryValue = 'pack';
-    else if (lowerName === 'drink' || lowerName === 'boisson' || lowerName.includes('boisson')) categoryValue = 'drink';
-    else if (lowerName === 'salade-jus' || lowerName.includes('salade') || lowerName.includes('jus')) categoryValue = 'salade-jus';
-    
-    console.log(`Mapping category "${cat.name}" to "${categoryValue}"`);
+    console.log(`Final mapping: "${cat.name}" -> "${categoryValue}"`);
     
     return {
       ...cat,
@@ -125,6 +146,13 @@ const HomePage: React.FC = () => {
 
   // Use mapped categories from database or default if none are found
   const categoriesToDisplay = mappedCategories.length > 0 ? mappedCategories : defaultCategories;
+
+  const handleShowMore = (categoryId: string) => {
+    setShowMoreItems(prev => ({
+      ...prev,
+      [categoryId]: true
+    }));
+  };
 
   return (
     <div className="bg-gray-50 min-h-screen pb-28 md:pb-6 py-0 px-0">
@@ -159,8 +187,9 @@ const HomePage: React.FC = () => {
           title={category.name}
           products={products}
           isLoading={isLoading}
-          showAll={false}
+          showAll={showMoreItems[category.id] || false}
           category={category.categoryValue}
+          onShowMore={() => handleShowMore(category.id)}
         />
       ))}
     </div>
