@@ -93,36 +93,27 @@ const HomePage: React.FC = () => {
     loadProducts();
   }, []);
 
-  // Improved category mapping function with exact matching
+  // Strict category mapping function - only exact matches
   const mapCategoryToValue = (categoryName: string): 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus' => {
     const lowerName = categoryName.toLowerCase().trim();
     
     console.log(`Mapping category: "${categoryName}" (lowercase: "${lowerName}")`);
     
-    // Exact match first, then partial matches
+    // Strict exact match only - no merging of categories
     if (lowerName === 'fruit' || lowerName === 'fruits') return 'fruit';
     if (lowerName === 'légume' || lowerName === 'légumes' || lowerName === 'vegetable' || lowerName === 'vegetables') return 'vegetable';
     if (lowerName === 'pack' || lowerName === 'packs') return 'pack';
     if (lowerName === 'drink' || lowerName === 'drinks' || lowerName === 'boisson' || lowerName === 'boissons') return 'drink';
     if (lowerName === 'salade-jus' || lowerName === 'salades-jus' || lowerName === 'salade & jus') return 'salade-jus';
     
-    // For special categories like "Légumes préparés", treat as separate from "Légumes"
-    if (lowerName.includes('préparés') || lowerName.includes('prepares')) return 'pack';
-    
-    // Fallback to partial matches only if no exact match
-    if (lowerName.includes('fruit')) return 'fruit';
-    if (lowerName.includes('legume') || lowerName.includes('légume')) return 'vegetable';
-    if (lowerName.includes('pack')) return 'pack';
-    if (lowerName.includes('boisson') || lowerName.includes('drink')) return 'drink';
-    if (lowerName.includes('salade') || lowerName.includes('jus')) return 'salade-jus';
-    
-    // Default fallback
-    console.log(`No specific mapping found for "${categoryName}", defaulting to vegetable`);
-    return 'vegetable';
+    // For categories like "Légumes préparés", they should stay as their own category
+    // Don't map them to other categories to prevent merging
+    console.log(`Category "${categoryName}" has no exact mapping, will not be displayed on home page`);
+    return 'vegetable'; // This is just a fallback, but the category won't be displayed
   };
 
-  // Map categories from database format to our application format, filtering out hidden categories
-  const visibleCategories = categories.filter(cat => cat.is_visible !== false);
+  // Filter categories to only show visible ones on the home page
+  const visibleCategories = categories.filter(cat => cat.is_visible === true);
   
   const mappedCategories = visibleCategories.map(cat => {
     const categoryValue = mapCategoryToValue(cat.name);
@@ -135,17 +126,11 @@ const HomePage: React.FC = () => {
     };
   });
 
-  // Default categories if none are found in database
-  const defaultCategories = [
-    { id: 'fruits', name: 'Fruits', categoryValue: 'fruit' as const },
-    { id: 'vegetables', name: 'Légumes', categoryValue: 'vegetable' as const },
-    { id: 'packs', name: 'Packs', categoryValue: 'pack' as const },
-    { id: 'drinks', name: 'Boissons', categoryValue: 'drink' as const },
-    { id: 'salade-jus', name: 'Salades & Jus', categoryValue: 'salade-jus' as const }
-  ];
-
-  // Use mapped categories from database or default if none are found
-  const categoriesToDisplay = mappedCategories.length > 0 ? mappedCategories : defaultCategories;
+  // Only use categories that have exact mappings and are set to be visible
+  const categoriesToDisplay = mappedCategories.filter(cat => {
+    const hasExactMapping = ['fruit', 'fruits', 'légume', 'légumes', 'vegetable', 'vegetables', 'pack', 'packs', 'drink', 'drinks', 'boisson', 'boissons', 'salade-jus', 'salades-jus', 'salade & jus'].includes(cat.name.toLowerCase().trim());
+    return hasExactMapping;
+  });
 
   const handleShowMore = (categoryId: string) => {
     setShowMoreItems(prev => ({
@@ -180,7 +165,7 @@ const HomePage: React.FC = () => {
       {/* Categories Section */}
       <CategoriesSection />
 
-      {/* Render a separate section for each category */}
+      {/* Render a separate section for each category that should appear on home page */}
       {categoriesToDisplay.map((category) => (
         <PopularItemsSection
           key={category.id}

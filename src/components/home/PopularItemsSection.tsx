@@ -30,14 +30,14 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
     categoryLink: p.categoryLink 
   })));
   
-  // Filter products by category - show products with categoryLink true OR undefined (default to true)
+  // Strict category filtering - only exact matches with categoryLink = true
   const categoryProducts = products.filter(product => {
-    const matchesCategory = product.category === category;
-    const hasCategoryLink = product.categoryLink !== false; // Show if true or undefined
+    const exactCategoryMatch = product.category === category;
+    const shouldShowOnHomePage = product.categoryLink === true;
     
-    console.log(`Product ${product.name}: category=${product.category}, matches=${matchesCategory}, categoryLink=${product.categoryLink}, hasCategoryLink=${hasCategoryLink}`);
+    console.log(`Product ${product.name}: category=${product.category}, exactMatch=${exactCategoryMatch}, categoryLink=${product.categoryLink}, shouldShow=${shouldShowOnHomePage}`);
     
-    return matchesCategory && hasCategoryLink;
+    return exactCategoryMatch && shouldShowOnHomePage;
   });
   
   console.log(`Found ${categoryProducts.length} products for category "${category}":`, categoryProducts.map(p => p.name));
