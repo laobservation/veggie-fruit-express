@@ -61,6 +61,15 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                   <td className="px-4 py-3">
                     <div>
                       <div className="font-medium text-gray-900">{item.product.name}</div>
+                      {/* Show weight/unit information */}
+                      {item.product.unit && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          {item.quantity} {item.product.unit}
+                          {item.product.unit === 'kg' && item.quantity !== 1 && (
+                            <span> ({item.quantity * 1000}g)</span>
+                          )}
+                        </div>
+                      )}
                       {/* Display selected services if any */}
                       {item.selectedServices && item.selectedServices.length > 0 && (
                         <div className="mt-1">
@@ -73,7 +82,9 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
                       )}
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-center">{item.quantity}</td>
+                  <td className="px-4 py-3 text-center">
+                    {item.quantity} {item.product.unit}
+                  </td>
                   <td className="px-4 py-3 text-right">
                     {formatPrice(item.product.price * item.quantity)} {currency}
                   </td>

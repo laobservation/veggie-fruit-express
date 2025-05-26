@@ -21,12 +21,17 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
   category
 }) => {
   console.log(`PopularItemsSection: Filtering products for category "${category}"`);
-  console.log('All products:', products.map(p => ({ id: p.id, name: p.name, category: p.category, categoryLink: p.categoryLink })));
+  console.log('All products:', products.map(p => ({ 
+    id: p.id, 
+    name: p.name, 
+    category: p.category, 
+    categoryLink: p.categoryLink 
+  })));
   
-  // Filter products by category and only show products with categoryLink = true
+  // Filter products by category - show products with categoryLink true OR undefined (default to true)
   const categoryProducts = products.filter(product => {
     const matchesCategory = product.category === category;
-    const hasCategoryLink = product.categoryLink === true;
+    const hasCategoryLink = product.categoryLink !== false; // Show if true or undefined
     
     console.log(`Product ${product.name}: category=${product.category}, matches=${matchesCategory}, categoryLink=${product.categoryLink}, hasCategoryLink=${hasCategoryLink}`);
     

@@ -81,8 +81,8 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
         />
       )}
 
-      {/* Service Options - only show for vegetables */}
-      {product.category === 'vegetable' && !isPack && (
+      {/* Service Options - show for vegetables AND pack category */}
+      {(product.category === 'vegetable' || product.category === 'pack') && !isPack && (
         <ServiceOptions
           serviceOptions={serviceOptions}
           selectedService={selectedService}

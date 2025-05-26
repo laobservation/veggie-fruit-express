@@ -1,3 +1,4 @@
+
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import { formatPrice } from '@/lib/formatPrice';
@@ -41,8 +42,8 @@ export const generateThankYouPDF = (orderDetails: any) => {
     doc.setFont(undefined, 'normal');
     doc.setFontSize(10);
     
-    // Items table with simple styling like in image
-    const tableColumn = ["Produit", "Qté", "Prix", "Total"];
+    // Items table with weight information
+    const tableColumn = ["Produit", "Qté/Poids", "Prix", "Total"];
     const tableRows: any[] = [];
     
     if (orderDetails.items && orderDetails.items.length > 0) {
@@ -50,6 +51,16 @@ export const generateThankYouPDF = (orderDetails: any) => {
         // Start with basic product info
         let itemName = item.product.name;
         let itemUnitPrice = item.product.price;
+        
+        // Format quantity with unit and weight information
+        let quantityDisplay = `${item.quantity}`;
+        if (item.product.unit) {
+          quantityDisplay += ` ${item.product.unit}`;
+          // Add weight in grams for kg products
+          if (item.product.unit === 'kg' && item.quantity !== 1) {
+            quantityDisplay += ` (${item.quantity * 1000}g)`;
+          }
+        }
         
         // Add service information to the item name if services exist
         if (item.selectedServices && item.selectedServices.length > 0) {
@@ -66,7 +77,7 @@ export const generateThankYouPDF = (orderDetails: any) => {
         
         const itemData = [
           itemName,
-          item.quantity,
+          quantityDisplay,
           formatPrice(itemUnitPrice),
           formatPrice(itemUnitPrice * item.quantity)
         ];

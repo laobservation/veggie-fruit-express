@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
 
@@ -51,12 +50,12 @@ const mapDatabaseToAppCategory = (dbCategory: string | null): 'fruit' | 'vegetab
 export const transformProductForSupabase = (product: ExtendedProduct): Omit<SupabaseProduct, 'id' | 'created_at'> => {
   return {
     name: product.name,
-    category: product.category, // Use the category directly
+    category: product.category,
     price: product.price,
     image_url: product.videoUrl && product.videoUrl.trim() !== '' ? product.videoUrl : product.image,
     description: product.description,
     unit: product.unit,
-    link_to_category: Boolean(product.categoryLink),
+    link_to_category: product.categoryLink !== false, // Default to true unless explicitly false
     media_type: product.videoUrl && product.videoUrl.trim() !== '' ? 'video' : 'image',
     stock: product.stock || 0,
     additional_images: product.additionalImages || null
@@ -69,7 +68,6 @@ export const transformProductFromSupabase = (product: SupabaseProduct): Extended
     throw new Error('Invalid product data from database');
   }
   
-  // Use the mapping function to ensure proper category assignment
   const category = mapDatabaseToAppCategory(product.category);
   
   return {
@@ -80,7 +78,7 @@ export const transformProductFromSupabase = (product: SupabaseProduct): Extended
     image: product.image_url || '',
     description: product.description || '',
     unit: product.unit || 'kg',
-    categoryLink: Boolean(product.link_to_category),
+    categoryLink: product.link_to_category !== false, // Default to true unless explicitly false
     videoUrl: product.media_type === 'video' ? product.image_url : undefined,
     featured: true,
     stock: product.stock || 0,
@@ -238,10 +236,9 @@ export const fixProductImportType = (products: any[]): Product[] => {
   return products.map(product => ({
     ...product,
     id: String(product.id),
-    // Use the mapping function to ensure consistent category assignment
     category: mapDatabaseToAppCategory(product.category),
-    featured: true, // Always set featured to true since it doesn't exist in DB
-    categoryLink: Boolean(product.link_to_category), // Ensure proper conversion
+    featured: true,
+    categoryLink: product.link_to_category !== false, // Default to true unless explicitly false
     additionalImages: product.additional_images || []
   }));
 };
