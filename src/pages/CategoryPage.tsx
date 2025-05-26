@@ -5,7 +5,7 @@ import Header from '@/components/Header';
 import ProductGrid from '@/components/ProductGrid';
 import CategoryBenefitsSection from '@/components/CategoryBenefitsSection';
 import { supabase, getCategoriesTable } from '@/integrations/supabase/client';
-import { transformProductFromSupabase } from '@/services/productService';
+import { fetchProductsByCategory } from '@/services/productService';
 import { Product } from '@/types/product';
 
 const CategoryPage = () => {
@@ -63,7 +63,7 @@ const CategoryPage = () => {
     };
     
     fetchCategory();
-    fetchProductsByCategory();
+    fetchCategoryProducts();
     
     // Listen for category changes
     const categoriesChannel = supabase
@@ -116,60 +116,20 @@ const CategoryPage = () => {
     }
   };
 
-  const fetchProductsByCategory = async () => {
+  const fetchCategoryProducts = async () => {
+    if (!categoryId) return;
+    
     setIsLoading(true);
     try {
-      // Map URL category to database category type
-      let dbCategory = mapUrlToDatabaseCategory(categoryId);
-      
-      console.log('Fetching products for category:', dbCategory, 'from URL:', categoryId);
-      
-      // Fetch products linked to this category AND have categoryLink set to true
-      const { data, error } = await supabase
-        .from('Products')
-        .select('*')
-        .eq('category', dbCategory)
-        .eq('link_to_category', true);
-      
-      if (error) {
-        throw error;
-      }
-      
-      // Transform the products
-      if (data && data.length > 0) {
-        console.log(`Found ${data.length} products for category ${dbCategory} with link_to_category=true`);
-        const categoryProducts = data.map(product => transformProductFromSupabase({
-          ...product,
-          additional_images: product.additional_images || null
-        }));
-        setProducts(categoryProducts);
-      } else {
-        console.log('No products found for category:', dbCategory);
-        setProducts([]);
-      }
+      console.log('Fetching products for category:', categoryId);
+      const categoryProducts = await fetchProductsByCategory(categoryId);
+      setProducts(categoryProducts);
     } catch (error) {
       console.error('Error fetching category products:', error);
+      setProducts([]);
     } finally {
       setIsLoading(false);
     }
-  };
-
-  // Helper function to map URL category to database category
-  const mapUrlToDatabaseCategory = (urlCategory: string | undefined): string => {
-    if (!urlCategory) return 'vegetable';
-    
-    // Handle common mappings - ensure singular forms are used in the database
-    const mapping: Record<string, string> = {
-      'fruits': 'fruit',
-      'vegetables': 'vegetable',
-      'légumes': 'vegetable',
-      'packs': 'pack',
-      'drinks': 'drink',
-      'salade-jus': 'salade-jus'
-    };
-    
-    console.log('Mapping URL category:', urlCategory, 'to database category:', mapping[urlCategory.toLowerCase()] || urlCategory.toLowerCase());
-    return mapping[urlCategory.toLowerCase()] || urlCategory.toLowerCase();
   };
 
   // Get the corresponding category path for linking back

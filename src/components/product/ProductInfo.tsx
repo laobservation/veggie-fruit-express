@@ -4,6 +4,7 @@ import { Product, ServiceOption } from '@/types/product';
 import { formatPrice } from '@/lib/formatPrice';
 import ServiceOptions from './ServiceOptions';
 import QuantitySelector from './QuantitySelector';
+import WeightSelector from './WeightSelector';
 
 interface ProductInfoProps {
   product: Product;
@@ -14,6 +15,8 @@ interface ProductInfoProps {
   setSelectedService: (service: string | null) => void;
   quantity: number;
   setQuantity: (quantity: number) => void;
+  selectedWeight?: number;
+  onWeightChange?: (weight: number, totalPrice: number) => void;
 }
 
 const ProductInfo: React.FC<ProductInfoProps> = ({
@@ -24,8 +27,13 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
   selectedService,
   setSelectedService,
   quantity,
-  setQuantity
+  setQuantity,
+  selectedWeight,
+  onWeightChange
 }) => {
+  // Check if product is sold by weight (kg)
+  const isWeightBased = product.unit === 'kg';
+
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
       <h1 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h1>
@@ -34,21 +42,44 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
         <span className="text-3xl font-bold text-green-600">
           {formatPrice(totalPrice)}
         </span>
-        <span className="text-gray-500">/ {product.unit}</span>
-        {quantity > 1 && (
+        {!isWeightBased && (
+          <>
+            <span className="text-gray-500">/ {product.unit}</span>
+            {quantity > 1 && (
+              <span className="text-sm text-gray-500">
+                ({formatPrice(product.price)} × {quantity})
+              </span>
+            )}
+          </>
+        )}
+        {isWeightBased && selectedWeight && (
           <span className="text-sm text-gray-500">
-            ({formatPrice(product.price)} × {quantity})
+            pour {selectedWeight} {product.unit}
           </span>
         )}
       </div>
 
-      {/* Quantity Selector */}
-      <QuantitySelector
-        quantity={quantity}
-        onQuantityChange={setQuantity}
-        min={1}
-        max={50}
-      />
+      {/* Weight Selector - only show for weight-based products */}
+      {isWeightBased && onWeightChange && (
+        <div className="mb-6">
+          <WeightSelector
+            basePrice={product.price}
+            unit={product.unit}
+            onWeightChange={onWeightChange}
+            initialWeight={selectedWeight || 1}
+          />
+        </div>
+      )}
+
+      {/* Quantity Selector - only show for non-weight-based products */}
+      {!isWeightBased && (
+        <QuantitySelector
+          quantity={quantity}
+          onQuantityChange={setQuantity}
+          min={1}
+          max={50}
+        />
+      )}
 
       {/* Service Options - only show for vegetables */}
       {product.category === 'vegetable' && !isPack && (

@@ -22,6 +22,8 @@ const ProductPage = () => {
     setSelectedService,
     quantity,
     setQuantity,
+    selectedWeight,
+    handleWeightChange,
     totalPrice,
     productInfoRef,
     handleAddToCart,
@@ -63,7 +65,7 @@ const ProductPage = () => {
               <ProductImage product={product} />
             )}
             
-            {/* Product Info - Now includes quantity selector and description above product actions */}
+            {/* Product Info - Now includes weight selector and quantity selector */}
             <div ref={productInfoRef}>
               <ProductInfo
                 product={product}
@@ -74,6 +76,8 @@ const ProductPage = () => {
                 setSelectedService={setSelectedService}
                 quantity={quantity}
                 setQuantity={setQuantity}
+                selectedWeight={selectedWeight}
+                onWeightChange={handleWeightChange}
               />
             </div>
             

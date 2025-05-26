@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Product } from "@/types/product";
 
@@ -26,7 +27,7 @@ export interface ExtendedProduct extends Product {
 export const transformProductForSupabase = (product: ExtendedProduct): Omit<SupabaseProduct, 'id' | 'created_at'> => {
   return {
     name: product.name,
-    category: product.category, // FIXED: Use the category directly without transformation
+    category: product.category, // Use the category directly
     price: product.price,
     image_url: product.videoUrl && product.videoUrl.trim() !== '' ? product.videoUrl : product.image,
     description: product.description,
@@ -44,7 +45,7 @@ export const transformProductFromSupabase = (product: SupabaseProduct): Extended
     throw new Error('Invalid product data from database');
   }
   
-  // FIXED: Use the category directly from database
+  // Ensure proper category mapping
   const category = product.category as 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus' || 'vegetable';
   
   return {
@@ -84,6 +85,54 @@ export const fetchProducts = async (): Promise<ExtendedProduct[]> => {
     console.error('Error fetching products:', error);
     throw error;
   }
+};
+
+// Fetch products by category with proper filtering
+export const fetchProductsByCategory = async (category: string): Promise<ExtendedProduct[]> => {
+  try {
+    console.log('Fetching products for category:', category);
+    
+    // Map URL category to database category
+    const dbCategory = mapUrlToDatabaseCategory(category);
+    
+    const { data, error } = await supabase
+      .from('Products')
+      .select('*')
+      .eq('category', dbCategory)
+      .eq('link_to_category', true);
+    
+    if (error) {
+      console.error('Error fetching products by category:', error);
+      throw error;
+    }
+    
+    console.log(`Found ${data?.length || 0} products for category ${dbCategory}`);
+    
+    if (data && data.length > 0) {
+      return data.map(transformProductFromSupabase);
+    }
+    
+    return [];
+  } catch (error) {
+    console.error('Error fetching products by category:', error);
+    return [];
+  }
+};
+
+// Helper function to map URL category to database category
+const mapUrlToDatabaseCategory = (urlCategory: string): string => {
+  if (!urlCategory) return 'vegetable';
+  
+  const mapping: Record<string, string> = {
+    'fruits': 'fruit',
+    'vegetables': 'vegetable',
+    'légumes': 'vegetable',
+    'packs': 'pack',
+    'drinks': 'drink',
+    'salade-jus': 'salade-jus'
+  };
+  
+  return mapping[urlCategory.toLowerCase()] || urlCategory.toLowerCase();
 };
 
 // Create a new product in Supabase

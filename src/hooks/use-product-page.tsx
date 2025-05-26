@@ -35,20 +35,22 @@ export const useProductPage = () => {
   const { product, relatedProducts, loading } = useProductDetails(productId);
   const { isFavorite, toggleFavorite } = useFavorites();
   const [selectedService, setSelectedService] = useState<string | null>(null);
-  const [quantity, setQuantity] = useState<number>(1); // NEW: Add quantity state
+  const [quantity, setQuantity] = useState<number>(1);
+  const [selectedWeight, setSelectedWeight] = useState<number>(1);
   const [totalPrice, setTotalPrice] = useState<number>(0);
   const productInfoRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
     // Reset scroll position when product changes
     window.scrollTo(0, 0);
-    // Reset selected service and quantity when product changes
+    // Reset selected service, quantity, and weight when product changes
     setSelectedService(null);
     setQuantity(1);
+    setSelectedWeight(1);
   }, [productId]);
 
   useEffect(() => {
-    // Calculate total price including selected service and quantity
+    // Calculate total price including selected service and quantity/weight
     if (product) {
       let servicePrice = 0;
       if (selectedService) {
@@ -58,9 +60,13 @@ export const useProductPage = () => {
         }
       }
       
-      setTotalPrice((product.price + servicePrice) * quantity);
+      // For weight-based products, use selectedWeight; for others, use quantity
+      const isWeightBased = product.unit === 'kg';
+      const multiplier = isWeightBased ? selectedWeight : quantity;
+      
+      setTotalPrice((product.price * multiplier) + (servicePrice * (isWeightBased ? 1 : quantity)));
     }
-  }, [product, selectedService, quantity]);
+  }, [product, selectedService, quantity, selectedWeight]);
   
   // Add automatic scroll to product info section
   useEffect(() => {
@@ -73,13 +79,34 @@ export const useProductPage = () => {
       }, 500);
     }
   }, [loading, product]);
+
+  // Handle weight change for weight-based products
+  const handleWeightChange = (weight: number, calculatedPrice: number) => {
+    setSelectedWeight(weight);
+    
+    // Add service price if applicable
+    let servicePrice = 0;
+    if (selectedService) {
+      const service = productServiceOptions.find(s => s.id === selectedService);
+      if (service) {
+        servicePrice = service.price;
+      }
+    }
+    
+    setTotalPrice(calculatedPrice + servicePrice);
+  };
   
   const handleAddToCart = () => {
     if (product) {
       const selectedServices = selectedService 
         ? [productServiceOptions.find(s => s.id === selectedService)].filter(Boolean) as ServiceOption[]
         : [];
-      addItem(product, quantity, selectedServices); // Use selected quantity
+      
+      // For weight-based products, use selectedWeight as quantity
+      const isWeightBased = product.unit === 'kg';
+      const cartQuantity = isWeightBased ? selectedWeight : quantity;
+      
+      addItem(product, cartQuantity, selectedServices);
     }
   };
 
@@ -97,7 +124,12 @@ export const useProductPage = () => {
       const selectedServices = selectedService 
         ? [productServiceOptions.find(s => s.id === selectedService)].filter(Boolean) as ServiceOption[]
         : [];
-      addItem(product, quantity, selectedServices); // Use selected quantity
+      
+      // For weight-based products, use selectedWeight as quantity
+      const isWeightBased = product.unit === 'kg';
+      const cartQuantity = isWeightBased ? selectedWeight : quantity;
+      
+      addItem(product, cartQuantity, selectedServices);
       openCart(); // Opens the cart/checkout form
     }
   };
@@ -138,8 +170,10 @@ export const useProductPage = () => {
     navigate,
     selectedService,
     setSelectedService,
-    quantity, // NEW: Export quantity
-    setQuantity, // NEW: Export setQuantity
+    quantity,
+    setQuantity,
+    selectedWeight,
+    handleWeightChange,
     totalPrice,
     productInfoRef,
     handleAddToCart,
