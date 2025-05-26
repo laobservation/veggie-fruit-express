@@ -66,6 +66,19 @@ const Header = () => {
   // Filter visible categories and limit to 4 for desktop display
   const visibleCategories = categories.filter(cat => cat.is_visible !== false).slice(0, 4);
   
+  // Helper function to create category path from name
+  const getCategoryPath = (categoryName: string) => {
+    let pathName = categoryName.toLowerCase().replace(/\s+/g, '-');
+    
+    // Special handling for certain categories to maintain consistent URL structure
+    if (pathName === 'fruit') pathName = 'fruits';
+    if (pathName === 'vegetable' || pathName === 'légume') pathName = 'légumes';
+    if (pathName === 'pack') pathName = 'packs';
+    if (pathName === 'drink') pathName = 'drinks';
+    
+    return `/category/${pathName}`;
+  };
+  
   return <>
       <header className="bg-white sticky top-0 z-50 shadow-sm py-[19px]">
         <div className="container mx-auto px-4 flex items-center justify-between relative">
@@ -80,7 +93,7 @@ const Header = () => {
                 {visibleCategories.map(category => (
                   <Link 
                     key={category.id} 
-                    to={`/category/${category.slug}`}
+                    to={getCategoryPath(category.name)}
                     className="text-gray-700 hover:text-green-600 font-medium transition-colors"
                   >
                     {category.name}

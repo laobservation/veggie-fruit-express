@@ -55,7 +55,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
         <ServiceOptions
           serviceOptions={serviceOptions}
           selectedService={selectedService}
-          onServiceChange={setSelectedService}
+          setSelectedService={setSelectedService}
         />
       )}
 
