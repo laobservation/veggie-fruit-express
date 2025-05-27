@@ -109,19 +109,18 @@ export const fetchProducts = async (): Promise<ExtendedProduct[]> => {
   }
 };
 
-// Fetch products by category with proper filtering
+// Fetch products by category with proper filtering and URL decoding
 export const fetchProductsByCategory = async (category: string): Promise<ExtendedProduct[]> => {
   try {
-    console.log('Fetching products for category:', category);
+    // Decode URL-encoded category name
+    const decodedCategory = decodeURIComponent(category);
+    console.log('Fetching products for decoded category:', decodedCategory);
     
-    // Map URL category to database category
-    const dbCategory = mapUrlToDatabaseCategory(category);
-    console.log('Mapped to database category:', dbCategory);
-    
-    const { data, error } = await supabase
+    // First try to find products with exact category match
+    let { data, error } = await supabase
       .from('Products')
       .select('*')
-      .eq('category', dbCategory)
+      .eq('category', decodedCategory)
       .eq('link_to_category', true);
     
     if (error) {
@@ -129,7 +128,30 @@ export const fetchProductsByCategory = async (category: string): Promise<Extende
       throw error;
     }
     
-    console.log(`Found ${data?.length || 0} products for category ${dbCategory}`);
+    // If no products found with exact match, try alternative mappings
+    if (!data || data.length === 0) {
+      console.log('No products found with exact match, trying alternative mappings...');
+      
+      // Map URL category to possible database categories
+      const possibleDbCategories = mapUrlToPossibleDatabaseCategories(decodedCategory);
+      console.log('Trying alternative categories:', possibleDbCategories);
+      
+      for (const dbCategory of possibleDbCategories) {
+        const { data: altData, error: altError } = await supabase
+          .from('Products')
+          .select('*')
+          .eq('category', dbCategory)
+          .eq('link_to_category', true);
+          
+        if (!altError && altData && altData.length > 0) {
+          data = altData;
+          console.log(`Found ${data.length} products for category ${dbCategory}`);
+          break;
+        }
+      }
+    }
+    
+    console.log(`Found ${data?.length || 0} products for category ${decodedCategory}`);
     
     if (data && data.length > 0) {
       return data.map(transformProductFromSupabase);
@@ -142,20 +164,26 @@ export const fetchProductsByCategory = async (category: string): Promise<Extende
   }
 };
 
-// Helper function to map URL category to database category
-const mapUrlToDatabaseCategory = (urlCategory: string): string => {
-  if (!urlCategory) return 'vegetable';
+// Helper function to map URL category to possible database categories
+const mapUrlToPossibleDatabaseCategories = (urlCategory: string): string[] => {
+  const normalized = urlCategory.toLowerCase();
   
-  const mapping: Record<string, string> = {
-    'fruits': 'fruit',
-    'vegetables': 'vegetable',
-    'légumes': 'vegetable',
-    'packs': 'pack',
-    'drinks': 'drink',
-    'salade-jus': 'salade-jus'
+  const mappings: Record<string, string[]> = {
+    'fruits': ['fruit', 'fruits'],
+    'fruit': ['fruit', 'fruits'],
+    'vegetables': ['vegetable', 'vegetables', 'légumes', 'legumes'],
+    'végétables': ['vegetable', 'vegetables', 'légumes', 'legumes'],
+    'légumes': ['vegetable', 'vegetables', 'légumes', 'legumes'],
+    'légumes préparés': ['légumes préparés', 'légumes-préparés', 'legumes prepares', 'legumes-prepares'],
+    'légumes-préparés': ['légumes préparés', 'légumes-préparés', 'legumes prepares', 'legumes-prepares'],
+    'packs': ['pack', 'packs'],
+    'pack': ['pack', 'packs'],
+    'drinks': ['drink', 'drinks', 'boisson', 'boissons'],
+    'drink': ['drink', 'drinks', 'boisson', 'boissons'],
+    'salade-jus': ['salade-jus', 'salade jus', 'salades-jus']
   };
   
-  return mapping[urlCategory.toLowerCase()] || urlCategory.toLowerCase();
+  return mappings[normalized] || [urlCategory, normalized];
 };
 
 // Create a new product in Supabase

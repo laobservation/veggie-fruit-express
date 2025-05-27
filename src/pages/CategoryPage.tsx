@@ -22,9 +22,13 @@ const CategoryPage = () => {
       if (!categoryId) return;
       
       try {
+        // Decode the URL-encoded category name
+        const decodedCategoryId = decodeURIComponent(categoryId);
+        console.log('Looking for category:', decodedCategoryId);
+        
         const { data, error } = await getCategoriesTable()
           .select('*')
-          .ilike('name', categoryId.replace(/-/g, ' '))
+          .ilike('name', decodedCategoryId)
           .single();
           
         if (error) {
@@ -52,7 +56,7 @@ const CategoryPage = () => {
     const setFallbackCategoryInfo = () => {
       // Use fallback category info based on URL
       const config = categoryConfig[categoryId as keyof typeof categoryConfig] || {
-        title: categoryId ? categoryId.charAt(0).toUpperCase() + categoryId.slice(1).replace(/-/g, ' ') : 'Products',
+        title: categoryId ? decodeURIComponent(categoryId).charAt(0).toUpperCase() + decodeURIComponent(categoryId).slice(1).replace(/-/g, ' ') : 'Products',
         description: 'Browse our selection of products.',
         bgClass: 'bg-gray-100'
       };
@@ -99,6 +103,16 @@ const CategoryPage = () => {
       description: 'Browse our selection of farm-fresh, organic vegetables.',
       bgClass: 'bg-green-100'
     },
+    'légumes': {
+      title: 'Légumes',
+      description: 'Browse our selection of farm-fresh vegetables.',
+      bgClass: 'bg-green-100'
+    },
+    'légumes-préparés': {
+      title: 'Légumes préparés',
+      description: 'Découvrez nos légumes préparés et prêts à cuisiner.',
+      bgClass: 'bg-green-100'
+    },
     packs: {
       title: 'Value Packs',
       description: 'Get more for your money with our specially curated value packs.',
@@ -121,8 +135,10 @@ const CategoryPage = () => {
     
     setIsLoading(true);
     try {
-      console.log('Fetching products for category:', categoryId);
-      const categoryProducts = await fetchProductsByCategory(categoryId);
+      // Decode the URL-encoded category name
+      const decodedCategoryId = decodeURIComponent(categoryId);
+      console.log('Fetching products for category:', decodedCategoryId);
+      const categoryProducts = await fetchProductsByCategory(decodedCategoryId);
       setProducts(categoryProducts);
     } catch (error) {
       console.error('Error fetching category products:', error);

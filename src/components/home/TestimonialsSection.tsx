@@ -57,6 +57,9 @@ const TestimonialsSection = () => {
       case 'youtube':
         const youtubeMatch = video.video_url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
         return youtubeMatch ? `https://img.youtube.com/vi/${youtubeMatch[1]}/maxresdefault.jpg` : null;
+      case 'instagram':
+        // For Instagram, we'll use a placeholder since we can't easily extract thumbnails
+        return null;
       default:
         return null;
     }
@@ -124,13 +127,12 @@ const TestimonialsSection = () => {
               <Card className="overflow-hidden h-full bg-black rounded-2xl shadow-xl transform transition-all duration-300 hover:scale-105">
                 <CardContent className="p-0 h-full relative">
                   <div className="aspect-[9/16] w-full relative">
-                    {/* Video Element */}
+                    {/* Video Element - Hidden initially */}
                     <video
                       ref={(el) => {
                         if (el) videoRefs.current[video.id] = el;
                       }}
                       className="w-full h-full object-cover rounded-2xl"
-                      poster={getThumbnail(video) || undefined}
                       muted
                       playsInline
                       preload="metadata"
@@ -139,26 +141,26 @@ const TestimonialsSection = () => {
                       <source src={getVideoPreviewUrl(video.video_url, video.platform)} type="video/mp4" />
                     </video>
 
-                    {/* Thumbnail when not playing */}
+                    {/* Thumbnail/Preview when not playing */}
                     {playingVideo !== video.id && (
-                      <div 
-                        className="absolute inset-0 bg-cover bg-center rounded-2xl"
-                        style={{ 
-                          backgroundImage: getThumbnail(video) ? `url(${getThumbnail(video)})` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                        }}
-                      />
-                    )}
-
-                    {/* Play Button Overlay */}
-                    {playingVideo !== video.id && !showContinuePrompt && (
-                      <div 
-                        className="absolute inset-0 bg-black/40 flex items-center justify-center cursor-pointer transition-all duration-300 hover:bg-black/50"
-                        onClick={() => playVideo(video.id)}
-                      >
-                        <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center transform transition-all duration-300 hover:scale-110 shadow-lg">
-                          <Play className="w-8 h-8 text-gray-800 ml-1" fill="currentColor" />
+                      <>
+                        <div 
+                          className="absolute inset-0 bg-cover bg-center rounded-2xl"
+                          style={{ 
+                            backgroundImage: getThumbnail(video) ? `url(${getThumbnail(video)})` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                          }}
+                        />
+                        
+                        {/* Play Button Overlay */}
+                        <div 
+                          className="absolute inset-0 bg-black/40 flex items-center justify-center cursor-pointer transition-all duration-300 hover:bg-black/50"
+                          onClick={() => playVideo(video.id)}
+                        >
+                          <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center transform transition-all duration-300 hover:scale-110 shadow-lg">
+                            <Play className="w-8 h-8 text-gray-800 ml-1" fill="currentColor" />
+                          </div>
                         </div>
-                      </div>
+                      </>
                     )}
 
                     {/* Continue Watching Prompt */}
