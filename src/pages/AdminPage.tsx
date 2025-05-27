@@ -100,25 +100,27 @@ const AdminPage = () => {
         </div>
 
         <div className="md:w-3/4">
-          <TabsContent value="dashboard">
-            <h1 className="text-2xl font-bold mb-4">Tableau de bord</h1>
-            <Dashboard />
-          </TabsContent>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsContent value="dashboard">
+              <h1 className="text-2xl font-bold mb-4">Tableau de bord</h1>
+              <Dashboard />
+            </TabsContent>
 
-          <TabsContent value="orders">
-            <h1 className="text-2xl font-bold mb-4">Commandes</h1>
-            <OrdersManager />
-          </TabsContent>
+            <TabsContent value="orders">
+              <h1 className="text-2xl font-bold mb-4">Commandes</h1>
+              <OrdersManager />
+            </TabsContent>
 
-          <TabsContent value="products">
-            <h1 className="text-2xl font-bold mb-4">Gestion des produits</h1>
-            <ProductManager />
-          </TabsContent>
+            <TabsContent value="products">
+              <h1 className="text-2xl font-bold mb-4">Gestion des produits</h1>
+              <ProductManager />
+            </TabsContent>
 
-          <TabsContent value="slider">
-            <h1 className="text-2xl font-bold mb-4">Slider</h1>
-            <SliderManager />
-          </TabsContent>
+            <TabsContent value="slider">
+              <h1 className="text-2xl font-bold mb-4">Slider</h1>
+              <SliderManager />
+            </TabsContent>
+          </Tabs>
         </div>
       </div>
     </div>
