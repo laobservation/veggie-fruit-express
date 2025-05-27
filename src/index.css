@@ -147,3 +147,13 @@
 .nav-icon-pulse {
   animation: nav-pulse 0.5s ease-in-out;
 }
+
+/* Testimonial progress animation */
+@keyframes testimonial-progress {
+  from { width: 0%; }
+  to { width: 100%; }
+}
+
+.animate-testimonial-progress {
+  animation: testimonial-progress 5s linear forwards;
+}

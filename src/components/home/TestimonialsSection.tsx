@@ -198,7 +198,7 @@ const TestimonialsSection = () => {
                     {/* Progress Bar (when playing) */}
                     {playingVideo === video.id && (
                       <div className="absolute bottom-0 left-0 right-0 h-1 bg-black/30">
-                        <div className="h-full bg-gradient-to-r from-pink-500 to-violet-500 animate-[progress_5s_linear_forwards]" />
+                        <div className="h-full bg-gradient-to-r from-pink-500 to-violet-500 animate-testimonial-progress" />
                       </div>
                     )}
                   </div>
@@ -214,13 +214,6 @@ const TestimonialsSection = () => {
           ))}
         </div>
       </div>
-
-      <style jsx>{`
-        @keyframes progress {
-          from { width: 0%; }
-          to { width: 100%; }
-        }
-      `}</style>
     </section>
   );
 };
