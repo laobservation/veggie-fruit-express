@@ -81,7 +81,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
         />
       )}
 
-      {/* Service Options - show ONLY for pack category */}
+      {/* Service Options - only show for pack category */}
       {product.category === 'pack' && (
         <ServiceOptions
           serviceOptions={serviceOptions}

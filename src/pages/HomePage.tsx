@@ -10,6 +10,7 @@ import { supabase } from '@/integrations/supabase/client';
 import PromotionSlider from '@/components/home/PromotionSlider';
 import CategoriesSection from '@/components/home/CategoriesSection';
 import PopularItemsSection from '@/components/home/PopularItemsSection';
+import TestimonialsSection from '@/components/home/TestimonialsSection';
 
 interface HomeSEO {
   meta_title: string;
@@ -149,6 +150,8 @@ const HomePage: React.FC = () => {
           {seo.meta_keywords && <meta name="keywords" content={seo.meta_keywords} />}
           {seo.canonical_url && <link rel="canonical" href={seo.canonical_url} />}
           {seo.robots_directives && <meta name="robots" content={seo.robots_directives} />}
+          {/* Disable zoom */}
+          <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           
           {/* Open Graph / Facebook */}
           {seo.og_title && <meta property="og:title" content={seo.og_title} />}
@@ -177,6 +180,9 @@ const HomePage: React.FC = () => {
           onShowMore={() => handleShowMore(category.id)}
         />
       ))}
+
+      {/* Testimonial Videos Section */}
+      <TestimonialsSection />
     </div>
   );
 };

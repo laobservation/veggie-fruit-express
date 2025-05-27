@@ -10,6 +10,8 @@ import AdminPage from '@/pages/AdminPage';
 import AdminAuthPage from '@/pages/AdminAuthPage';
 import AdminSliderPage from '@/pages/AdminSliderPage';
 import AdminSettingsPage from '@/pages/AdminSettingsPage';
+import AdminTestimonialsPage from '@/pages/AdminTestimonialsPage';
+import PriceManagementPage from '@/pages/PriceManagementPage';
 import { CartNotificationProvider } from '@/hooks/use-cart';
 import { Toaster } from "@/components/ui/sonner";
 import FavoritesPage from '@/pages/FavoritesPage';
@@ -59,6 +61,16 @@ function App() {
             <Route path="/admin/settings" element={
               <ProtectedAdminRoute>
                 <AdminSettingsPage />
+              </ProtectedAdminRoute>
+            } />
+            <Route path="/admin/testimonials" element={
+              <ProtectedAdminRoute>
+                <AdminTestimonialsPage />
+              </ProtectedAdminRoute>
+            } />
+            <Route path="/prix" element={
+              <ProtectedAdminRoute>
+                <PriceManagementPage />
               </ProtectedAdminRoute>
             } />
             
