@@ -22,6 +22,30 @@ const PriceManagementPage = () => {
     loadProducts();
   }, []);
 
+  // Helper function to map database category to our application category types
+  const mapDatabaseToAppCategory = (dbCategory: string | null): 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus' => {
+    if (!dbCategory) return 'vegetable';
+    
+    const category = dbCategory.toLowerCase();
+    
+    // Direct mapping for exact matches
+    if (category === 'fruit') return 'fruit';
+    if (category === 'vegetable') return 'vegetable';
+    if (category === 'pack') return 'pack';
+    if (category === 'drink') return 'drink';
+    if (category === 'salade-jus') return 'salade-jus';
+    
+    // Fuzzy matching for similar terms
+    if (category.includes('fruit')) return 'fruit';
+    if (category.includes('légume') || category.includes('legume')) return 'vegetable';
+    if (category.includes('pack')) return 'pack';
+    if (category.includes('boisson') || category.includes('drink')) return 'drink';
+    if (category.includes('salade') || category.includes('jus')) return 'salade-jus';
+    
+    // Default fallback
+    return 'vegetable';
+  };
+
   const loadProducts = async () => {
     try {
       const { data, error } = await supabase
@@ -35,7 +59,7 @@ const PriceManagementPage = () => {
       const transformedProducts = data.map(item => ({
         id: item.id.toString(),
         name: item.name || '',
-        category: item.category || 'fruit',
+        category: mapDatabaseToAppCategory(item.category),
         price: item.price || 0,
         image: item.image_url || '',
         description: item.description || '',
