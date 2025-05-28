@@ -44,6 +44,12 @@ const TestimonialsSection = () => {
     }
   };
 
+  const getVideoPreviewUrl = (url: string, platform: string) => {
+    // For demo purposes, we'll use placeholder videos
+    // In production, you'd need to extract actual video files or use platform APIs
+    return 'https://sample-videos.com/zip/10/mp4/SampleVideo_640x360_1mb.mp4';
+  };
+
   const getThumbnail = (video: TestimonialVideo) => {
     if (video.thumbnail_url) return video.thumbnail_url;
     
@@ -59,19 +65,6 @@ const TestimonialsSection = () => {
     }
   };
 
-  const getEmbedUrl = (video: TestimonialVideo) => {
-    switch (video.platform) {
-      case 'youtube':
-        const youtubeMatch = video.video_url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
-        return youtubeMatch ? `https://www.youtube.com/embed/${youtubeMatch[1]}?autoplay=1&mute=0&controls=1` : null;
-      case 'instagram':
-        // For Instagram, we'll use the direct URL - note this might not work for embeds
-        return video.video_url;
-      default:
-        return video.video_url;
-    }
-  };
-
   const getPlatformIcon = (platform: string) => {
     switch (platform) {
       case 'instagram':
@@ -84,12 +77,17 @@ const TestimonialsSection = () => {
   };
 
   const playVideo = (videoId: string) => {
-    setPlayingVideo(videoId);
-    
-    // Stop video after 5 seconds and show continue prompt
-    setTimeout(() => {
-      setShowContinuePrompt(videoId);
-    }, 5000);
+    const videoElement = videoRefs.current[videoId];
+    if (videoElement) {
+      setPlayingVideo(videoId);
+      videoElement.play();
+      
+      // Stop video after 5 seconds and show continue prompt
+      setTimeout(() => {
+        videoElement.pause();
+        setShowContinuePrompt(videoId);
+      }, 5000);
+    }
   };
 
   const continueWatching = (video: TestimonialVideo) => {
@@ -101,6 +99,10 @@ const TestimonialsSection = () => {
   const closePrompt = (videoId: string) => {
     setShowContinuePrompt(null);
     setPlayingVideo(null);
+    const videoElement = videoRefs.current[videoId];
+    if (videoElement) {
+      videoElement.currentTime = 0;
+    }
   };
 
   if (loading || videos.length === 0) {
@@ -125,26 +127,29 @@ const TestimonialsSection = () => {
               <Card className="overflow-hidden h-full bg-black rounded-2xl shadow-xl transform transition-all duration-300 hover:scale-105">
                 <CardContent className="p-0 h-full relative">
                   <div className="aspect-[9/16] w-full relative">
-                    {/* Video Preview - Always show thumbnail or iframe */}
-                    {playingVideo !== video.id ? (
+                    {/* Video Element - Hidden initially */}
+                    <video
+                      ref={(el) => {
+                        if (el) videoRefs.current[video.id] = el;
+                      }}
+                      className="w-full h-full object-cover rounded-2xl"
+                      muted
+                      playsInline
+                      preload="metadata"
+                      style={{ display: playingVideo === video.id ? 'block' : 'none' }}
+                    >
+                      <source src={getVideoPreviewUrl(video.video_url, video.platform)} type="video/mp4" />
+                    </video>
+
+                    {/* Thumbnail/Preview when not playing */}
+                    {playingVideo !== video.id && (
                       <>
-                        {/* Show thumbnail if available */}
-                        {getThumbnail(video) ? (
-                          <div 
-                            className="absolute inset-0 bg-cover bg-center rounded-2xl"
-                            style={{ backgroundImage: `url(${getThumbnail(video)})` }}
-                          />
-                        ) : (
-                          /* Show iframe preview for platforms without thumbnails */
-                          <iframe
-                            src={getEmbedUrl(video)}
-                            className="w-full h-full object-cover rounded-2xl"
-                            frameBorder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                            style={{ pointerEvents: 'none' }}
-                          />
-                        )}
+                        <div 
+                          className="absolute inset-0 bg-cover bg-center rounded-2xl"
+                          style={{ 
+                            backgroundImage: getThumbnail(video) ? `url(${getThumbnail(video)})` : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                          }}
+                        />
                         
                         {/* Play Button Overlay */}
                         <div 
@@ -156,15 +161,6 @@ const TestimonialsSection = () => {
                           </div>
                         </div>
                       </>
-                    ) : (
-                      /* Playing Video with Sound */
-                      <iframe
-                        src={getEmbedUrl(video)}
-                        className="w-full h-full object-cover rounded-2xl"
-                        frameBorder="0"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      />
                     )}
 
                     {/* Continue Watching Prompt */}

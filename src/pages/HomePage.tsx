@@ -75,6 +75,7 @@ const HomePage: React.FC = () => {
       setIsLoading(true);
       try {
         const products = await getProductsWithStock();
+        // Fix product types to ensure compatibility
         const fixedProducts = fixProductImportType(products);
         console.log('Loaded products:', fixedProducts);
         setProducts(fixedProducts);
@@ -93,59 +94,44 @@ const HomePage: React.FC = () => {
     loadProducts();
   }, []);
 
-  // Get visible categories that have products
-  const getVisibleCategoriesWithProducts = () => {
-    return categories.filter(category => {
-      // Only show visible categories
-      if (!category.is_visible) return false;
-      
-      // Check if category has products
-      const categoryProducts = products.filter(product => {
-        // Match by exact category name or similar variations
-        const productCategory = product.category?.toLowerCase().trim();
-        const categoryName = category.name.toLowerCase().trim();
-        
-        // Direct match
-        if (productCategory === categoryName) return product.categoryLink === true;
-        
-        // Handle variations
-        if ((categoryName === 'légumes' || categoryName === 'vegetable') && 
-            (productCategory === 'légumes' || productCategory === 'vegetable')) {
-          return product.categoryLink === true;
-        }
-        
-        if ((categoryName === 'fruits' || categoryName === 'fruit') && 
-            (productCategory === 'fruits' || productCategory === 'fruit')) {
-          return product.categoryLink === true;
-        }
-        
-        if ((categoryName === 'packs' || categoryName === 'pack') && 
-            (productCategory === 'packs' || productCategory === 'pack')) {
-          return product.categoryLink === true;
-        }
-        
-        if ((categoryName === 'drinks' || categoryName === 'boissons') && 
-            (productCategory === 'drinks' || productCategory === 'drink')) {
-          return product.categoryLink === true;
-        }
-        
-        if (categoryName === 'salade-jus' && productCategory === 'salade-jus') {
-          return product.categoryLink === true;
-        }
-        
-        // For special categories like "Légumes préparés"
-        if (categoryName === 'légumes préparés' && productCategory === 'légumes préparés') {
-          return product.categoryLink === true;
-        }
-        
-        return false;
-      });
-      
-      return categoryProducts.length > 0;
-    });
+  // Strict category mapping function - only exact matches
+  const mapCategoryToValue = (categoryName: string): 'fruit' | 'vegetable' | 'pack' | 'drink' | 'salade-jus' => {
+    const lowerName = categoryName.toLowerCase().trim();
+    
+    console.log(`Mapping category: "${categoryName}" (lowercase: "${lowerName}")`);
+    
+    // Strict exact match only - no merging of categories
+    if (lowerName === 'fruit' || lowerName === 'fruits') return 'fruit';
+    if (lowerName === 'légume' || lowerName === 'légumes' || lowerName === 'vegetable' || lowerName === 'vegetables') return 'vegetable';
+    if (lowerName === 'pack' || lowerName === 'packs') return 'pack';
+    if (lowerName === 'drink' || lowerName === 'drinks' || lowerName === 'boisson' || lowerName === 'boissons') return 'drink';
+    if (lowerName === 'salade-jus' || lowerName === 'salades-jus' || lowerName === 'salade & jus') return 'salade-jus';
+    
+    // For categories like "Légumes préparés", they should stay as their own category
+    // Don't map them to other categories to prevent merging
+    console.log(`Category "${categoryName}" has no exact mapping, will not be displayed on home page`);
+    return 'vegetable'; // This is just a fallback, but the category won't be displayed
   };
 
-  const visibleCategoriesWithProducts = getVisibleCategoriesWithProducts();
+  // Filter categories to only show visible ones on the home page
+  const visibleCategories = categories.filter(cat => cat.is_visible === true);
+  
+  const mappedCategories = visibleCategories.map(cat => {
+    const categoryValue = mapCategoryToValue(cat.name);
+    
+    console.log(`Final mapping: "${cat.name}" -> "${categoryValue}"`);
+    
+    return {
+      ...cat,
+      categoryValue
+    };
+  });
+
+  // Only use categories that have exact mappings and are set to be visible
+  const categoriesToDisplay = mappedCategories.filter(cat => {
+    const hasExactMapping = ['fruit', 'fruits', 'légume', 'légumes', 'vegetable', 'vegetables', 'pack', 'packs', 'drink', 'drinks', 'boisson', 'boissons', 'salade-jus', 'salades-jus', 'salade & jus'].includes(cat.name.toLowerCase().trim());
+    return hasExactMapping;
+  });
 
   const handleShowMore = (categoryId: string) => {
     setShowMoreItems(prev => ({
@@ -164,6 +150,7 @@ const HomePage: React.FC = () => {
           {seo.meta_keywords && <meta name="keywords" content={seo.meta_keywords} />}
           {seo.canonical_url && <link rel="canonical" href={seo.canonical_url} />}
           {seo.robots_directives && <meta name="robots" content={seo.robots_directives} />}
+          {/* Disable zoom */}
           <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
           
           {/* Open Graph / Facebook */}
@@ -175,22 +162,26 @@ const HomePage: React.FC = () => {
         </Helmet>
       )}
 
+      {/* Promotions Slider - Uses the slider data from database */}
       <PromotionSlider />
+
+      {/* Categories Section */}
       <CategoriesSection />
 
-      {/* Render sections for visible categories with products */}
-      {visibleCategoriesWithProducts.map((category) => (
+      {/* Render a separate section for each category that should appear on home page */}
+      {categoriesToDisplay.map((category) => (
         <PopularItemsSection
           key={category.id}
           title={category.name}
           products={products}
           isLoading={isLoading}
           showAll={showMoreItems[category.id] || false}
-          categoryName={category.name}
+          category={category.categoryValue}
           onShowMore={() => handleShowMore(category.id)}
         />
       ))}
 
+      {/* Testimonial Videos Section */}
       <TestimonialsSection />
     </div>
   );

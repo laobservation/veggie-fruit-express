@@ -4,10 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Search, X } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { products } from '@/data/products';
 import { Link } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
-import { transformProductFromSupabase } from '@/services/productService';
-import { Product } from '@/types/product';
 
 interface SearchBarProps {
   expanded?: boolean;
@@ -17,9 +15,8 @@ interface SearchBarProps {
 const SearchBar: React.FC<SearchBarProps> = ({ expanded = false, onClose }) => {
   const [isExpanded, setIsExpanded] = useState(expanded);
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<Product[]>([]);
+  const [searchResults, setSearchResults] = useState<typeof products>([]);
   const [showResults, setShowResults] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const resultsRef = useRef<HTMLDivElement>(null);
   
   // Focus input when expanded
@@ -46,39 +43,20 @@ const SearchBar: React.FC<SearchBarProps> = ({ expanded = false, onClose }) => {
     };
   }, []);
   
-  // Smart search with database query
+  // Update search results as user types
   useEffect(() => {
-    const searchProducts = async () => {
-      if (searchTerm.length >= 2) {
-        setIsLoading(true);
-        try {
-          // Search in products table
-          const { data, error } = await supabase
-            .from('Products')
-            .select('*')
-            .or(`name.ilike.%${searchTerm}%,description.ilike.%${searchTerm}%,category.ilike.%${searchTerm}%`)
-            .limit(10);
-          
-          if (error) throw error;
-          
-          // Transform and filter results
-          const transformedProducts = data?.map(transformProductFromSupabase) || [];
-          setSearchResults(transformedProducts);
-          setShowResults(true);
-        } catch (error) {
-          console.error('Search error:', error);
-          setSearchResults([]);
-        } finally {
-          setIsLoading(false);
-        }
-      } else {
-        setSearchResults([]);
-        setShowResults(false);
-      }
-    };
-    
-    const debounceTimer = setTimeout(searchProducts, 300);
-    return () => clearTimeout(debounceTimer);
+    if (searchTerm.length >= 1) {
+      const results = products.filter(product => 
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+        product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.category.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setSearchResults(results);
+      setShowResults(true);
+    } else {
+      setSearchResults([]);
+      setShowResults(false);
+    }
   }, [searchTerm]);
   
   const handleClear = () => {
@@ -89,7 +67,8 @@ const SearchBar: React.FC<SearchBarProps> = ({ expanded = false, onClose }) => {
   
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
-    if (searchTerm.length >= 2) {
+    console.log('Searching for:', searchTerm);
+    if (searchTerm.length >= 1) {
       setShowResults(true);
     }
   };
@@ -101,23 +80,9 @@ const SearchBar: React.FC<SearchBarProps> = ({ expanded = false, onClose }) => {
   };
   
   const handleInputFocus = () => {
-    if (searchTerm.length >= 2) {
+    if (searchTerm.length >= 1) {
       setShowResults(true);
     }
-  };
-
-  const getCategoryText = (category: string) => {
-    const categoryMap: Record<string, string> = {
-      'fruit': 'Fruit',
-      'vegetable': 'Légume',
-      'pack': 'Pack',
-      'drink': 'Boisson',
-      'salade-jus': 'Salade & Jus',
-      'légumes': 'Légume',
-      'fruits': 'Fruit',
-      'légumes préparés': 'Légumes préparés'
-    };
-    return categoryMap[category.toLowerCase()] || category;
   };
   
   return (
@@ -137,7 +102,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ expanded = false, onClose }) => {
             <Input
               id="search-input"
               type="text"
-              placeholder="Rechercher des produits..."
+              placeholder="Rechercher..."
               className="pr-8 w-full"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
@@ -155,49 +120,42 @@ const SearchBar: React.FC<SearchBarProps> = ({ expanded = false, onClose }) => {
               </Button>
             )}
             
-            {showResults && (
-              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-md shadow-lg z-50 max-h-80 overflow-y-auto border">
-                {isLoading ? (
-                  <div className="px-4 py-3 text-sm text-gray-500">Recherche en cours...</div>
-                ) : searchResults.length > 0 ? (
-                  <ul className="py-1">
-                    {searchResults.map((product) => (
-                      <li key={product.id}>
-                        <Link 
-                          to={`/product/${product.id}`}
-                          className="flex items-center px-4 py-3 hover:bg-gray-50 transition-colors"
-                          onClick={handleResultClick}
-                        >
-                          <div className="h-12 w-12 mr-3 bg-gray-100 rounded overflow-hidden flex-shrink-0">
-                            <img 
-                              src={product.image} 
-                              alt={product.name} 
-                              className="h-full w-full object-cover"
-                              onError={(e) => {
-                                (e.target as HTMLImageElement).src = '/placeholder.svg';
-                              }}
-                            />
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
-                            <p className="text-xs text-gray-500 truncate">{getCategoryText(product.category)}</p>
-                            {product.description && (
-                              <p className="text-xs text-gray-400 truncate mt-1">{product.description}</p>
-                            )}
-                          </div>
-                          <div className="ml-2 flex-shrink-0">
-                            <p className="text-sm font-medium text-green-600">{product.price.toFixed(2)} DH</p>
-                            <p className="text-xs text-gray-400">/{product.unit}</p>
-                          </div>
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                ) : (
-                  <div className="px-4 py-3 text-sm text-gray-500">
-                    Aucun résultat trouvé pour "{searchTerm}"
-                  </div>
-                )}
+            {showResults && searchResults.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-md shadow-lg z-50 max-h-80 overflow-y-auto">
+                <ul className="py-1">
+                  {searchResults.map((product) => (
+                    <li key={product.id}>
+                      <Link 
+                        to={`/product/${product.id}`}
+                        className="flex items-center px-4 py-2 hover:bg-gray-100"
+                        onClick={handleResultClick}
+                      >
+                        <div className="h-10 w-10 mr-3 bg-gray-100 rounded overflow-hidden">
+                          <img 
+                            src={product.image} 
+                            alt={product.name} 
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-medium text-gray-900 truncate">{product.name}</p>
+                          <p className="text-xs text-gray-500 truncate">{product.category === 'fruit' ? 'Fruit' : 'Légume'}</p>
+                        </div>
+                        <div className="ml-2">
+                          <p className="text-sm font-medium text-green-600">{product.price.toFixed(2)} €</p>
+                        </div>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            
+            {showResults && searchResults.length === 0 && searchTerm.length >= 1 && (
+              <div className="absolute top-full left-0 right-0 mt-2 bg-white rounded-md shadow-lg z-50">
+                <div className="px-4 py-3 text-sm text-gray-500">
+                  Aucun résultat trouvé pour "{searchTerm}"
+                </div>
               </div>
             )}
           </div>
@@ -209,7 +167,7 @@ const SearchBar: React.FC<SearchBarProps> = ({ expanded = false, onClose }) => {
               className="ml-2"
               onClick={onClose}
             >
-              Annuler
+              Cancel
             </Button>
           )}
         </form>

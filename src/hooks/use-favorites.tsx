@@ -15,7 +15,6 @@ interface FavoritesState {
   removeFavorite: (productId: string) => Promise<void>;
   clearFavorites: () => Promise<void>;
   fetchFavorites: () => Promise<void>;
-  getTotalFavorites: () => number;
 }
 
 // Helper function to get favorites from localStorage
@@ -44,10 +43,6 @@ export const useFavoritesStore = create<FavoritesState>((set, get) => ({
   
   isFavorite: (productId: string) => {
     return get().favorites.some(item => item.id === productId);
-  },
-  
-  getTotalFavorites: () => {
-    return get().favorites.length;
   },
   
   toggleFavorite: async (product: Product) => {
