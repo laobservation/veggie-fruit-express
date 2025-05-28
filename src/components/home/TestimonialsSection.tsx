@@ -80,9 +80,8 @@ const TestimonialsSection = () => {
   };
 
   const getVideoPreviewUrl = (url: string, platform: string) => {
-    // For demo purposes, we'll use placeholder videos
-    // In production, you'd need to extract actual video files or use platform APIs
-    return 'https://sample-videos.com/zip/10/mp4/SampleVideo_640x360_1mb.mp4';
+    // For demo purposes, using a working sample video
+    return 'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
   };
 
   const getThumbnail = (video: TestimonialVideo) => {
@@ -115,12 +114,16 @@ const TestimonialsSection = () => {
     const videoElement = videoRefs.current[videoId];
     if (videoElement) {
       setPlayingVideo(videoId);
-      videoElement.play();
+      videoElement.play().catch(error => {
+        console.error('Error playing video:', error);
+      });
       
       // Stop video after 5 seconds and show continue prompt
       setTimeout(() => {
-        videoElement.pause();
-        setShowContinuePrompt(videoId);
+        if (videoElement) {
+          videoElement.pause();
+          setShowContinuePrompt(videoId);
+        }
       }, 5000);
     }
   };
@@ -162,7 +165,7 @@ const TestimonialsSection = () => {
               <Card className="overflow-hidden h-full bg-black rounded-2xl shadow-xl transform transition-all duration-300 hover:scale-105">
                 <CardContent className="p-0 h-full relative">
                   <div className="aspect-[9/16] w-full relative">
-                    {/* Video Element - Hidden initially */}
+                    {/* Video Element */}
                     <video
                       ref={(el) => {
                         if (el) videoRefs.current[video.id] = el;
@@ -172,6 +175,12 @@ const TestimonialsSection = () => {
                       playsInline
                       preload="metadata"
                       style={{ display: playingVideo === video.id ? 'block' : 'none' }}
+                      onLoadedData={() => {
+                        console.log(`Video ${video.id} loaded and ready to play`);
+                      }}
+                      onError={(e) => {
+                        console.error(`Error loading video ${video.id}:`, e);
+                      }}
                     >
                       <source src={getVideoPreviewUrl(video.video_url, video.platform)} type="video/mp4" />
                     </video>

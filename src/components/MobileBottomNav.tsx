@@ -17,7 +17,7 @@ const MobileBottomNav = () => {
     return location.pathname.startsWith(path);
   };
 
-  // FIXED: Handle cart click to open cart instead of navigating
+  // Handle cart click to open cart instead of navigating
   const handleCartClick = (e: React.MouseEvent) => {
     e.preventDefault();
     console.log('Mobile cart button clicked - opening cart');
@@ -41,7 +41,7 @@ const MobileBottomNav = () => {
       icon: ShoppingCart, 
       label: 'Panier',
       badge: getTotalItems() > 0 ? getTotalItems() : null,
-      isCart: true // Mark this as the cart item
+      isCart: true
     },
     { 
       path: 'http://wa.me/212649150370', 
@@ -50,6 +50,11 @@ const MobileBottomNav = () => {
       external: true
     }
   ];
+
+  const formatBadgeNumber = (num: number) => {
+    if (num > 99) return '99+';
+    return num.toString();
+  };
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-40 md:hidden">
@@ -71,7 +76,6 @@ const MobileBottomNav = () => {
               <span className="text-xs mt-1 font-medium">{item.label}</span>
             </a>
           ) : item.isCart ? (
-            // FIXED: Use button for cart instead of Link
             <button
               key={item.path}
               onClick={handleCartClick}
@@ -90,8 +94,8 @@ const MobileBottomNav = () => {
                   <item.icon className="h-5 w-5" />
                 </div>
                 {item.badge && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-lg">
-                    {item.badge}
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold min-w-[20px] h-5 flex items-center justify-center px-1 rounded-full shadow-lg">
+                    {formatBadgeNumber(item.badge)}
                   </span>
                 )}
               </div>
@@ -120,8 +124,8 @@ const MobileBottomNav = () => {
                   <item.icon className="h-5 w-5" />
                 </div>
                 {item.badge && (
-                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold shadow-lg">
-                    {item.badge}
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold min-w-[20px] h-5 flex items-center justify-center px-1 rounded-full shadow-lg">
+                    {formatBadgeNumber(item.badge)}
                   </span>
                 )}
               </div>

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '@/hooks/use-cart';
@@ -60,8 +59,8 @@ export const useProductPage = () => {
         }
       }
       
-      // For weight-based products, use selectedWeight; for others, use quantity
-      const isWeightBased = product.unit === 'kg';
+      // For weight-based products (excluding packs), use selectedWeight; for others, use quantity
+      const isWeightBased = product.unit === 'kg' && product.category !== 'pack';
       const multiplier = isWeightBased ? selectedWeight : quantity;
       
       setTotalPrice((product.price * multiplier) + (servicePrice * (isWeightBased ? 1 : quantity)));
@@ -80,7 +79,7 @@ export const useProductPage = () => {
     }
   }, [loading, product]);
 
-  // Handle weight change for weight-based products
+  // Handle weight change for weight-based products (excluding packs)
   const handleWeightChange = (weight: number, calculatedPrice: number) => {
     setSelectedWeight(weight);
     
@@ -102,8 +101,8 @@ export const useProductPage = () => {
         ? [productServiceOptions.find(s => s.id === selectedService)].filter(Boolean) as ServiceOption[]
         : [];
       
-      // For weight-based products, use selectedWeight as quantity
-      const isWeightBased = product.unit === 'kg';
+      // For weight-based products (excluding packs), use selectedWeight as quantity
+      const isWeightBased = product.unit === 'kg' && product.category !== 'pack';
       const cartQuantity = isWeightBased ? selectedWeight : quantity;
       
       addItem(product, cartQuantity, selectedServices);
@@ -125,8 +124,8 @@ export const useProductPage = () => {
         ? [productServiceOptions.find(s => s.id === selectedService)].filter(Boolean) as ServiceOption[]
         : [];
       
-      // For weight-based products, use selectedWeight as quantity
-      const isWeightBased = product.unit === 'kg';
+      // For weight-based products (excluding packs), use selectedWeight as quantity
+      const isWeightBased = product.unit === 'kg' && product.category !== 'pack';
       const cartQuantity = isWeightBased ? selectedWeight : quantity;
       
       addItem(product, cartQuantity, selectedServices);

@@ -31,8 +31,8 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
   selectedWeight,
   onWeightChange
 }) => {
-  // Check if product is sold by weight (kg)
-  const isWeightBased = product.unit === 'kg';
+  // Check if product is sold by weight (kg) AND not a pack
+  const isWeightBased = product.unit === 'kg' && product.category !== 'pack';
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
@@ -59,7 +59,7 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
         )}
       </div>
 
-      {/* Weight Selector - only show for weight-based products */}
+      {/* Weight Selector - only show for weight-based products that are NOT packs */}
       {isWeightBased && onWeightChange && (
         <div className="mb-6">
           <WeightSelector
@@ -71,8 +71,8 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
         </div>
       )}
 
-      {/* Quantity Selector - only show for non-weight-based products */}
-      {!isWeightBased && (
+      {/* Quantity Selector - show for non-weight-based products OR pack products */}
+      {(!isWeightBased || product.category === 'pack') && (
         <QuantitySelector
           quantity={quantity}
           onQuantityChange={setQuantity}
