@@ -20,11 +20,46 @@ const TestimonialsSection = () => {
   const [loading, setLoading] = useState(true);
   const [playingVideo, setPlayingVideo] = useState<string | null>(null);
   const [showContinuePrompt, setShowContinuePrompt] = useState<string | null>(null);
+  const [hasStartedAutoplay, setHasStartedAutoplay] = useState(false);
   const videoRefs = useRef<{[key: string]: HTMLVideoElement}>({});
+  const sectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     loadVideos();
   }, []);
+
+  // Intersection Observer for automatic video playback
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !hasStartedAutoplay && videos.length > 0) {
+            // Start playing the first video automatically
+            const firstVideo = videos[0];
+            if (firstVideo) {
+              console.log('Starting autoplay for first video:', firstVideo.id);
+              playVideo(firstVideo.id);
+              setHasStartedAutoplay(true);
+            }
+          }
+        });
+      },
+      {
+        threshold: 0.3, // Trigger when 30% of the section is visible
+        rootMargin: '0px 0px -10% 0px'
+      }
+    );
+
+    if (sectionRef.current) {
+      observer.observe(sectionRef.current);
+    }
+
+    return () => {
+      if (sectionRef.current) {
+        observer.unobserve(sectionRef.current);
+      }
+    };
+  }, [videos, hasStartedAutoplay]);
 
   const loadVideos = async () => {
     try {
@@ -110,7 +145,7 @@ const TestimonialsSection = () => {
   }
 
   return (
-    <section className="py-12 px-4 md:px-0 bg-gradient-to-br from-gray-50 to-gray-100">
+    <section ref={sectionRef} className="py-12 px-4 md:px-0 bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="container mx-auto">
         <div className="text-center mb-8">
           <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">
