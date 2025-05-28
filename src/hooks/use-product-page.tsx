@@ -81,19 +81,8 @@ export const useProductPage = () => {
   }, [loading, product]);
 
   // Handle weight change for weight-based products
-  const handleWeightChange = (weight: number, calculatedPrice: number) => {
+  const handleWeightChange = (weight: number) => {
     setSelectedWeight(weight);
-    
-    // Add service price if applicable
-    let servicePrice = 0;
-    if (selectedService) {
-      const service = productServiceOptions.find(s => s.id === selectedService);
-      if (service) {
-        servicePrice = service.price;
-      }
-    }
-    
-    setTotalPrice(calculatedPrice + servicePrice);
   };
   
   const handleAddToCart = () => {

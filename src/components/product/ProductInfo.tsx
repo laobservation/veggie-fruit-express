@@ -10,8 +10,8 @@ interface ProductInfoProps {
   totalPrice: number;
   isPack: boolean;
   serviceOptions: ServiceOption[];
-  selectedService: ServiceOption | null;
-  setSelectedService: (service: ServiceOption | null) => void;
+  selectedService: string | null;
+  setSelectedService: (service: string | null) => void;
   quantity: number;
   setQuantity: (quantity: number) => void;
   selectedWeight: number;
@@ -50,9 +50,9 @@ const ProductInfo: React.FC<ProductInfoProps> = ({
       {/* Service Options - Show for all products */}
       {serviceOptions.length > 0 && (
         <ServiceOptions
-          options={serviceOptions}
+          serviceOptions={serviceOptions}
           selectedService={selectedService}
-          onServiceChange={setSelectedService}
+          setSelectedService={setSelectedService}
         />
       )}
 
