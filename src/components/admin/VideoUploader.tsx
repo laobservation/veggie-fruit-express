@@ -50,6 +50,22 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
     setUploading(true);
 
     try {
+      // Check if bucket exists and is accessible
+      console.log('Checking bucket access...');
+      const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
+      
+      if (bucketError) {
+        console.error('Bucket access error:', bucketError);
+        throw new Error('Impossible d\'accéder au stockage');
+      }
+
+      const akhdarmediaBucket = buckets?.find(bucket => bucket.name === 'akhdarmedia');
+      if (!akhdarmediaBucket) {
+        throw new Error('Le bucket akhdarmedia n\'existe pas');
+      }
+
+      console.log('Bucket found:', akhdarmediaBucket);
+
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = `testimonials/${fileName}`;
@@ -62,15 +78,31 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
         .from('akhdarmedia')
         .upload(filePath, file, {
           cacheControl: '3600',
-          upsert: false
+          upsert: false,
+          contentType: file.type
         });
 
       if (uploadError) {
-        console.error('Upload error:', uploadError);
-        throw uploadError;
+        console.error('Upload error details:', uploadError);
+        
+        // More specific error handling
+        if (uploadError.message.includes('row-level security')) {
+          throw new Error('Problème de sécurité - veuillez vérifier les permissions du bucket');
+        } else if (uploadError.message.includes('not found')) {
+          throw new Error('Bucket non trouvé - veuillez vérifier la configuration');
+        } else {
+          throw new Error(uploadError.message || 'Erreur lors du téléchargement');
+        }
       }
 
       console.log('Upload successful:', data);
+
+      // Verify the file was uploaded by trying to get its public URL
+      const { data: urlData } = supabase.storage
+        .from('akhdarmedia')
+        .getPublicUrl(filePath);
+
+      console.log('File public URL:', urlData.publicUrl);
 
       onVideoUploaded(filePath, file.size);
       
@@ -78,11 +110,11 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
         title: "Succès",
         description: "Vidéo téléchargée avec succès.",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error uploading video:', error);
       toast({
         title: "Erreur",
-        description: `Erreur lors du téléchargement de la vidéo: ${error.message || 'Erreur inconnue'}`,
+        description: error.message || 'Erreur inconnue lors du téléchargement',
         variant: "destructive",
       });
     } finally {
