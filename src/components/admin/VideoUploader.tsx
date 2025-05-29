@@ -51,14 +51,26 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
 
     try {
       const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}.${fileExt}`;
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = `testimonials/${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('akhdarmedia')
-        .upload(filePath, file);
+      console.log('Uploading file:', filePath);
+      console.log('File size:', file.size);
+      console.log('File type:', file.type);
 
-      if (uploadError) throw uploadError;
+      const { data, error: uploadError } = await supabase.storage
+        .from('akhdarmedia')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
+
+      if (uploadError) {
+        console.error('Upload error:', uploadError);
+        throw uploadError;
+      }
+
+      console.log('Upload successful:', data);
 
       onVideoUploaded(filePath, file.size);
       
@@ -70,7 +82,7 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
       console.error('Error uploading video:', error);
       toast({
         title: "Erreur",
-        description: "Erreur lors du téléchargement de la vidéo.",
+        description: `Erreur lors du téléchargement de la vidéo: ${error.message || 'Erreur inconnue'}`,
         variant: "destructive",
       });
     } finally {
