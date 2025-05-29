@@ -137,7 +137,7 @@ const TestimonialManager = () => {
       // Delete from storage if it's an uploaded video
       if (videoPath) {
         await supabase.storage
-          .from('testimonial-videos')
+          .from('akhdarmedia')
           .remove([videoPath]);
       }
 

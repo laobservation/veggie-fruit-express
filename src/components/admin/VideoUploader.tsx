@@ -55,7 +55,7 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
       const filePath = `testimonials/${fileName}`;
 
       const { error: uploadError } = await supabase.storage
-        .from('testimonial-videos')
+        .from('akhdarmedia')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;

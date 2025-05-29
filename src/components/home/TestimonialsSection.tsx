@@ -50,7 +50,7 @@ const TestimonialsSection = () => {
   const getVideoSrc = (video: TestimonialVideo) => {
     if (video.video_file_path) {
       const { data } = supabase.storage
-        .from('testimonial-videos')
+        .from('akhdarmedia')
         .getPublicUrl(video.video_file_path);
       return data.publicUrl;
     }
