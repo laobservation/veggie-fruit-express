@@ -4,11 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Trash2, Plus, GripVertical } from 'lucide-react';
+import { Trash2, Plus, GripVertical, ExternalLink } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import VideoUploader from './VideoUploader';
 
 interface TestimonialVideo {
   id: string;
@@ -18,6 +18,10 @@ interface TestimonialVideo {
   thumbnail_url: string | null;
   is_active: boolean;
   display_order: number;
+  video_file_path: string | null;
+  video_file_size: number | null;
+  redirect_url: string | null;
+  enable_redirect: boolean | null;
 }
 
 const TestimonialManager = () => {
@@ -25,8 +29,10 @@ const TestimonialManager = () => {
   const [loading, setLoading] = useState(true);
   const [newVideo, setNewVideo] = useState({
     title: '',
-    video_url: '',
-    platform: 'instagram',
+    video_file_path: '',
+    video_file_size: 0,
+    redirect_url: '',
+    enable_redirect: false,
     is_active: true
   });
   const { toast } = useToast();
@@ -56,77 +62,58 @@ const TestimonialManager = () => {
     }
   };
 
-  const extractVideoId = (url: string, platform: string) => {
-    try {
-      switch (platform) {
-        case 'youtube':
-          const youtubeMatch = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([^&\n?#]+)/);
-          return youtubeMatch ? youtubeMatch[1] : null;
-        case 'instagram':
-          const instagramMatch = url.match(/instagram\.com\/(?:p|reel)\/([^/?]+)/);
-          return instagramMatch ? instagramMatch[1] : null;
-        case 'tiktok':
-          const tiktokMatch = url.match(/tiktok\.com\/.*\/video\/(\d+)/);
-          return tiktokMatch ? tiktokMatch[1] : null;
-        case 'facebook':
-          return url;
-        default:
-          return null;
-      }
-    } catch {
-      return null;
-    }
+  const handleVideoUpload = (videoPath: string, fileSize: number) => {
+    setNewVideo(prev => ({
+      ...prev,
+      video_file_path: videoPath,
+      video_file_size: fileSize
+    }));
   };
 
-  const generateThumbnail = (url: string, platform: string) => {
-    const videoId = extractVideoId(url, platform);
-    if (!videoId) return null;
-
-    switch (platform) {
-      case 'youtube':
-        return `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
-      case 'instagram':
-        return null; // Instagram doesn't provide direct thumbnail URLs
-      case 'tiktok':
-        return null; // TikTok doesn't provide direct thumbnail URLs
-      case 'facebook':
-        return null; // Facebook doesn't provide direct thumbnail URLs
-      default:
-        return null;
-    }
+  const removeUploadedVideo = () => {
+    setNewVideo(prev => ({
+      ...prev,
+      video_file_path: '',
+      video_file_size: 0
+    }));
   };
 
   const addVideo = async () => {
-    if (!newVideo.title || !newVideo.video_url) {
+    if (!newVideo.title || !newVideo.video_file_path) {
       toast({
         title: "Erreur",
-        description: "Veuillez remplir tous les champs requis.",
+        description: "Veuillez remplir tous les champs requis et télécharger une vidéo.",
         variant: "destructive",
       });
       return;
     }
 
     try {
-      const thumbnail_url = generateThumbnail(newVideo.video_url, newVideo.platform);
       const maxOrder = Math.max(...videos.map(v => v.display_order), -1);
       
       const { error } = await supabase
         .from('testimonial_videos')
         .insert({
           title: newVideo.title,
-          video_url: newVideo.video_url,
-          platform: newVideo.platform,
-          thumbnail_url,
+          video_url: '', // Not used for uploaded videos
+          platform: 'upload', // Mark as uploaded video
+          thumbnail_url: null,
           is_active: newVideo.is_active,
-          display_order: maxOrder + 1
+          display_order: maxOrder + 1,
+          video_file_path: newVideo.video_file_path,
+          video_file_size: newVideo.video_file_size,
+          redirect_url: newVideo.redirect_url || null,
+          enable_redirect: newVideo.enable_redirect
         });
 
       if (error) throw error;
 
       setNewVideo({
         title: '',
-        video_url: '',
-        platform: 'instagram',
+        video_file_path: '',
+        video_file_size: 0,
+        redirect_url: '',
+        enable_redirect: false,
         is_active: true
       });
 
@@ -145,8 +132,15 @@ const TestimonialManager = () => {
     }
   };
 
-  const deleteVideo = async (id: string) => {
+  const deleteVideo = async (id: string, videoPath?: string) => {
     try {
+      // Delete from storage if it's an uploaded video
+      if (videoPath) {
+        await supabase.storage
+          .from('testimonial-videos')
+          .remove([videoPath]);
+      }
+
       const { error } = await supabase
         .from('testimonial_videos')
         .delete()
@@ -188,6 +182,25 @@ const TestimonialManager = () => {
     }
   };
 
+  const toggleRedirect = async (id: string, enable_redirect: boolean) => {
+    try {
+      const { error } = await supabase
+        .from('testimonial_videos')
+        .update({ enable_redirect })
+        .eq('id', id);
+
+      if (error) throw error;
+      loadVideos();
+    } catch (error) {
+      console.error('Error updating redirect setting:', error);
+      toast({
+        title: "Erreur",
+        description: "Erreur lors de la mise à jour du paramètre de redirection.",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (loading) {
     return <div className="text-center py-4">Chargement...</div>;
   }
@@ -199,43 +212,38 @@ const TestimonialManager = () => {
           <CardTitle>Ajouter une nouvelle vidéo témoignage</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="title">Titre</Label>
-              <Input
-                id="title"
-                value={newVideo.title}
-                onChange={(e) => setNewVideo(prev => ({ ...prev, title: e.target.value }))}
-                placeholder="Titre de la vidéo"
-              />
-            </div>
-            <div>
-              <Label htmlFor="platform">Plateforme</Label>
-              <Select 
-                value={newVideo.platform} 
-                onValueChange={(value) => setNewVideo(prev => ({ ...prev, platform: value }))}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="instagram">Instagram</SelectItem>
-                  <SelectItem value="facebook">Facebook</SelectItem>
-                  <SelectItem value="tiktok">TikTok</SelectItem>
-                  <SelectItem value="youtube">YouTube</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+          <div>
+            <Label htmlFor="title">Titre</Label>
+            <Input
+              id="title"
+              value={newVideo.title}
+              onChange={(e) => setNewVideo(prev => ({ ...prev, title: e.target.value }))}
+              placeholder="Titre de la vidéo"
+            />
           </div>
+
+          <VideoUploader
+            onVideoUploaded={handleVideoUpload}
+            currentVideoPath={newVideo.video_file_path}
+            onRemove={removeUploadedVideo}
+          />
           
           <div>
-            <Label htmlFor="video_url">URL de la vidéo</Label>
+            <Label htmlFor="redirect_url">URL de redirection (optionnel)</Label>
             <Input
-              id="video_url"
-              value={newVideo.video_url}
-              onChange={(e) => setNewVideo(prev => ({ ...prev, video_url: e.target.value }))}
-              placeholder="https://..."
+              id="redirect_url"
+              value={newVideo.redirect_url}
+              onChange={(e) => setNewVideo(prev => ({ ...prev, redirect_url: e.target.value }))}
+              placeholder="https://instagram.com/p/..."
             />
+          </div>
+
+          <div className="flex items-center space-x-2">
+            <Switch
+              checked={newVideo.enable_redirect}
+              onCheckedChange={(checked) => setNewVideo(prev => ({ ...prev, enable_redirect: checked }))}
+            />
+            <Label>Activer la redirection vers l'URL officielle</Label>
           </div>
 
           <div className="flex items-center space-x-2">
@@ -263,28 +271,54 @@ const TestimonialManager = () => {
           ) : (
             <div className="space-y-4">
               {videos.map((video) => (
-                <div key={video.id} className="border rounded-lg p-4 flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <GripVertical className="w-5 h-5 text-gray-400 cursor-move" />
-                    <div>
-                      <h3 className="font-semibold">{video.title}</h3>
-                      <p className="text-sm text-gray-500 capitalize">{video.platform}</p>
-                      <p className="text-xs text-gray-400 break-all max-w-md">{video.video_url}</p>
+                <div key={video.id} className="border rounded-lg p-4">
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center space-x-4 flex-1">
+                      <GripVertical className="w-5 h-5 text-gray-400 cursor-move" />
+                      <div className="flex-1">
+                        <h3 className="font-semibold">{video.title}</h3>
+                        <p className="text-sm text-gray-500">
+                          {video.platform === 'upload' ? 'Vidéo téléchargée' : video.platform}
+                        </p>
+                        {video.video_file_path && (
+                          <p className="text-xs text-gray-400">{video.video_file_path}</p>
+                        )}
+                        {video.redirect_url && (
+                          <p className="text-xs text-blue-600 flex items-center gap-1">
+                            <ExternalLink className="w-3 h-3" />
+                            {video.redirect_url}
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-3">
-                    <Switch
-                      checked={video.is_active}
-                      onCheckedChange={(checked) => toggleVideoStatus(video.id, checked)}
-                    />
-                    <Button
-                      variant="destructive"
-                      size="sm"
-                      onClick={() => deleteVideo(video.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    
+                    <div className="flex items-center space-x-3">
+                      <div className="flex flex-col space-y-2">
+                        <div className="flex items-center space-x-2">
+                          <Switch
+                            checked={video.is_active}
+                            onCheckedChange={(checked) => toggleVideoStatus(video.id, checked)}
+                          />
+                          <span className="text-xs">Actif</span>
+                        </div>
+                        {video.redirect_url && (
+                          <div className="flex items-center space-x-2">
+                            <Switch
+                              checked={video.enable_redirect || false}
+                              onCheckedChange={(checked) => toggleRedirect(video.id, checked)}
+                            />
+                            <span className="text-xs">Redirection</span>
+                          </div>
+                        )}
+                      </div>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => deleteVideo(video.id, video.video_file_path || undefined)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ))}

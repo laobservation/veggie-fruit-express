@@ -8,13 +8,13 @@ interface MediaDisplayProps {
   autoplay?: boolean;
   controls?: boolean;
   loading?: "lazy" | "eager";
-  isHero?: boolean; // To identify the LCP image
+  isHero?: boolean;
 }
 
 const MediaDisplay: React.FC<MediaDisplayProps> = ({ 
   product, 
   className = "", 
-  autoplay = true,
+  autoplay = false, // Changed default to false for better performance
   controls = true,
   loading = "lazy",
   isHero = false
@@ -35,7 +35,7 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({
     return (
       <div className={`w-full h-full ${className}`}>
         <iframe
-          src={`https://www.youtube.com/embed/${videoId}?autoplay=${autoplay ? '1' : '0'}&mute=${autoplay ? '1' : '0'}&controls=${controls ? '1' : '0'}`}
+          src={`https://www.youtube.com/embed/${videoId}?autoplay=${autoplay ? '1' : '0'}&mute=${autoplay ? '1' : '0'}&controls=${controls ? '1' : '0'}&rel=0&modestbranding=1`}
           title={product.name}
           className="w-full h-full object-cover"
           frameBorder="0"
@@ -47,14 +47,15 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({
     );
   }
 
-  // Display image as fallback with appropriate loading strategy
+  // Display image with optimized loading
   return (
     <img
       src={product.image}
       alt={product.name}
-      className={`${className} object-contain`}
-      loading={isHero ? "eager" : loading} // Use eager loading for hero/LCP images
-      fetchPriority={isHero ? "high" : "auto"} // High priority fetch for LCP
+      className={`${className} object-contain transition-opacity duration-300`}
+      loading={isHero ? "eager" : loading}
+      fetchPriority={isHero ? "high" : "auto"}
+      decoding={isHero ? "sync" : "async"}
       onError={(e) => {
         (e.target as HTMLImageElement).src = '/placeholder.svg';
       }}

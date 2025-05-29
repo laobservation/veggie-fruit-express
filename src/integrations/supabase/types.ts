@@ -448,34 +448,46 @@ export type Database = {
         Row: {
           created_at: string
           display_order: number
+          enable_redirect: boolean | null
           id: string
           is_active: boolean
           platform: string
+          redirect_url: string | null
           thumbnail_url: string | null
           title: string
           updated_at: string
+          video_file_path: string | null
+          video_file_size: number | null
           video_url: string
         }
         Insert: {
           created_at?: string
           display_order?: number
+          enable_redirect?: boolean | null
           id?: string
           is_active?: boolean
           platform: string
+          redirect_url?: string | null
           thumbnail_url?: string | null
           title: string
           updated_at?: string
+          video_file_path?: string | null
+          video_file_size?: number | null
           video_url: string
         }
         Update: {
           created_at?: string
           display_order?: number
+          enable_redirect?: boolean | null
           id?: string
           is_active?: boolean
           platform?: string
+          redirect_url?: string | null
           thumbnail_url?: string | null
           title?: string
           updated_at?: string
+          video_file_path?: string | null
+          video_file_size?: number | null
           video_url?: string
         }
         Relationships: []
