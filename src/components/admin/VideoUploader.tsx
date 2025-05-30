@@ -50,32 +50,42 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
     setUploading(true);
 
     try {
-      // Check if bucket exists and is accessible
-      console.log('Checking bucket access...');
-      const { data: buckets, error: bucketError } = await supabase.storage.listBuckets();
+      // Create the bucket if it doesn't exist
+      console.log('Creating/checking bucket...');
+      const { data: buckets, error: listError } = await supabase.storage.listBuckets();
       
-      if (bucketError) {
-        console.error('Bucket access error:', bucketError);
-        throw new Error('Impossible d\'accéder au stockage');
+      if (listError) {
+        console.error('Error listing buckets:', listError);
       }
 
-      const akhdarmediaBucket = buckets?.find(bucket => bucket.name === 'akhdarmedia');
-      if (!akhdarmediaBucket) {
-        throw new Error('Le bucket akhdarmedia n\'existe pas');
-      }
+      const bucketName = 'testimonial-videos';
+      const bucketExists = buckets?.some(bucket => bucket.name === bucketName);
 
-      console.log('Bucket found:', akhdarmediaBucket);
+      if (!bucketExists) {
+        console.log('Creating bucket:', bucketName);
+        const { error: createError } = await supabase.storage.createBucket(bucketName, {
+          public: true,
+          allowedMimeTypes: ['video/mp4', 'video/webm', 'video/mov', 'video/avi'],
+          fileSizeLimit: 52428800 // 50MB
+        });
+
+        if (createError) {
+          console.error('Error creating bucket:', createError);
+          throw new Error(`Impossible de créer le bucket: ${createError.message}`);
+        }
+        console.log('Bucket created successfully');
+      }
 
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = `testimonials/${fileName}`;
+      const filePath = `videos/${fileName}`;
 
       console.log('Uploading file:', filePath);
       console.log('File size:', file.size);
       console.log('File type:', file.type);
 
       const { data, error: uploadError } = await supabase.storage
-        .from('akhdarmedia')
+        .from(bucketName)
         .upload(filePath, file, {
           cacheControl: '3600',
           upsert: false,
@@ -84,22 +94,14 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
 
       if (uploadError) {
         console.error('Upload error details:', uploadError);
-        
-        // More specific error handling
-        if (uploadError.message.includes('row-level security')) {
-          throw new Error('Problème de sécurité - veuillez vérifier les permissions du bucket');
-        } else if (uploadError.message.includes('not found')) {
-          throw new Error('Bucket non trouvé - veuillez vérifier la configuration');
-        } else {
-          throw new Error(uploadError.message || 'Erreur lors du téléchargement');
-        }
+        throw new Error(uploadError.message || 'Erreur lors du téléchargement');
       }
 
       console.log('Upload successful:', data);
 
       // Verify the file was uploaded by trying to get its public URL
       const { data: urlData } = supabase.storage
-        .from('akhdarmedia')
+        .from(bucketName)
         .getPublicUrl(filePath);
 
       console.log('File public URL:', urlData.publicUrl);

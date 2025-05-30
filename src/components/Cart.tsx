@@ -76,7 +76,7 @@ const Cart: React.FC<CartProps> = ({
     <Sheet open={effectiveIsOpen} onOpenChange={handleClose}>
       <SheetContent className={`flex flex-col h-full w-full sm:max-w-md ${animateCart ? 'animate-bounce' : ''}`}>
         <SheetHeader>
-          <SheetTitle>{showDeliveryForm ? "Informations de livraison" : "Votre Panier"}</SheetTitle>
+          <SheetTitle>{showDeliveryForm ? "Informations de ramassage et livraison" : "Votre Panier"}</SheetTitle>
         </SheetHeader>
         
         {showDeliveryForm ? (
@@ -157,7 +157,7 @@ const Cart: React.FC<CartProps> = ({
                 <span>{formatPrice(subtotal)}</span>
               </div>
               <div className="flex justify-between mb-2">
-                <span className="font-medium">Livraison</span>
+                <span className="font-medium">Ramassage et livraison</span>
                 <span>{formatPrice(shippingCost)}</span>
               </div>
               <Separator className="my-4" />
@@ -168,7 +168,7 @@ const Cart: React.FC<CartProps> = ({
               
               <Button onClick={handleShowDeliveryForm} className="w-full text-white mb-2 bg-green-600 hover:bg-green-500 shadow-md hover:shadow-lg transition-all duration-300">
                 <Truck className="mr-2 h-5 w-5" />
-                Procéder à la livraison
+                Procéder au ramassage et livraison
               </Button>
               <Button variant="outline" className="w-full" onClick={handleClose}>Continuer mes achats</Button>
             </div>
