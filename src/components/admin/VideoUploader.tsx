@@ -50,32 +50,7 @@ const VideoUploader: React.FC<VideoUploaderProps> = ({
     setUploading(true);
 
     try {
-      // Create the bucket if it doesn't exist
-      console.log('Creating/checking bucket...');
-      const { data: buckets, error: listError } = await supabase.storage.listBuckets();
-      
-      if (listError) {
-        console.error('Error listing buckets:', listError);
-      }
-
       const bucketName = 'testimonial-videos';
-      const bucketExists = buckets?.some(bucket => bucket.name === bucketName);
-
-      if (!bucketExists) {
-        console.log('Creating bucket:', bucketName);
-        const { error: createError } = await supabase.storage.createBucket(bucketName, {
-          public: true,
-          allowedMimeTypes: ['video/mp4', 'video/webm', 'video/mov', 'video/avi'],
-          fileSizeLimit: 52428800 // 50MB
-        });
-
-        if (createError) {
-          console.error('Error creating bucket:', createError);
-          throw new Error(`Impossible de créer le bucket: ${createError.message}`);
-        }
-        console.log('Bucket created successfully');
-      }
-
       const fileExt = file.name.split('.').pop();
       const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
       const filePath = `videos/${fileName}`;
