@@ -130,7 +130,7 @@ const DeliveryForm: React.FC<DeliveryFormProps> = ({
                 <span>{subtotal.toFixed(2)} {settings.currency}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span>Frais de livraison:</span>
+                <span>Frais de ramassage et livraison:</span>
                 <span>{shippingCost.toFixed(2)} {settings.currency}</span>
               </div>
               <div className="flex justify-between font-bold pt-2 border-t">

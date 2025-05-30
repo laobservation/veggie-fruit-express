@@ -25,9 +25,9 @@ const DeliveryTimeSelector: React.FC = () => {
         name="deliveryDay"
         render={({ field }) => (
           <FormItem>
-            <FormLabel>Jour de livraison</FormLabel>
+            <FormLabel>Jour de ramassage et livraison</FormLabel>
             <FormControl>
-              <Input placeholder="Jour de livraison souhaité" {...field} />
+              <Input placeholder="Jour de ramassage et livraison souhaité" {...field} />
             </FormControl>
             <FormDescription>
               Par exemple: Lundi, Mardi, etc.
@@ -43,9 +43,9 @@ const DeliveryTimeSelector: React.FC = () => {
         render={({ field }) => (
           <FormItem className="flex flex-row items-center justify-between rounded-lg border p-3 shadow-sm">
             <div className="space-y-0.5">
-              <FormLabel>Heure de livraison spécifique</FormLabel>
+              <FormLabel>Heure de ramassage et livraison spécifique</FormLabel>
               <FormDescription>
-                Spécifiez une heure de livraison préférée
+                Spécifiez une heure de ramassage et livraison préférée
               </FormDescription>
             </div>
             <FormControl>
@@ -64,7 +64,7 @@ const DeliveryTimeSelector: React.FC = () => {
           name="deliveryTime"
           render={({ field }) => (
             <FormItem className="space-y-3">
-              <FormLabel>Heure de livraison préférée</FormLabel>
+              <FormLabel>Heure de ramassage et livraison préférée</FormLabel>
               <FormControl>
                 <RadioGroup
                   onValueChange={field.onChange}
