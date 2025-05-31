@@ -23,11 +23,43 @@ const TestimonialsSection = () => {
   const [loading, setLoading] = useState(true);
   const [playingVideo, setPlayingVideo] = useState<string | null>(null);
   const [hoveredVideo, setHoveredVideo] = useState<string | null>(null);
+  const [autoplayInitiated, setAutoplayInitiated] = useState(false);
   const sectionRef = useRef<HTMLDivElement>(null);
+  const videoRefs = useRef<{[key: string]: HTMLVideoElement}>({});
 
   useEffect(() => {
     loadVideos();
   }, []);
+
+  // Intersection Observer for autoplay when section comes into view
+  useEffect(() => {
+    if (!sectionRef.current || videos.length === 0 || autoplayInitiated) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting && !autoplayInitiated) {
+            // Start autoplay for the first video when section comes into view
+            const firstVideo = videos[0];
+            if (firstVideo) {
+              setPlayingVideo(firstVideo.id);
+              setAutoplayInitiated(true);
+            }
+          }
+        });
+      },
+      {
+        threshold: 0.3, // Trigger when 30% of the section is visible
+        rootMargin: '0px 0px -50px 0px' // Add some margin to trigger slightly earlier
+      }
+    );
+
+    observer.observe(sectionRef.current);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [videos, autoplayInitiated]);
 
   const loadVideos = async () => {
     try {
@@ -60,7 +92,7 @@ const TestimonialsSection = () => {
   const getThumbnail = (video: TestimonialVideo) => {
     if (video.thumbnail_url) return video.thumbnail_url;
     
-    // For uploaded videos, use the first frame as thumbnail (browser will handle this)
+    // For uploaded videos, we'll use the video itself with poster attribute
     const videoSrc = getVideoSrc(video);
     return videoSrc;
   };
@@ -69,7 +101,7 @@ const TestimonialsSection = () => {
     if (video.enable_redirect && video.redirect_url) {
       window.open(video.redirect_url, '_blank');
     } else {
-      setPlayingVideo(video.id);
+      setPlayingVideo(video.id === playingVideo ? null : video.id);
     }
   };
 
@@ -80,6 +112,19 @@ const TestimonialsSection = () => {
   const handleMouseLeave = () => {
     setHoveredVideo(null);
   };
+
+  // Auto-cycle through videos every 5 seconds when autoplay is active
+  useEffect(() => {
+    if (!playingVideo || videos.length <= 1) return;
+
+    const interval = setInterval(() => {
+      const currentIndex = videos.findIndex(v => v.id === playingVideo);
+      const nextIndex = (currentIndex + 1) % videos.length;
+      setPlayingVideo(videos[nextIndex].id);
+    }, 5000); // Change video every 5 seconds
+
+    return () => clearInterval(interval);
+  }, [playingVideo, videos]);
 
   if (loading || videos.length === 0) {
     return null;
@@ -110,16 +155,21 @@ const TestimonialsSection = () => {
                   <CardContent className="p-0 h-full relative">
                     <div className="aspect-[9/16] w-full relative">
                       {/* Video Player */}
-                      {videoSrc && (isPlaying || isHovered) && (
+                      {videoSrc && (
                         <video
+                          ref={(el) => {
+                            if (el) videoRefs.current[video.id] = el;
+                          }}
                           className="w-full h-full object-cover rounded-2xl"
                           src={videoSrc}
                           autoPlay={isPlaying}
                           muted
-                          loop={isPlaying}
+                          loop
                           playsInline
                           preload="metadata"
+                          poster={thumbnail || undefined}
                           onLoadStart={() => console.log('Video loading started')}
+                          style={{ display: isPlaying || isHovered ? 'block' : 'none' }}
                         />
                       )}
 
@@ -180,6 +230,13 @@ const TestimonialsSection = () => {
                       {video.enable_redirect && (
                         <div className="absolute top-4 left-4 bg-blue-500/80 backdrop-blur-sm rounded-full px-2 py-1">
                           <ExternalLink className="w-3 h-3 text-white" />
+                        </div>
+                      )}
+
+                      {/* Autoplay indicator */}
+                      {isPlaying && (
+                        <div className="absolute bottom-4 right-4 bg-red-500/80 backdrop-blur-sm rounded-full px-2 py-1">
+                          <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
                         </div>
                       )}
                     </div>
