@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -63,6 +62,7 @@ const TestimonialManager = () => {
   };
 
   const handleVideoUpload = (videoPath: string, fileSize: number) => {
+    console.log('Video uploaded successfully:', { videoPath, fileSize });
     setNewVideo(prev => ({
       ...prev,
       video_file_path: videoPath,
@@ -88,26 +88,40 @@ const TestimonialManager = () => {
       return;
     }
 
+    console.log('Adding video with data:', newVideo);
+
     try {
       const maxOrder = Math.max(...videos.map(v => v.display_order), -1);
       
-      const { error } = await supabase
+      const videoData = {
+        title: newVideo.title,
+        video_url: '', // Empty for uploaded videos
+        platform: 'upload',
+        thumbnail_url: null,
+        is_active: newVideo.is_active,
+        display_order: maxOrder + 1,
+        video_file_path: newVideo.video_file_path,
+        video_file_size: newVideo.video_file_size,
+        redirect_url: newVideo.redirect_url || null,
+        enable_redirect: newVideo.enable_redirect
+      };
+
+      console.log('Inserting video data:', videoData);
+
+      const { data, error } = await supabase
         .from('testimonial_videos')
-        .insert({
-          title: newVideo.title,
-          video_url: '', // Not used for uploaded videos
-          platform: 'upload', // Mark as uploaded video
-          thumbnail_url: null,
-          is_active: newVideo.is_active,
-          display_order: maxOrder + 1,
-          video_file_path: newVideo.video_file_path,
-          video_file_size: newVideo.video_file_size,
-          redirect_url: newVideo.redirect_url || null,
-          enable_redirect: newVideo.enable_redirect
-        });
+        .insert(videoData)
+        .select()
+        .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database insert error:', error);
+        throw error;
+      }
 
+      console.log('Video inserted successfully:', data);
+
+      // Reset form
       setNewVideo({
         title: '',
         video_file_path: '',
@@ -117,16 +131,18 @@ const TestimonialManager = () => {
         is_active: true
       });
 
-      loadVideos();
+      // Reload videos
+      await loadVideos();
+      
       toast({
         title: "Succès",
         description: "Vidéo témoignage ajoutée avec succès.",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding video:', error);
       toast({
         title: "Erreur",
-        description: "Erreur lors de l'ajout de la vidéo.",
+        description: `Erreur lors de l'ajout de la vidéo: ${error.message}`,
         variant: "destructive",
       });
     }
