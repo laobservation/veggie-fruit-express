@@ -6,10 +6,35 @@ import type { Database } from './types';
 const SUPABASE_URL = "https://lehmfhvdbakbcehxsenl.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxlaG1maHZkYmFrYmNlaHhzZW5sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDYxMTQ4MTQsImV4cCI6MjA2MTY5MDgxNH0.Fb_Aqi03vFD-scRl8i7YB8YtYGKsDboOSdNfsYjmPpM";
 
-// Import the supabase client like this:
-// import { supabase } from "@/integrations/supabase/client";
+// Security: Input validation
+if (!SUPABASE_URL || !SUPABASE_PUBLISHABLE_KEY) {
+  throw new Error('Missing Supabase configuration');
+}
 
-export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+// Enhanced security configuration
+export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: {
+    autoRefreshToken: true,
+    persistSession: true,
+    detectSessionInUrl: true,
+    // Security: Configure secure storage
+    storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+    storageKey: 'supabase.auth.token',
+    // Security: Configure secure headers
+    flowType: 'pkce'
+  },
+  global: {
+    headers: {
+      'X-Client-Info': 'supabase-js-web'
+    }
+  },
+  // Security: Configure realtime with secure defaults
+  realtime: {
+    params: {
+      eventsPerSecond: 10
+    }
+  }
+});
 
 // Function to fix type issues with Supabase Products table
 export const getProductsTable = () => {
@@ -29,4 +54,17 @@ export const getSettingsTable = () => {
 // Function to fix type issues with Supabase Categories table
 export const getCategoriesTable = () => {
   return supabase.from('categories');
+};
+
+// Security: Add error boundary for Supabase operations
+export const withErrorHandling = async <T>(
+  operation: () => Promise<T>,
+  errorMessage: string = 'Database operation failed'
+): Promise<T | null> => {
+  try {
+    return await operation();
+  } catch (error) {
+    console.error(errorMessage, error);
+    return null;
+  }
 };

@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 interface TestimonialVideo {
@@ -24,9 +24,27 @@ export const useTestimonials = () => {
   const sectionRef = useRef<HTMLDivElement>(null);
   const videoRefs = useRef<{[key: string]: HTMLVideoElement}>({});
 
+  const loadVideos = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('testimonial_videos')
+        .select('*')
+        .eq('is_active', true)
+        .order('display_order', { ascending: true })
+        .limit(6);
+      
+      if (error) throw error;
+      setVideos(data || []);
+    } catch (error) {
+      console.error('Error loading testimonial videos:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
     loadVideos();
-  }, []);
+  }, [loadVideos]);
 
   // Intersection Observer for autoplay when section comes into view
   useEffect(() => {
@@ -70,25 +88,8 @@ export const useTestimonials = () => {
     return () => clearInterval(interval);
   }, [playingVideo, videos]);
 
-  const loadVideos = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('testimonial_videos')
-        .select('*')
-        .eq('is_active', true)
-        .order('display_order', { ascending: true })
-        .limit(6);
-      
-      if (error) throw error;
-      setVideos(data || []);
-    } catch (error) {
-      console.error('Error loading testimonial videos:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const getVideoSrc = (video: TestimonialVideo) => {
+  // Memoized video source getter for better performance
+  const getVideoSrc = useCallback((video: TestimonialVideo) => {
     if (video.video_file_path) {
       const { data } = supabase.storage
         .from('testimonial-videos')
@@ -96,32 +97,42 @@ export const useTestimonials = () => {
       return data.publicUrl;
     }
     return null;
-  };
+  }, []);
 
-  const getThumbnail = (video: TestimonialVideo) => {
+  // Memoized thumbnail getter
+  const getThumbnail = useCallback((video: TestimonialVideo) => {
     if (video.thumbnail_url) return video.thumbnail_url;
     
     const videoSrc = getVideoSrc(video);
     return videoSrc;
-  };
+  }, [getVideoSrc]);
 
-  const handleVideoClick = (video: TestimonialVideo) => {
+  const handleVideoClick = useCallback((video: TestimonialVideo) => {
     if (video.enable_redirect && video.redirect_url) {
-      window.open(video.redirect_url, '_blank');
+      // Security: Validate URL before opening
+      try {
+        const url = new URL(video.redirect_url);
+        if (url.protocol === 'https:' || url.protocol === 'http:') {
+          window.open(video.redirect_url, '_blank', 'noopener,noreferrer');
+        }
+      } catch (error) {
+        console.error('Invalid redirect URL:', video.redirect_url);
+      }
     } else {
       setPlayingVideo(video.id === playingVideo ? null : video.id);
     }
-  };
+  }, [playingVideo]);
 
-  const handleMouseEnter = (videoId: string) => {
+  const handleMouseEnter = useCallback((videoId: string) => {
     setHoveredVideo(videoId);
-  };
+  }, []);
 
-  const handleMouseLeave = () => {
+  const handleMouseLeave = useCallback(() => {
     setHoveredVideo(null);
-  };
+  }, []);
 
-  return {
+  // Memoize the return object to prevent unnecessary re-renders
+  return useMemo(() => ({
     videos,
     loading,
     playingVideo,
@@ -134,5 +145,15 @@ export const useTestimonials = () => {
     handleMouseEnter,
     handleMouseLeave,
     setPlayingVideo
-  };
+  }), [
+    videos,
+    loading,
+    playingVideo,
+    hoveredVideo,
+    getVideoSrc,
+    getThumbnail,
+    handleVideoClick,
+    handleMouseEnter,
+    handleMouseLeave
+  ]);
 };

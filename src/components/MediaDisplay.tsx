@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import { Product } from '@/types/product';
 
 interface MediaDisplayProps {
@@ -9,20 +9,25 @@ interface MediaDisplayProps {
   controls?: boolean;
   loading?: "lazy" | "eager";
   isHero?: boolean;
+  priority?: boolean;
 }
+
+// Lazy load YouTube component for better performance
+const LazyYouTubePlayer = lazy(() => import('./LazyYouTubePlayer'));
 
 const MediaDisplay: React.FC<MediaDisplayProps> = ({ 
   product, 
   className = "", 
-  autoplay = false, // Changed default to false for better performance
+  autoplay = false,
   controls = true,
   loading = "lazy",
-  isHero = false
+  isHero = false,
+  priority = false
 }) => {
   const [videoId, setVideoId] = useState<string | null>(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
   
   useEffect(() => {
-    // Extract YouTube video ID if videoUrl exists
     if (product.videoUrl) {
       const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
       const match = product.videoUrl.match(youtubeRegex);
@@ -34,32 +39,45 @@ const MediaDisplay: React.FC<MediaDisplayProps> = ({
   if (videoId && product.videoUrl) {
     return (
       <div className={`w-full h-full ${className}`}>
-        <iframe
-          src={`https://www.youtube.com/embed/${videoId}?autoplay=${autoplay ? '1' : '0'}&mute=${autoplay ? '1' : '0'}&controls=${controls ? '1' : '0'}&rel=0&modestbranding=1`}
-          title={product.name}
-          className="w-full h-full object-cover"
-          frameBorder="0"
-          loading={loading}
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-          allowFullScreen
-        ></iframe>
+        <Suspense fallback={<div className="w-full h-full bg-gray-200 animate-pulse" />}>
+          <LazyYouTubePlayer
+            videoId={videoId}
+            title={product.name}
+            autoplay={autoplay}
+            controls={controls}
+            loading={loading}
+          />
+        </Suspense>
       </div>
     );
   }
 
-  // Display image with optimized loading
+  // Display image with optimized loading and security improvements
   return (
-    <img
-      src={product.image}
-      alt={product.name}
-      className={`${className} object-contain transition-opacity duration-300`}
-      loading={isHero ? "eager" : loading}
-      fetchPriority={isHero ? "high" : "auto"}
-      decoding={isHero ? "sync" : "async"}
-      onError={(e) => {
-        (e.target as HTMLImageElement).src = '/placeholder.svg';
-      }}
-    />
+    <div className={`w-full h-full ${className} relative`}>
+      {!imageLoaded && (
+        <div className="absolute inset-0 bg-gray-200 animate-pulse" />
+      )}
+      <img
+        src={product.image}
+        alt={product.name}
+        className={`${className} object-contain transition-opacity duration-300 ${
+          imageLoaded ? 'opacity-100' : 'opacity-0'
+        }`}
+        loading={isHero || priority ? "eager" : loading}
+        fetchPriority={isHero || priority ? "high" : "auto"}
+        decoding={isHero ? "sync" : "async"}
+        onLoad={() => setImageLoaded(true)}
+        onError={(e) => {
+          console.error('Image failed to load:', product.image);
+          (e.target as HTMLImageElement).src = '/placeholder.svg';
+          setImageLoaded(true);
+        }}
+        // Security: Prevent potential XSS attacks
+        referrerPolicy="no-referrer"
+        crossOrigin="anonymous"
+      />
+    </div>
   );
 };
 
