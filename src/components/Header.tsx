@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { ShoppingCart, Heart, Menu, X } from 'lucide-react';
@@ -11,8 +12,10 @@ import { LogIn } from 'lucide-react';
 
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const { totalItems } = useCart();
+  const { getTotalItems } = useCart();
   const { user } = useAuth();
+
+  const totalItems = getTotalItems();
 
   const toggleMobileMenu = () => {
     setIsMobileMenuOpen(!isMobileMenuOpen);
