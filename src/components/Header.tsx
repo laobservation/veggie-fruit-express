@@ -9,6 +9,10 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import SearchBar from './SearchBar';
 import { useFavorites } from '@/hooks/use-favorites';
 import { useCategories } from '@/hooks/use-categories';
+import { useTranslation } from '@/hooks/use-translation';
+import { useLanguage } from '@/contexts/LanguageContext';
+import LanguageSwitcher from './LanguageSwitcher';
+
 const Header = () => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -27,6 +31,8 @@ const Header = () => {
     categories
   } = useCategories();
   const isMobile = useIsMobile();
+  const { t } = useTranslation();
+  const { isRTL } = useLanguage();
 
   // Close mobile menu when resizing to desktop
   useEffect(() => {
@@ -75,9 +81,9 @@ const Header = () => {
   };
   return <>
       <header className="bg-white sticky top-0 z-50 shadow-sm py-[19px]">
-        <div className="container mx-auto px-4 flex items-center justify-between relative">
+        <div className={`container mx-auto px-4 flex items-center justify-between relative ${isRTL ? 'font-arabic' : ''}`}>
           <div className="flex items-center gap-6">
-            {isMobile && <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="mr-2 relative z-50 px-0 bg-transparent py-0 mx-[18px] my-0">
+            {isMobile && <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className={`mr-2 relative z-50 px-0 bg-transparent py-0 mx-[18px] my-0 ${isRTL ? 'ml-2 mr-0 mx-0' : ''}`}>
                 {!isMobileMenuOpen ? <Menu className="h-6 w-6 text-gray-700 mx-0 px-0 text-base font-semibold my-[2px] py-0" /> : <span className="h-6 w-6 text-gray-700">✕</span>}
                 <span className="sr-only">Menu</span>
               </Button>}
@@ -87,8 +93,8 @@ const Header = () => {
             
             <div className="hidden md:block">
               <div className="flex flex-col">
-                <h3 className="font-semibold text-gray-800">Meknès, Maroc</h3>
-                <p className="text-sm text-gray-500">Livraison et Préparation 20DH</p>
+                <h3 className="font-semibold text-gray-800">{t('header.location')}</h3>
+                <p className="text-sm text-gray-500">{t('header.delivery')}</p>
               </div>
             </div>
           </div>
@@ -105,11 +111,16 @@ const Header = () => {
               <SearchBar />
             </div>
             
+            {/* Language Switcher */}
+            <div className="hidden md:block">
+              <LanguageSwitcher />
+            </div>
+            
             {/* WhatsApp Button (only visible on desktop) */}
             <div className="hidden md:block">
               <a href="http://wa.me/212649150370" target="_blank" rel="noopener noreferrer" className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-md text-sm font-medium transition-all duration-300 hover:shadow-lg">
                 <Phone className="h-4 w-4" />
-                <span>Contact</span>
+                <span>{t('header.contact')}</span>
               </a>
             </div>
 
@@ -117,12 +128,12 @@ const Header = () => {
             <Link to="/favorites" className="relative rounded-full p-2 flex items-center bg-transparent">
               <div className="relative">
                 <Heart className={`h-5 w-5 text-red-500 transition-all duration-300 ${favoriteAnimating ? 'animate-bounce scale-125' : ''} ${favorites.length > 0 ? 'fill-current' : ''}`} />
-                {favorites.length > 0 && <span className={`absolute -top-2 -right-2 flex items-center justify-center bg-red-500 text-white rounded-full w-4 h-4 text-xs font-bold shadow-sm transition-all duration-300 ${favoriteAnimating ? 'animate-pulse scale-110' : ''}`}>
+                {favorites.length > 0 && <span className={`absolute ${isRTL ? '-top-2 -left-2' : '-top-2 -right-2'} flex items-center justify-center bg-red-500 text-white rounded-full w-4 h-4 text-xs font-bold shadow-sm transition-all duration-300 ${favoriteAnimating ? 'animate-pulse scale-110' : ''}`}>
                     {favorites.length}
                   </span>}
               </div>
               <span className="text-red-500 font-semibold ml-2 hidden md:inline-block">
-                Favoris
+                {t('header.favorites')}
               </span>
             </Link>
             
@@ -130,12 +141,12 @@ const Header = () => {
             <button onClick={handleCartClick} className="relative rounded-full p-2 flex items-center bg-transparent" aria-label="View cart">
               <div className="relative">
                 <ShoppingCart className={`h-5 w-5 text-green-600 transition-all duration-300 ease-in-out ${isAnimating ? 'animate-bounce scale-125' : ''}`} />
-                {getTotalItems() > 0 && <span className={`absolute -top-2 -right-2 flex items-center justify-center bg-red-500 text-white rounded-full w-4 h-4 text-xs font-bold shadow-sm transition-all duration-200 ease-in-out ${quantityAnimating ? 'animate-pulse scale-110' : ''}`}>
+                {getTotalItems() > 0 && <span className={`absolute ${isRTL ? '-top-2 -left-2' : '-top-2 -right-2'} flex items-center justify-center bg-red-500 text-white rounded-full w-4 h-4 text-xs font-bold shadow-sm transition-all duration-200 ease-in-out ${quantityAnimating ? 'animate-pulse scale-110' : ''}`}>
                     {getTotalItems()}
                   </span>}
               </div>
-              <span className="text-green-600 font-semibold ml-2 hidden md:inline-block">
-                Panier
+              <span className={`text-green-600 font-semibold ${isRTL ? 'mr-2' : 'ml-2'} hidden md:inline-block`}>
+                {t('header.cart')}
               </span>
             </button>
           </div>
@@ -147,4 +158,5 @@ const Header = () => {
       <Cart isOpen={isCartOpen} onClose={closeCart} />
     </>;
 };
+
 export default Header;
