@@ -13,7 +13,7 @@ const LanguageSelectionModal = () => {
 
   return (
     <Dialog open={showLanguageModal} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-md" hideCloseButton>
+      <DialogContent className="sm:max-w-md [&>button]:hidden">
         <DialogHeader>
           <DialogTitle className="text-center text-xl font-bold mb-4">
             Choisissez votre langue / اختر لغتك
