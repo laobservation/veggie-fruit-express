@@ -1,6 +1,6 @@
-
 import React from 'react';
 import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { AuthProvider } from '@/hooks/useAuth';
 import Index from '@/pages/Index';
 import ProductPage from '@/pages/ProductPage';
 import CategoryPage from '@/pages/CategoryPage';
@@ -17,69 +17,42 @@ import { Toaster } from "@/components/ui/sonner";
 import FavoritesPage from '@/pages/FavoritesPage';
 import Cart from '@/components/Cart';
 import SocialMediaSticky from '@/components/SocialMediaSticky';
-
-// Admin Route Protection Component
-const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
-  const isAuthenticated = sessionStorage.getItem('adminAuth') === 'true';
-  const location = useLocation();
-  
-  if (!isAuthenticated) {
-    // Redirect to admin login page, but save the intended destination
-    return <Navigate to="/admin-auth" state={{ from: location }} replace />;
-  }
-
-  return <>{children}</>;
-};
+import AuthPage from '@/pages/AuthPage';
 
 function App() {
   return (
-    <CartNotificationProvider>
-      <div className="flex flex-col min-h-screen">
-        <Toaster position="bottom-right" />
-        <SocialMediaSticky />
-        <div className="flex-grow">
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/product/:productId" element={<ProductPage />} />
-            <Route path="/product/:productId/:slug" element={<ProductPage />} />
-            <Route path="/category/:categoryId" element={<CategoryPage />} />
-            <Route path="/favorites" element={<FavoritesPage />} />
-            <Route path="/thank-you" element={<ThankYouPage />} />
-            <Route path="/admin-auth" element={<AdminAuthPage />} />
-            
-            {/* Protected Admin Routes */}
-            <Route path="/admin" element={
-              <ProtectedAdminRoute>
-                <AdminPage />
-              </ProtectedAdminRoute>
-            } />
-            <Route path="/admin/slider" element={
-              <ProtectedAdminRoute>
-                <AdminSliderPage />
-              </ProtectedAdminRoute>
-            } />
-            <Route path="/admin/settings" element={
-              <ProtectedAdminRoute>
-                <AdminSettingsPage />
-              </ProtectedAdminRoute>
-            } />
-            <Route path="/admin/testimonials" element={
-              <ProtectedAdminRoute>
-                <AdminTestimonialsPage />
-              </ProtectedAdminRoute>
-            } />
-            <Route path="/prix" element={
-              <ProtectedAdminRoute>
-                <PriceManagementPage />
-              </ProtectedAdminRoute>
-            } />
-            
-            <Route path="*" element={<NotFound />} />
-          </Routes>
+    <AuthProvider>
+      <CartNotificationProvider>
+        <div className="flex flex-col min-h-screen">
+          <Toaster position="bottom-right" />
+          <SocialMediaSticky />
+          <div className="flex-grow">
+            <Routes>
+              <Route path="/" element={<Index />} />
+              <Route path="/product/:productId" element={<ProductPage />} />
+              <Route path="/product/:productId/:slug" element={<ProductPage />} />
+              <Route path="/category/:categoryId" element={<CategoryPage />} />
+              <Route path="/favorites" element={<FavoritesPage />} />
+              <Route path="/thank-you" element={<ThankYouPage />} />
+              
+              {/* Authentication Routes */}
+              <Route path="/auth" element={<AuthPage />} />
+              <Route path="/admin-auth" element={<Navigate to="/auth" replace />} />
+              
+              {/* Protected Admin Routes - now using AdminRouteGuard */}
+              <Route path="/admin" element={<AdminPage />} />
+              <Route path="/admin/slider" element={<AdminSliderPage />} />
+              <Route path="/admin/settings" element={<AdminSettingsPage />} />
+              <Route path="/admin/testimonials" element={<AdminTestimonialsPage />} />
+              <Route path="/prix" element={<PriceManagementPage />} />
+              
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </div>
+          <Cart />
         </div>
-        <Cart />
-      </div>
-    </CartNotificationProvider>
+      </CartNotificationProvider>
+    </AuthProvider>
   );
 }
 
