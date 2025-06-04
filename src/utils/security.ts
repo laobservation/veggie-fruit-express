@@ -1,3 +1,4 @@
+
 // Security utilities for input validation and sanitization
 
 /**
@@ -52,29 +53,15 @@ export const sanitizeProductData = (data: any) => {
 };
 
 /**
- * Validates admin session with proper Supabase authentication
+ * Validates admin session
  */
 export const validateAdminSession = (): boolean => {
   try {
-    // Check if we have a valid authentication session
     const authData = sessionStorage.getItem('adminAuthData');
     if (!authData) return false;
     
     const parsed = JSON.parse(authData);
     return parsed.authenticated && Date.now() < parsed.expires;
-  } catch {
-    return false;
-  }
-};
-
-/**
- * Enhanced admin session validation with Supabase auth
- */
-export const validateSupabaseAdminSession = async () => {
-  try {
-    const { supabase } = await import('@/integrations/supabase/client');
-    const { data: { session } } = await supabase.auth.getSession();
-    return !!session?.user;
   } catch {
     return false;
   }
