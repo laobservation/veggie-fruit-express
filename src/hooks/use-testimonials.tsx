@@ -75,18 +75,18 @@ export const useTestimonials = () => {
     };
   }, [videos, autoplayInitiated]);
 
-  // Auto-cycle through videos every 5 seconds when autoplay is active
+  // Auto-cycle through videos every 8 seconds when autoplay is active (increased from 5s)
   useEffect(() => {
-    if (!playingVideo || videos.length <= 1) return;
+    if (!playingVideo || videos.length <= 1 || hoveredVideo) return;
 
     const interval = setInterval(() => {
       const currentIndex = videos.findIndex(v => v.id === playingVideo);
       const nextIndex = (currentIndex + 1) % videos.length;
       setPlayingVideo(videos[nextIndex].id);
-    }, 5000);
+    }, 8000);
 
     return () => clearInterval(interval);
-  }, [playingVideo, videos]);
+  }, [playingVideo, videos, hoveredVideo]);
 
   // Memoized video source getter for better performance
   const getVideoSrc = useCallback((video: TestimonialVideo) => {
@@ -125,7 +125,11 @@ export const useTestimonials = () => {
 
   const handleMouseEnter = useCallback((videoId: string) => {
     setHoveredVideo(videoId);
-  }, []);
+    // Pause auto-cycling when user hovers
+    if (playingVideo && playingVideo !== videoId) {
+      setPlayingVideo(null);
+    }
+  }, [playingVideo]);
 
   const handleMouseLeave = useCallback(() => {
     setHoveredVideo(null);

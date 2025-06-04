@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useRef, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Play, ExternalLink } from 'lucide-react';
 
@@ -41,72 +41,107 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
   onMouseLeave,
   onStopPlaying
 }) => {
+  const internalVideoRef = useRef<HTMLVideoElement>(null);
+
+  // Handle video playback based on hover/touch state
+  useEffect(() => {
+    const videoElement = internalVideoRef.current;
+    if (!videoElement || !videoSrc) return;
+
+    if (isHovered || isPlaying) {
+      videoElement.currentTime = 0;
+      videoElement.play().catch((error) => {
+        console.log('Video autoplay prevented:', error);
+      });
+    } else {
+      videoElement.pause();
+      videoElement.currentTime = 0;
+    }
+  }, [isHovered, isPlaying, videoSrc]);
+
+  // Set up video ref for parent component
+  useEffect(() => {
+    if (internalVideoRef.current) {
+      videoRef(internalVideoRef.current);
+    }
+  }, [videoRef]);
+
+  const handleCardClick = () => {
+    if (video.enable_redirect && video.redirect_url) {
+      onVideoClick();
+    } else {
+      // For non-redirect videos, clicking toggles play state
+      if (isPlaying) {
+        onStopPlaying();
+      } else {
+        onVideoClick();
+      }
+    }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    e.preventDefault();
+    onMouseEnter(); // Trigger hover effect on touch
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    e.preventDefault();
+    // Delay to allow video to play briefly
+    setTimeout(() => {
+      onMouseLeave();
+    }, 2000);
+  };
+
   return (
     <div className="group relative">
       <Card className="overflow-hidden h-full bg-black rounded-2xl shadow-xl transform transition-all duration-300 hover:scale-105">
         <CardContent className="p-0 h-full relative">
-          <div className="aspect-[9/16] w-full relative">
-            {/* Video Player */}
+          <div 
+            className="aspect-[9/16] w-full relative cursor-pointer"
+            onMouseEnter={onMouseEnter}
+            onMouseLeave={onMouseLeave}
+            onTouchStart={handleTouchStart}
+            onTouchEnd={handleTouchEnd}
+            onClick={handleCardClick}
+          >
+            {/* Main Video Element */}
             {videoSrc && (
               <video
-                ref={videoRef}
+                ref={internalVideoRef}
                 className="w-full h-full object-cover rounded-2xl"
                 src={videoSrc}
-                autoPlay={isPlaying}
                 muted
                 loop
                 playsInline
                 preload="metadata"
                 poster={thumbnail || undefined}
                 onLoadStart={() => console.log('Video loading started')}
-                style={{ display: isPlaying || isHovered ? 'block' : 'none' }}
               />
             )}
 
-            {/* Thumbnail when not playing/hovered */}
-            {(!isPlaying && !isHovered) && (
-              <>
-                {thumbnail && videoSrc ? (
-                  <video
-                    className="w-full h-full object-cover rounded-2xl"
-                    src={videoSrc}
-                    muted
-                    preload="metadata"
-                    poster={thumbnail}
-                  />
-                ) : (
-                  <div 
-                    className="absolute inset-0 bg-cover bg-center rounded-2xl"
-                    style={{ 
-                      backgroundImage: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                    }}
-                  />
-                )}
-                
-                {/* Play Button Overlay */}
-                <div 
-                  className="absolute inset-0 bg-black/40 flex items-center justify-center cursor-pointer transition-all duration-300 hover:bg-black/50"
-                  onClick={onVideoClick}
-                  onMouseEnter={onMouseEnter}
-                  onMouseLeave={onMouseLeave}
-                >
-                  <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center transform transition-all duration-300 hover:scale-110 shadow-lg">
-                    {video.enable_redirect ? (
-                      <ExternalLink className="w-8 h-8 text-gray-800" />
-                    ) : (
-                      <Play className="w-8 h-8 text-gray-800 ml-1" fill="currentColor" />
-                    )}
-                  </div>
-                </div>
-              </>
-            )}
-
-            {/* Click overlay for playing videos */}
-            {isPlaying && (
+            {/* Fallback for no video */}
+            {!videoSrc && (
               <div 
-                className="absolute inset-0 cursor-pointer"
-                onClick={onStopPlaying}
+                className="absolute inset-0 bg-cover bg-center rounded-2xl"
+                style={{ 
+                  backgroundImage: thumbnail 
+                    ? `url(${thumbnail})` 
+                    : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
+                }}
               />
+            )}
+
+            {/* Play Button Overlay - only show when not playing/hovering */}
+            {!isPlaying && !isHovered && (
+              <div className="absolute inset-0 bg-black/40 flex items-center justify-center transition-all duration-300 hover:bg-black/50">
+                <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center transform transition-all duration-300 hover:scale-110 shadow-lg">
+                  {video.enable_redirect ? (
+                    <ExternalLink className="w-8 h-8 text-gray-800" />
+                  ) : (
+                    <Play className="w-8 h-8 text-gray-800 ml-1" fill="currentColor" />
+                  )}
+                </div>
+              </div>
             )}
 
             {/* Platform Badge */}
@@ -123,8 +158,8 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
               </div>
             )}
 
-            {/* Autoplay indicator */}
-            {isPlaying && (
+            {/* Playing indicator */}
+            {(isPlaying || isHovered) && (
               <div className="absolute bottom-4 right-4 bg-red-500/80 backdrop-blur-sm rounded-full px-2 py-1">
                 <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
               </div>
