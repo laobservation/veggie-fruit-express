@@ -1,8 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase, getCategoriesTable } from '@/integrations/supabase/client';
-
 interface Category {
   id: string;
   name: string;
@@ -12,7 +10,6 @@ interface Category {
   isVisible?: boolean;
   displayOrder?: number;
 }
-
 export const CategoryNavigation: React.FC = () => {
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
@@ -51,7 +48,6 @@ export const CategoryNavigation: React.FC = () => {
     isVisible: true,
     displayOrder: 4
   }];
-
   useEffect(() => {
     fetchCategories();
 
@@ -68,7 +64,6 @@ export const CategoryNavigation: React.FC = () => {
       supabase.removeChannel(categoriesChannel);
     };
   }, []);
-
   const fetchCategories = async () => {
     setLoading(true);
     try {
@@ -91,14 +86,14 @@ export const CategoryNavigation: React.FC = () => {
           if (pathName === 'vegetable' || pathName === 'légume') pathName = 'légumes';
           if (pathName === 'pack') pathName = 'packs';
           if (pathName === 'drink') pathName = 'drinks';
-          
           return {
             id: cat.id,
             name: cat.name,
             imageIcon: cat.image_icon || null,
             bg: cat.background_color || 'bg-gray-100',
             path: `/category/${pathName}`,
-            isVisible: true, // FORCE TRUE to always show category icons under home slider
+            isVisible: true,
+            // FORCE TRUE to always show category icons under home slider
             displayOrder: cat.display_order || 999
           };
         });
@@ -115,7 +110,6 @@ export const CategoryNavigation: React.FC = () => {
       setLoading(false);
     }
   };
-
   if (loading) {
     return <div className="grid grid-cols-4 gap-4 w-full pb-2">
         {[1, 2, 3, 4].map(i => <div key={i} className="flex flex-col items-center animate-pulse">
@@ -124,9 +118,8 @@ export const CategoryNavigation: React.FC = () => {
           </div>)}
       </div>;
   }
-
   return <div className="grid grid-cols-4 gap-4 w-full pb-2 my-0 py-px">
-      {categories.map(category => <Link to={category.path} key={category.id} className="flex flex-col items-center">
+      {categories.map(category => <Link to={category.path} key={category.id} className="flex flex-col items-center py-0">
           <div className={`${category.bg} w-16 h-16 rounded-lg flex items-center justify-center mb-2`}>
             {category.imageIcon ? <img src={category.imageIcon} alt={category.name} className="w-10 h-10 object-contain" onError={e => {
           console.error("Image failed to load:", category.imageIcon);
@@ -141,5 +134,4 @@ export const CategoryNavigation: React.FC = () => {
         </Link>)}
     </div>;
 };
-
 export default CategoryNavigation;

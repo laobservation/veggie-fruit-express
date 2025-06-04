@@ -62,7 +62,7 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
         return '/';
     }
   };
-  return <section className="px-4 md:px-0 py-[16px]">
+  return <section className="px-4 md:px-0 py-0">
       <div className="flex justify-between items-center mb-4 py-0">
         <h2 className="md:text-2xl text-gray-900 text-xl font-semibold">{title}</h2>
         {!showAll && categoryProducts.length > 6 && <Link to={getCategoryPath(category)} className="flex items-center text-green-600 hover:text-green-700 font-medium">
@@ -83,7 +83,7 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
           </div>
           
           {/* Show More Button - Only show if there are more products to display and we're not showing all */}
-          {!showAll && categoryProducts.length > 6 && onShowMore && <div className="flex justify-center mt-6">
+          {!showAll && categoryProducts.length > 6 && onShowMore && <div className="flex justify-center mt-6 my-[25px]">
               <button onClick={onShowMore} className="relative inline-flex items-center px-8 py-3 text-white font-semibold rounded-lg
                          bg-gradient-to-br from-green-500 via-green-600 to-green-700
                          shadow-lg shadow-green-500/25 hover:shadow-xl hover:shadow-green-500/40
