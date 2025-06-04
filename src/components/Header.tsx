@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { ShoppingCart, Heart, Menu, X } from 'lucide-react';
 import SearchBar from '@/components/SearchBar';
-import logo from '@/assets/images/logo.png';
 import { useCart } from '@/hooks/use-cart';
 import { useAuth } from '@/hooks/useAuth';
 import UserMenu from '@/components/auth/UserMenu';
@@ -27,8 +26,7 @@ const Header = () => {
         <div className="flex items-center justify-between h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center">
-              <img src={logo} alt="Logo" className="h-8 mr-2" />
-              <span className="font-bold">Ma Boutique</span>
+              <span className="font-bold text-xl">Ma Boutique</span>
             </Link>
             <SearchBar />
           </div>
