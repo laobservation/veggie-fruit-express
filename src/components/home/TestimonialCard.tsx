@@ -79,13 +79,11 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
     }
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    e.preventDefault();
+  const handleTouchStart = () => {
     onMouseEnter(); // Trigger hover effect on touch
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    e.preventDefault();
+  const handleTouchEnd = () => {
     // Delay to allow video to play briefly
     setTimeout(() => {
       onMouseLeave();
