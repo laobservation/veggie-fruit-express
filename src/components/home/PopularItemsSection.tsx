@@ -62,9 +62,9 @@ const PopularItemsSection: React.FC<PopularItemsSectionProps> = ({
         return '/';
     }
   };
-  return <section className="py-6 px-4 md:px-0">
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="md:text-2xl text-gray-900 text-xl font-normal">{title}</h2>
+  return <section className="px-4 md:px-0 py-[16px]">
+      <div className="flex justify-between items-center mb-4 py-0">
+        <h2 className="md:text-2xl text-gray-900 text-xl font-semibold">{title}</h2>
         {!showAll && categoryProducts.length > 6 && <Link to={getCategoryPath(category)} className="flex items-center text-green-600 hover:text-green-700 font-medium">
             Voir tout
             <ChevronRight className="ml-1 h-4 w-4" />
