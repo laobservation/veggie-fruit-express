@@ -1,6 +1,5 @@
 
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -69,37 +68,6 @@
   body {
     @apply bg-background text-foreground;
     font-family: "Inter", sans-serif;
-  }
-  
-  /* Arabic typography */
-  [lang="ar"] body,
-  .font-arabic {
-    font-family: "Cairo", "Noto Sans Arabic", "Arial", sans-serif;
-    line-height: 1.8;
-  }
-  
-  /* RTL-specific styles */
-  [dir="rtl"] {
-    text-align: right;
-  }
-  
-  [dir="rtl"] .flex {
-    flex-direction: row-reverse;
-  }
-  
-  [dir="rtl"] .space-x-4 > :not([hidden]) ~ :not([hidden]) {
-    --tw-space-x-reverse: 1;
-  }
-  
-  /* RTL adjustments for specific components */
-  [dir="rtl"] .ml-auto {
-    margin-left: unset;
-    margin-right: auto;
-  }
-  
-  [dir="rtl"] .mr-auto {
-    margin-right: unset;
-    margin-left: auto;
   }
 }
 

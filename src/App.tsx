@@ -17,8 +17,6 @@ import { Toaster } from "@/components/ui/sonner";
 import FavoritesPage from '@/pages/FavoritesPage';
 import Cart from '@/components/Cart';
 import SocialMediaSticky from '@/components/SocialMediaSticky';
-import { LanguageProvider } from '@/contexts/LanguageContext';
-import LanguageSelectionModal from '@/components/LanguageSelectionModal';
 
 // Admin Route Protection Component
 const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
@@ -35,56 +33,53 @@ const ProtectedAdminRoute = ({ children }: { children: React.ReactNode }) => {
 
 function App() {
   return (
-    <LanguageProvider>
-      <CartNotificationProvider>
-        <div className="flex flex-col min-h-screen">
-          <Toaster position="bottom-right" />
-          <SocialMediaSticky />
-          <LanguageSelectionModal />
-          <div className="flex-grow">
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/product/:productId" element={<ProductPage />} />
-              <Route path="/product/:productId/:slug" element={<ProductPage />} />
-              <Route path="/category/:categoryId" element={<CategoryPage />} />
-              <Route path="/favorites" element={<FavoritesPage />} />
-              <Route path="/thank-you" element={<ThankYouPage />} />
-              <Route path="/admin-auth" element={<AdminAuthPage />} />
-              
-              {/* Protected Admin Routes */}
-              <Route path="/admin" element={
-                <ProtectedAdminRoute>
-                  <AdminPage />
-                </ProtectedAdminRoute>
-              } />
-              <Route path="/admin/slider" element={
-                <ProtectedAdminRoute>
-                  <AdminSliderPage />
-                </ProtectedAdminRoute>
-              } />
-              <Route path="/admin/settings" element={
-                <ProtectedAdminRoute>
-                  <AdminSettingsPage />
-                </ProtectedAdminRoute>
-              } />
-              <Route path="/admin/testimonials" element={
-                <ProtectedAdminRoute>
-                  <AdminTestimonialsPage />
-                </ProtectedAdminRoute>
-              } />
-              <Route path="/prix" element={
-                <ProtectedAdminRoute>
-                  <PriceManagementPage />
-                </ProtectedAdminRoute>
-              } />
-              
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-          </div>
-          <Cart />
+    <CartNotificationProvider>
+      <div className="flex flex-col min-h-screen">
+        <Toaster position="bottom-right" />
+        <SocialMediaSticky />
+        <div className="flex-grow">
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/product/:productId" element={<ProductPage />} />
+            <Route path="/product/:productId/:slug" element={<ProductPage />} />
+            <Route path="/category/:categoryId" element={<CategoryPage />} />
+            <Route path="/favorites" element={<FavoritesPage />} />
+            <Route path="/thank-you" element={<ThankYouPage />} />
+            <Route path="/admin-auth" element={<AdminAuthPage />} />
+            
+            {/* Protected Admin Routes */}
+            <Route path="/admin" element={
+              <ProtectedAdminRoute>
+                <AdminPage />
+              </ProtectedAdminRoute>
+            } />
+            <Route path="/admin/slider" element={
+              <ProtectedAdminRoute>
+                <AdminSliderPage />
+              </ProtectedAdminRoute>
+            } />
+            <Route path="/admin/settings" element={
+              <ProtectedAdminRoute>
+                <AdminSettingsPage />
+              </ProtectedAdminRoute>
+            } />
+            <Route path="/admin/testimonials" element={
+              <ProtectedAdminRoute>
+                <AdminTestimonialsPage />
+              </ProtectedAdminRoute>
+            } />
+            <Route path="/prix" element={
+              <ProtectedAdminRoute>
+                <PriceManagementPage />
+              </ProtectedAdminRoute>
+            } />
+            
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </div>
-      </CartNotificationProvider>
-    </LanguageProvider>
+        <Cart />
+      </div>
+    </CartNotificationProvider>
   );
 }
 

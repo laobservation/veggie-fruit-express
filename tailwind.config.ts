@@ -21,7 +21,6 @@ export default {
 		extend: {
 			fontFamily: {
 				sans: ['Rubik', 'sans-serif'],
-				arabic: ['Cairo', 'Amiri', 'Noto Sans Arabic', 'sans-serif'],
 			},
 			colors: {
 				border: 'hsl(var(--border))',
@@ -118,40 +117,5 @@ export default {
 			}
 		}
 	},
-	plugins: [
-		require("tailwindcss-animate"),
-		// RTL support plugin
-		function({ addUtilities }: any) {
-			const newUtilities = {
-				'.rtl-flip': {
-					'[dir="rtl"] &': {
-						transform: 'scaleX(-1)',
-					},
-				},
-				'.rtl-mr-auto': {
-					'[dir="rtl"] &': {
-						marginRight: 'auto',
-						marginLeft: 'unset',
-					},
-				},
-				'.rtl-ml-auto': {
-					'[dir="rtl"] &': {
-						marginLeft: 'auto',
-						marginRight: 'unset',
-					},
-				},
-				'.rtl-text-right': {
-					'[dir="rtl"] &': {
-						textAlign: 'right',
-					},
-				},
-				'.rtl-text-left': {
-					'[dir="rtl"] &': {
-						textAlign: 'left',
-					},
-				}
-			}
-			addUtilities(newUtilities)
-		}
-	],
+	plugins: [require("tailwindcss-animate")],
 } satisfies Config;
