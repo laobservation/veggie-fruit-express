@@ -18,7 +18,7 @@ const MobileMenu: React.FC<MobileMenuProps> = ({
   return <div className={cn("fixed inset-0 bg-black/50 z-40 transition-opacity duration-300", isOpen ? "opacity-100" : "opacity-0 pointer-events-none")} onClick={onClose}>
       <div className={cn("fixed top-0 left-0 h-full w-4/5 max-w-xs bg-white z-50 shadow-xl transition-transform duration-300 ease-in-out transform", isOpen ? "translate-x-0" : "-translate-x-full")} onClick={e => e.stopPropagation()}>
         <div className="flex flex-col h-full">
-          <div className="p-6 border-b rounded-none bg-white px-0 mx-0 my-[2px] py-0">
+          <div className="p-6 border-b rounded-none bg-white px-0 mx-0 py-0 my-[11px]">
             <img src="/lovable-uploads/4c234092-7248-4896-9d9b-9da5909ffbfb.png" alt="Marché Bio Logo" className="h-14 w-auto object-contain mx-auto" />
           </div>
           
