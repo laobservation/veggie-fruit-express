@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -59,17 +60,62 @@ const Footer: React.FC = () => {
             { title: 'Légumes', url: '/category/légumes' }
           ]
         });
+      } else {
+        // Set default settings if no data found
+        setFooterSettings({
+          companyName: 'Marché Bio',
+          description: 'Fresh fruits and vegetables delivered right to your doorstep.',
+          copyrightText: `© ${new Date().getFullYear()} Marché Bio. All rights reserved.`,
+          contactInfo: {
+            email: 'contact@marchebiomobile.com',
+            phone: '+212 649150370',
+            address: 'Meknès, Maroc'
+          },
+          socialLinks: {
+            facebook: '',
+            instagram: '',
+            twitter: ''
+          },
+          quickLinks: [
+            { title: 'Accueil', url: '/' },
+            { title: 'Fruits', url: '/category/fruits' },
+            { title: 'Légumes', url: '/category/légumes' }
+          ]
+        });
       }
     } catch (error) {
       console.error('Error in fetchFooterSettings:', error);
+      // Set default settings on error
+      setFooterSettings({
+        companyName: 'Marché Bio',
+        description: 'Fresh fruits and vegetables delivered right to your doorstep.',
+        copyrightText: `© ${new Date().getFullYear()} Marché Bio. All rights reserved.`,
+        contactInfo: {
+          email: 'contact@marchebiomobile.com',
+          phone: '+212 649150370',
+          address: 'Meknès, Maroc'
+        },
+        socialLinks: {
+          facebook: '',
+          instagram: '',
+          twitter: ''
+        },
+        quickLinks: [
+          { title: 'Accueil', url: '/' },
+          { title: 'Fruits', url: '/category/fruits' },
+          { title: 'Légumes', url: '/category/légumes' }
+        ]
+      });
     } finally {
       setLoading(false);
     }
   };
 
+  console.log('Footer component rendering:', { loading, footerSettings });
+
   if (loading) {
     return (
-      <footer className="bg-gray-800 text-white py-8">
+      <footer className="bg-gray-800 text-white py-8 w-full">
         <div className="container mx-auto px-4">
           <div className="animate-pulse">
             <div className="h-4 bg-gray-600 rounded w-1/4 mb-4"></div>
@@ -82,11 +128,12 @@ const Footer: React.FC = () => {
   }
 
   if (!footerSettings) {
+    console.log('No footer settings, not rendering footer');
     return null;
   }
 
   return (
-    <footer className="bg-gray-800 text-white py-8">
+    <footer className="bg-gray-800 text-white py-8 w-full">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}
