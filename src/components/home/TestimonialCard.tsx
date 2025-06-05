@@ -92,7 +92,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
 
   return (
     <div className="group relative">
-      <Card className="overflow-hidden h-full bg-black rounded-2xl shadow-xl transform transition-all duration-300 hover:scale-105">
+      <Card className="overflow-hidden h-full bg-black rounded-lg shadow-lg transform transition-all duration-300 hover:scale-105">
         <CardContent className="p-0 h-full relative">
           <div 
             className="aspect-[9/16] w-full relative cursor-pointer"
@@ -106,7 +106,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
             {videoSrc && (
               <video
                 ref={internalVideoRef}
-                className="w-full h-full object-cover rounded-2xl"
+                className="w-full h-full object-cover rounded-lg"
                 src={videoSrc}
                 muted
                 loop
@@ -120,7 +120,7 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
             {/* Fallback for no video */}
             {!videoSrc && (
               <div 
-                className="absolute inset-0 bg-cover bg-center rounded-2xl"
+                className="absolute inset-0 bg-cover bg-center rounded-lg"
                 style={{ 
                   backgroundImage: thumbnail 
                     ? `url(${thumbnail})` 
@@ -132,18 +132,18 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
             {/* Play Button Overlay - only show when not playing/hovering */}
             {!isPlaying && !isHovered && (
               <div className="absolute inset-0 bg-black/40 flex items-center justify-center transition-all duration-300 hover:bg-black/50">
-                <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center transform transition-all duration-300 hover:scale-110 shadow-lg">
+                <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center transform transition-all duration-300 hover:scale-110 shadow-lg">
                   {video.enable_redirect ? (
-                    <ExternalLink className="w-8 h-8 text-gray-800" />
+                    <ExternalLink className="w-6 h-6 text-gray-800" />
                   ) : (
-                    <Play className="w-8 h-8 text-gray-800 ml-1" fill="currentColor" />
+                    <Play className="w-6 h-6 text-gray-800 ml-1" fill="currentColor" />
                   )}
                 </div>
               </div>
             )}
 
             {/* Platform Badge */}
-            <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-sm rounded-full px-3 py-1 flex items-center gap-2">
+            <div className="absolute top-2 right-2 bg-black/50 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
               <span className="text-white text-xs font-medium">
                 {video.platform === 'upload' ? 'Vidéo' : video.platform}
               </span>
@@ -151,23 +151,23 @@ const TestimonialCard: React.FC<TestimonialCardProps> = ({
 
             {/* Redirect indicator */}
             {video.enable_redirect && (
-              <div className="absolute top-4 left-4 bg-blue-500/80 backdrop-blur-sm rounded-full px-2 py-1">
+              <div className="absolute top-2 left-2 bg-blue-500/80 backdrop-blur-sm rounded-full px-1 py-1">
                 <ExternalLink className="w-3 h-3 text-white" />
               </div>
             )}
 
             {/* Playing indicator */}
             {(isPlaying || isHovered) && (
-              <div className="absolute bottom-4 right-4 bg-red-500/80 backdrop-blur-sm rounded-full px-2 py-1">
+              <div className="absolute bottom-2 right-2 bg-red-500/80 backdrop-blur-sm rounded-full px-2 py-1">
                 <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
               </div>
             )}
           </div>
           
           {/* Video Info */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4">
-            <h3 className="text-white font-semibold text-lg mb-1">{video.title}</h3>
-            <p className="text-white/70 text-sm">
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-3">
+            <h3 className="text-white font-semibold text-sm mb-1 line-clamp-2">{video.title}</h3>
+            <p className="text-white/70 text-xs">
               {video.platform === 'upload' ? 'Témoignage client' : `@${video.platform}`}
             </p>
           </div>
