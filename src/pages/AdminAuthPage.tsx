@@ -57,6 +57,18 @@ const AdminAuthPage = () => {
     }
   }, [lockoutEnd]);
 
+  // Handle Enter key press
+  useEffect(() => {
+    const handleKeyPress = (event: KeyboardEvent) => {
+      if (event.key === 'Enter' && pin.length === 6 && !isSubmitting && !isLocked) {
+        handlePinSubmit();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyPress);
+    return () => document.removeEventListener('keydown', handleKeyPress);
+  }, [pin, isSubmitting, isLocked]);
+
   const handlePinSubmit = () => {
     if (isLocked) {
       toast({
@@ -160,9 +172,9 @@ const AdminAuthPage = () => {
             maxLength={6} 
             value={pin} 
             onChange={setPin} 
-            placeholder="•" 
             className="my-0"
             disabled={isLocked}
+            type="password"
           >
             <InputOTPGroup>
               <InputOTPSlot index={0} className="border-gray-300" />
