@@ -1,16 +1,37 @@
+
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
-import { LayoutGrid, Settings, BarChart, FileBox, Image, ShoppingCart, DollarSign, Video } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { LayoutGrid, Settings, BarChart, FileBox, Image, ShoppingCart, DollarSign, Video, LogOut } from 'lucide-react';
 import ProductManager from '@/components/admin/ProductManager';
 import Dashboard from '@/components/admin/Dashboard';
 import OrdersManager from '@/components/admin/OrdersManager';
 import SliderManager from '@/components/admin/SliderManager';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import AdminRouteGuard from '@/components/admin/AdminRouteGuard';
+import { useToast } from '@/hooks/use-toast';
 
 const AdminPage = () => {
   const [activeTab, setActiveTab] = React.useState<string>('dashboard');
+  const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSignOut = () => {
+    // Clear admin session
+    sessionStorage.removeItem('adminAuth');
+    sessionStorage.removeItem('adminAuthData');
+    localStorage.removeItem('adminAttempts');
+    localStorage.removeItem('adminLockoutEnd');
+    
+    toast({
+      title: "Déconnexion réussie",
+      description: "Vous avez été déconnecté avec succès"
+    });
+    
+    // Redirect to home page
+    navigate('/');
+  };
 
   return (
     <AdminRouteGuard>
@@ -65,6 +86,17 @@ const AdminPage = () => {
                     <Settings className="h-4 w-4" />
                     <span>Paramètres</span>
                   </Link>
+
+                  <div className="border-t my-4" />
+
+                  <Button 
+                    onClick={handleSignOut}
+                    variant="outline"
+                    className="w-full justify-start px-2 py-2 text-sm text-red-600 hover:text-red-700 hover:bg-red-50 border-none"
+                  >
+                    <LogOut className="h-4 w-4 mr-2" />
+                    Se déconnecter
+                  </Button>
                 </div>
               </CardContent>
             </Card>
