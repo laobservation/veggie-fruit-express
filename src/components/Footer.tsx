@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
@@ -70,7 +69,7 @@ const Footer: React.FC = () => {
 
   if (loading) {
     return (
-      <footer className="bg-gray-800 text-white py-8 hidden md:block">
+      <footer className="bg-gray-800 text-white py-8">
         <div className="container mx-auto px-4">
           <div className="animate-pulse">
             <div className="h-4 bg-gray-600 rounded w-1/4 mb-4"></div>
@@ -87,7 +86,7 @@ const Footer: React.FC = () => {
   }
 
   return (
-    <footer className="bg-gray-800 text-white py-8 hidden md:block">
+    <footer className="bg-gray-800 text-white py-8">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Company Info */}

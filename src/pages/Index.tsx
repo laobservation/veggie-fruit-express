@@ -15,13 +15,15 @@ const Index = () => {
         </div>
       </main>
       
-      {/* Hide footer on mobile, show on desktop */}
+      {/* Footer - visible on desktop only */}
       <div className="hidden md:block">
         <Footer />
       </div>
       
-      {/* Mobile Bottom Navigation */}
-      <MobileBottomNav />
+      {/* Mobile Bottom Navigation - visible on mobile only */}
+      <div className="md:hidden">
+        <MobileBottomNav />
+      </div>
     </div>
   );
 };
