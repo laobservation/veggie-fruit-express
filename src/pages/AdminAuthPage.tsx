@@ -174,15 +174,26 @@ const AdminAuthPage = () => {
             onChange={setPin} 
             className="my-0"
             disabled={isLocked}
-            type="password"
           >
             <InputOTPGroup>
-              <InputOTPSlot index={0} className="border-gray-300" />
-              <InputOTPSlot index={1} className="border-gray-300" />
-              <InputOTPSlot index={2} className="border-gray-300" />
-              <InputOTPSlot index={3} className="border-gray-300" />
-              <InputOTPSlot index={4} className="border-gray-300" />
-              <InputOTPSlot index={5} className="border-gray-300" />
+              <InputOTPSlot index={0} className="border-gray-300">
+                {pin[0] ? '•' : ''}
+              </InputOTPSlot>
+              <InputOTPSlot index={1} className="border-gray-300">
+                {pin[1] ? '•' : ''}
+              </InputOTPSlot>
+              <InputOTPSlot index={2} className="border-gray-300">
+                {pin[2] ? '•' : ''}
+              </InputOTPSlot>
+              <InputOTPSlot index={3} className="border-gray-300">
+                {pin[3] ? '•' : ''}
+              </InputOTPSlot>
+              <InputOTPSlot index={4} className="border-gray-300">
+                {pin[4] ? '•' : ''}
+              </InputOTPSlot>
+              <InputOTPSlot index={5} className="border-gray-300">
+                {pin[5] ? '•' : ''}
+              </InputOTPSlot>
             </InputOTPGroup>
           </InputOTP>
         </div>
